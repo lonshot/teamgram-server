@@ -6,4 +6,4 @@ Etcd:
   Key: service.idgen
 NodeId: 1
 SeqIDGen:
-  - Host: 127.0.0.1:6379
+  - Host: 127.0.0.1:6370

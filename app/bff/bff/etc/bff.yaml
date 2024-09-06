@@ -8,7 +8,7 @@ Log:
   Mode: file
   Path: ../logs/bff
 KV:
-  - Host: localhost:6379
+  - Host: localhost:6370
 
 Code:
   Name: "none"

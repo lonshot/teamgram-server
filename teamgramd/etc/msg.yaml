@@ -15,7 +15,7 @@ Mysql:
   Idle: 64
   IdleTimeout: 4h
 KV:
-  - Host: 127.0.0.1:6379
+  - Host: 127.0.0.1:6370
 
 InboxConsumer:
   Topics:
@@ -47,5 +47,5 @@ SyncClient:
     - 127.0.0.1:9092
 
 Redis2:
-  Host: 127.0.0.1:6379
+  Host: 127.0.0.1:6370
   Type: node

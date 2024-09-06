@@ -22,7 +22,7 @@ Mysql:
   ExecTimeout: 5s
   TranTimeout: 5s
 KV:
-  - Host: 127.0.0.1:6379
+  - Host: 127.0.0.1:6370
 
 IdgenClient:
   Etcd:
