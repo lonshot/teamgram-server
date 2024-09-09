@@ -86,10 +86,10 @@ services:
       # 时区上海 - Time zone Shanghai (Change if needed)
       #TZ: Asia/Shanghai
       # root 密码 - root password
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-pwm_rootp@aass}
       MYSQL_DATABASE: teamgram
       MYSQL_USER: teamgram
-      MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-pwm_p@aasu}
       # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - 127.0.0.1:3360:3360
@@ -161,8 +161,8 @@ services:
       - kafka
       - etcd
       - redis
-      - mysql
       - minio
+      - mysql
 
 networks:
   teamgram_net:
