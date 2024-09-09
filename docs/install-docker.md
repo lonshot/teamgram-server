@@ -49,7 +49,7 @@ image: mysql:8.0.29
 container_name: mysql
 restart: always
 ports:
-- 3360:3360
+- 3306:3306
 networks:
 - teamgram-net
 volumes:
@@ -209,8 +209,8 @@ mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "$CHANGE_AUTHENTICATION $CHANGE_PAS
 ![image.png](./image/23165610-55bb467a0603c2b3.webp)
 
 ```
-127.0.0.1:3360
-=>mysql:3360
+127.0.0.1:3306
+=>mysql:3306
 
 127.0.0.1:2379
 =>etcd:2379
@@ -240,8 +240,8 @@ Log:
 Mode: file
 Path: ../logs/authsession
 Mysql:
-Addr: mysql:3360
-DSN: root:@tcp(mysql:3360)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+Addr: mysql:3306
+DSN: root:@tcp(mysql:3306)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 Active: 64
 Idle: 64
 IdleTimeout: 4h

@@ -92,7 +92,7 @@ services:
       MYSQL_PASSWORD: pwm_p@aasu
       # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
-      - 127.0.0.1:3360:3360
+      - 127.0.0.1:3306:3306
     volumes:
       # 数据挂载 - Data mounting
       - ./data/mysql/data:/var/lib/mysql
