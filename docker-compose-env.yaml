@@ -1,17 +1,7 @@
-version: "3"
-
-######## 项目依赖的环境，启动项目之前要先启动此环境 #######
-######## The environment that the project depends on, starting this environment before starting the project #######
-
 services: 
   mysql:
     image: mysql:5.7
     container_name: mysql
-    security_opt:
-      - apparmor:unconfined
-      - seccomp:unconfined  # Added seccomp to match the docker run command
-    cap_add:
-      - SYS_PTRACE  # Added to mimic the successful docker run command
     environment:
       # 时区上海 - Time zone Shanghai (Change if needed)
       #TZ: Asia/Shanghai
