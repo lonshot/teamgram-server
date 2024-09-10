@@ -64,9 +64,9 @@ services:
 
   redis:
     image: redis
-    container_name: redis-teamgram
+    container_name: redis
     ports:
-      - 127.0.0.1:6370:6370
+      - 127.0.0.1:6379:6379
     volumes:
       - ./data/redis/data:/data:rw
       #redis config file
@@ -136,14 +136,14 @@ services:
     build: .
     restart: always
     ports:
-      - "10443:10443"
+      - "10443:9443"
       - "11443:11443"
       - "20450:20450"
       - "20010:20010"
       - "20020:20020"
       - "20640:20640"
       - "20110:20110"
-      - "5222:5222"
+      - "5222:9080"
       - "8801:8801"
       - "20660:20660"
       - "20650:20650"
@@ -164,6 +164,3 @@ services:
 networks:
   pwm_net:
     driver: bridge
-    # ipam:
-    #   config:
-    #     - subnet: 172.20.0.0/16
