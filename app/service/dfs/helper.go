@@ -11,13 +11,13 @@
 package dfs_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/imaging"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/minio_util"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/server/http"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/svc"
+	"pwm-server/app/service/dfs/internal/config"
+	"pwm-server/app/service/dfs/internal/dao"
+	"pwm-server/app/service/dfs/internal/imaging"
+	"pwm-server/app/service/dfs/internal/minio_util"
+	"pwm-server/app/service/dfs/internal/server/grpc/service"
+	"pwm-server/app/service/dfs/internal/server/http"
+	"pwm-server/app/service/dfs/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"github.com/zeromicro/go-zero/zrpc"

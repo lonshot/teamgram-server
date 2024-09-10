@@ -14,7 +14,7 @@ import (
 
 	"github.com/teamgram/marmota/pkg/stores/sqlc"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
+	"pwm-server/app/service/authsession/authsession"
 )
 
 // AuthsessionGetAuthStateData

@@ -14,7 +14,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/bff/autodownload/internal/core"
+	"pwm-server/app/bff/autodownload/internal/core"
 )
 
 // AccountGetAutoDownloadSettings

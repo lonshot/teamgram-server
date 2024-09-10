@@ -8,7 +8,7 @@ package dao
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/dialog/internal/dal/dataobject"
+	"pwm-server/app/service/biz/dialog/internal/dal/dataobject"
 )
 
 func (d *Dao) MakeSavedDialog(do *dataobject.SavedDialogsDO) *mtproto.SavedDialog {

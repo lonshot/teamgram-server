@@ -19,7 +19,7 @@
 package svc
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/sponsoredmessages/internal/config"
+	"pwm-server/app/bff/sponsoredmessages/internal/config"
 )
 
 type ServiceContext struct {

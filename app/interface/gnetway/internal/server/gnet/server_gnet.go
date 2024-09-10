@@ -26,9 +26,9 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/server/gnet/ws"
-	"github.com/teamgram/teamgram-server/app/interface/session/client"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
+	"pwm-server/app/interface/gnetway/internal/server/gnet/ws"
+	"pwm-server/app/interface/session/client"
+	"pwm-server/app/interface/session/session"
 
 	"github.com/gobwas/ws/wsutil"
 	"github.com/panjf2000/gnet/v2"

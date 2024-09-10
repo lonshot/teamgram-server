@@ -15,11 +15,11 @@ import (
 	"strings"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/msg/plugin"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/msg/msg"
+	"pwm-server/app/messenger/msg/msg/plugin"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	userpb "pwm-server/app/service/biz/user/user"
 
 	"github.com/zeromicro/go-zero/core/mr"
 )

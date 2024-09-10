@@ -16,10 +16,10 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/dfs/dfs"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/imaging"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/model"
+	"pwm-server/app/service/dfs/dfs"
+	"pwm-server/app/service/dfs/internal/dao"
+	"pwm-server/app/service/dfs/internal/imaging"
+	"pwm-server/app/service/dfs/internal/model"
 
 	"github.com/minio/minio-go/v7"
 	"google.golang.org/protobuf/types/known/wrapperspb"

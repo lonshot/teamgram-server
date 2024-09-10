@@ -15,7 +15,7 @@ import (
 	"strconv"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/svc"
+	"pwm-server/app/interface/session/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

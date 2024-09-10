@@ -11,9 +11,9 @@
 package nsfw_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/nsfw/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/nsfw/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/nsfw/internal/svc"
+	"pwm-server/app/bff/nsfw/internal/config"
+	"pwm-server/app/bff/nsfw/internal/server/grpc/service"
+	"pwm-server/app/bff/nsfw/internal/svc"
 )
 
 type (

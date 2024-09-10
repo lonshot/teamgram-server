@@ -11,9 +11,9 @@
 package code_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/code/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/code/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/code/internal/svc"
+	"pwm-server/app/service/biz/code/internal/config"
+	"pwm-server/app/service/biz/code/internal/server/grpc/service"
+	"pwm-server/app/service/biz/code/internal/svc"
 )
 
 type (

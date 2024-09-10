@@ -14,7 +14,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/bff/notification/internal/core"
+	"pwm-server/app/bff/notification/internal/core"
 )
 
 // AccountRegisterDevice

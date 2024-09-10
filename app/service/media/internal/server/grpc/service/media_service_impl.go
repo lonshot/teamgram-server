@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/core"
-	"github.com/teamgram/teamgram-server/app/service/media/media"
+	"pwm-server/app/service/media/internal/core"
+	"pwm-server/app/service/media/media"
 )
 
 // MediaUploadPhotoFile

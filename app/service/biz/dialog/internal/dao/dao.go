@@ -12,7 +12,7 @@ package dao
 import (
 	"github.com/teamgram/marmota/pkg/stores/sqlc"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
-	"github.com/teamgram/teamgram-server/app/service/biz/dialog/internal/config"
+	"pwm-server/app/service/biz/dialog/internal/config"
 )
 
 // Dao dao.

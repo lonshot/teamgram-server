@@ -20,9 +20,9 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	mediapb "github.com/teamgram/teamgram-server/app/service/media/media"
-	"github.com/teamgram/teamgram-server/pkg/phonenumber"
+	userpb "pwm-server/app/service/biz/user/user"
+	mediapb "pwm-server/app/service/media/media"
+	"pwm-server/pkg/phonenumber"
 	"math/rand"
 	"time"
 )

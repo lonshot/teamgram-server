@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/internal/core"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/updates"
+	"pwm-server/app/service/biz/updates/internal/core"
+	"pwm-server/app/service/biz/updates/updates"
 )
 
 // UpdatesGetStateV2

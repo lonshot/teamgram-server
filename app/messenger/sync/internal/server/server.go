@@ -13,9 +13,9 @@ import (
 	"flag"
 
 	kafka "github.com/teamgram/marmota/pkg/mq"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/internal/config"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/internal/server/mq"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/internal/svc"
+	"pwm-server/app/messenger/sync/internal/config"
+	"pwm-server/app/messenger/sync/internal/server/mq"
+	"pwm-server/app/messenger/sync/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

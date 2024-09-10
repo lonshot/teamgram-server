@@ -20,8 +20,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
+	"pwm-server/app/interface/session/session"
+	"pwm-server/app/service/authsession/authsession"
 )
 
 // SessionQueryAuthKey

@@ -33,8 +33,8 @@ import (
 	"github.com/teamgram/marmota/pkg/hex2"
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/crypto"
-	sessionclient "github.com/teamgram/teamgram-server/app/interface/session/client"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
+	sessionclient "pwm-server/app/interface/session/client"
+	"pwm-server/app/interface/session/session"
 
 	"github.com/panjf2000/gnet/v2"
 	"github.com/zeromicro/go-zero/core/logx"

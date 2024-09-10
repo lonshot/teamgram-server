@@ -21,10 +21,10 @@ package server
 import (
 	"flag"
 
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/config"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/server/gnet"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/server/grpc"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/svc"
+	"pwm-server/app/interface/gnetway/internal/config"
+	"pwm-server/app/interface/gnetway/internal/server/gnet"
+	"pwm-server/app/interface/gnetway/internal/server/grpc"
+	"pwm-server/app/interface/gnetway/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

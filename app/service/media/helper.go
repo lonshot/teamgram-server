@@ -11,11 +11,11 @@
 package media_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/media/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/svc"
+	"pwm-server/app/service/media/internal/config"
+	"pwm-server/app/service/media/internal/dal/dataobject"
+	"pwm-server/app/service/media/internal/dao"
+	"pwm-server/app/service/media/internal/server/grpc/service"
+	"pwm-server/app/service/media/internal/svc"
 )
 
 type (

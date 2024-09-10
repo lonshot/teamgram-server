@@ -12,7 +12,7 @@ import (
 	"github.com/teamgram/marmota/pkg/random2"
 	"github.com/teamgram/marmota/pkg/utils"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/pkg/env2"
+	"pwm-server/pkg/env2"
 )
 
 func GetChatTypeByInviteHash(hash string) int {

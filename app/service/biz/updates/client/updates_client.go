@@ -14,7 +14,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/updates"
+	"pwm-server/app/service/biz/updates/updates"
 
 	"github.com/zeromicro/go-zero/zrpc"
 )

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/internal/dal/dataobject"
+	"pwm-server/app/messenger/sync/internal/dal/dataobject"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 )

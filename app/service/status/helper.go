@@ -11,9 +11,9 @@
 package status_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/status/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/status/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/status/internal/svc"
+	"pwm-server/app/service/status/internal/config"
+	"pwm-server/app/service/status/internal/server/grpc/service"
+	"pwm-server/app/service/status/internal/svc"
 )
 
 type (

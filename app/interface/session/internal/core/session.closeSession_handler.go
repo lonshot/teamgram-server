@@ -20,7 +20,7 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
+	"pwm-server/app/interface/session/session"
 )
 
 // SessionCloseSession

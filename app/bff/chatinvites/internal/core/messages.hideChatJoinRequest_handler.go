@@ -20,10 +20,10 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	msgpb "github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	"pwm-server/app/messenger/sync/sync"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/user/user"
 	"math/rand"
 )
 

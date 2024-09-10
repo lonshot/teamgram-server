@@ -16,7 +16,7 @@ import (
 
 	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/dfs/dfs"
+	"pwm-server/app/service/dfs/dfs"
 )
 
 // DfsUploadEncryptedFileV2

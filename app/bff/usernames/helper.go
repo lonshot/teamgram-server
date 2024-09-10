@@ -11,10 +11,10 @@
 package usernames_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/usernames/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/usernames/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/usernames/internal/svc"
-	"github.com/teamgram/teamgram-server/app/bff/usernames/plugin"
+	"pwm-server/app/bff/usernames/internal/config"
+	"pwm-server/app/bff/usernames/internal/server/grpc/service"
+	"pwm-server/app/bff/usernames/internal/svc"
+	"pwm-server/app/bff/usernames/plugin"
 )
 
 type (

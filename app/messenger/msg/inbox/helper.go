@@ -12,10 +12,10 @@ package inbox_helper
 
 import (
 	kafka "github.com/teamgram/marmota/pkg/mq"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/config"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/core"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/server/mq"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/svc"
+	"pwm-server/app/messenger/msg/inbox/internal/config"
+	"pwm-server/app/messenger/msg/inbox/internal/core"
+	"pwm-server/app/messenger/msg/inbox/internal/server/mq"
+	"pwm-server/app/messenger/msg/inbox/internal/svc"
 )
 
 type (

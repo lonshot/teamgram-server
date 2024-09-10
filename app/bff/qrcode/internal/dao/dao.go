@@ -21,10 +21,10 @@ package dao
 import (
 	kafka "github.com/teamgram/marmota/pkg/mq"
 	"github.com/teamgram/marmota/pkg/net/rpcx"
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/internal/config"
-	sync_client "github.com/teamgram/teamgram-server/app/messenger/sync/client"
-	authsession_client "github.com/teamgram/teamgram-server/app/service/authsession/client"
-	user_client "github.com/teamgram/teamgram-server/app/service/biz/user/client"
+	"pwm-server/app/bff/qrcode/internal/config"
+	sync_client "pwm-server/app/messenger/sync/client"
+	authsession_client "pwm-server/app/service/authsession/client"
+	user_client "pwm-server/app/service/biz/user/client"
 	"github.com/zeromicro/go-zero/core/stores/kv"
 )
 

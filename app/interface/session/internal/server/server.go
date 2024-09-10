@@ -12,9 +12,9 @@ package server
 import (
 	"flag"
 
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/config"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/server/grpc"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/svc"
+	"pwm-server/app/interface/session/internal/config"
+	"pwm-server/app/interface/session/internal/server/grpc"
+	"pwm-server/app/interface/session/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

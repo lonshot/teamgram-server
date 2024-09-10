@@ -19,7 +19,7 @@
 package core
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/service/biz/user/user"
 )
 
 // UserCheckBots

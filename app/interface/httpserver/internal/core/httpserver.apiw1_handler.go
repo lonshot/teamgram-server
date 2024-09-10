@@ -13,8 +13,8 @@ import (
 
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/crypto"
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/dao"
-	sessionpb "github.com/teamgram/teamgram-server/app/interface/session/session"
+	"pwm-server/app/interface/httpserver/internal/dao"
+	sessionpb "pwm-server/app/interface/session/session"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

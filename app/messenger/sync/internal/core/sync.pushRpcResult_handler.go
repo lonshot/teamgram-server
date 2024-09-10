@@ -11,8 +11,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
+	"pwm-server/app/interface/session/session"
+	"pwm-server/app/messenger/sync/sync"
 )
 
 // SyncPushRpcResult

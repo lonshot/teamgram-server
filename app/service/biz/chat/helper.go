@@ -11,12 +11,12 @@
 package chat_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/dal/dao/mysql_dao"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/svc"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/plugin"
+	"pwm-server/app/service/biz/chat/internal/config"
+	"pwm-server/app/service/biz/chat/internal/dal/dao/mysql_dao"
+	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
+	"pwm-server/app/service/biz/chat/internal/server/grpc/service"
+	"pwm-server/app/service/biz/chat/internal/svc"
+	"pwm-server/app/service/biz/chat/plugin"
 )
 
 type (

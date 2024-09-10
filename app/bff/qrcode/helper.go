@@ -11,10 +11,10 @@
 package qrcode_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/internal/svc"
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/plugin"
+	"pwm-server/app/bff/qrcode/internal/config"
+	"pwm-server/app/bff/qrcode/internal/server/grpc/service"
+	"pwm-server/app/bff/qrcode/internal/svc"
+	"pwm-server/app/bff/qrcode/plugin"
 )
 
 type (

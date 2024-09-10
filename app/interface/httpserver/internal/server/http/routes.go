@@ -15,8 +15,8 @@ import (
 
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/core"
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/svc"
+	"pwm-server/app/interface/httpserver/internal/core"
+	"pwm-server/app/interface/httpserver/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"

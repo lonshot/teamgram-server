@@ -21,7 +21,7 @@ package core
 import (
 	"github.com/teamgram/marmota/pkg/utils"
 	"github.com/teamgram/proto/mtproto"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 )
 
 // MessagesGetCommonChats

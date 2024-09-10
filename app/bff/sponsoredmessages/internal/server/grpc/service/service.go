@@ -11,7 +11,7 @@
 package service
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/sponsoredmessages/internal/svc"
+	"pwm-server/app/bff/sponsoredmessages/internal/svc"
 )
 
 type Service struct {

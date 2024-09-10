@@ -11,7 +11,7 @@
 package mysql_dao
 
 import (
-	message_helper "github.com/teamgram/teamgram-server/app/service/biz/message"
+	message_helper "pwm-server/app/service/biz/message"
 )
 
 type (

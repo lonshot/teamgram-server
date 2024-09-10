@@ -22,9 +22,9 @@ import (
 	"math/rand"
 
 	"github.com/teamgram/proto/mtproto"
-	msgpb "github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
 func (c *ChatsCore) createChat(iUsers []*mtproto.InputUser, chatTitle string, ttlPeriod int32) (*mtproto.Updates, error) {

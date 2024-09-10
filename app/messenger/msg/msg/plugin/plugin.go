@@ -10,7 +10,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/username"
+	"pwm-server/app/service/biz/username/username"
 )
 
 type MsgPlugin interface {

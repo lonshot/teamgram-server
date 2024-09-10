@@ -23,7 +23,7 @@ import (
 	"os"
 
 	"github.com/teamgram/marmota/pkg/bytes2"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/imaging"
+	"pwm-server/app/service/dfs/internal/imaging"
 )
 
 func main() {

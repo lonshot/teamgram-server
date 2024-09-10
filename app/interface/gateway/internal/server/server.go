@@ -27,8 +27,8 @@ import (
 	"github.com/teamgram/marmota/pkg/net2"
 	"github.com/teamgram/marmota/pkg/timer2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/config"
-	sessionpb "github.com/teamgram/teamgram-server/app/interface/session/session"
+	"pwm-server/app/interface/gateway/internal/config"
+	sessionpb "pwm-server/app/interface/session/session"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

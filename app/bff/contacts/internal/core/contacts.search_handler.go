@@ -20,8 +20,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/username"
+	userpb "pwm-server/app/service/biz/user/user"
+	"pwm-server/app/service/biz/username/username"
 )
 
 // ContactsSearch

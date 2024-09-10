@@ -12,8 +12,8 @@ package core
 import (
 	"github.com/teamgram/marmota/pkg/container2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/dal/dataobject"
+	"pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
 )
 
 // ChatGetAdminsWithInvites

@@ -27,8 +27,8 @@ import (
 	"github.com/teamgram/marmota/pkg/container2"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/service/biz/user/internal/dal/dataobject"
+	"pwm-server/app/service/biz/user/user"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"

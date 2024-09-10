@@ -11,9 +11,9 @@
 package chatinvites_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/chatinvites/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/chatinvites/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/chatinvites/internal/svc"
+	"pwm-server/app/bff/chatinvites/internal/config"
+	"pwm-server/app/bff/chatinvites/internal/server/grpc/service"
+	"pwm-server/app/bff/chatinvites/internal/svc"
 )
 
 type (

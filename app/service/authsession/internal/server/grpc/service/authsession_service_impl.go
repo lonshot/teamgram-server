@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
-	"github.com/teamgram/teamgram-server/app/service/authsession/internal/core"
+	"pwm-server/app/service/authsession/authsession"
+	"pwm-server/app/service/authsession/internal/core"
 )
 
 // AuthsessionGetAuthorizations

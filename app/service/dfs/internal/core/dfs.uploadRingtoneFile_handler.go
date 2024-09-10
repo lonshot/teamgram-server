@@ -26,9 +26,9 @@ import (
 
 	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/dfs/dfs"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/ffmpegutil"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/model"
+	"pwm-server/app/service/dfs/dfs"
+	"pwm-server/app/service/dfs/internal/ffmpegutil"
+	"pwm-server/app/service/dfs/internal/model"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )

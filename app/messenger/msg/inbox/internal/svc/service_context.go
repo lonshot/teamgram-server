@@ -13,14 +13,14 @@ import (
 	kafka "github.com/teamgram/marmota/pkg/mq"
 	"github.com/teamgram/marmota/pkg/net/rpcx"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/config"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/internal/dao"
-	sync_client "github.com/teamgram/teamgram-server/app/messenger/sync/client"
-	// channel_client "github.com/teamgram/teamgram-server/app/service/biz/channel/client"
-	chat_client "github.com/teamgram/teamgram-server/app/service/biz/chat/client"
-	dialog_client "github.com/teamgram/teamgram-server/app/service/biz/dialog/client"
-	user_client "github.com/teamgram/teamgram-server/app/service/biz/user/client"
-	idgen_client "github.com/teamgram/teamgram-server/app/service/idgen/client"
+	"pwm-server/app/messenger/msg/inbox/internal/config"
+	"pwm-server/app/messenger/msg/internal/dao"
+	sync_client "pwm-server/app/messenger/sync/client"
+	// channel_client "pwm-server/app/service/biz/channel/client"
+	chat_client "pwm-server/app/service/biz/chat/client"
+	dialog_client "pwm-server/app/service/biz/dialog/client"
+	user_client "pwm-server/app/service/biz/user/client"
+	idgen_client "pwm-server/app/service/idgen/client"
 )
 
 type ServiceContext struct {

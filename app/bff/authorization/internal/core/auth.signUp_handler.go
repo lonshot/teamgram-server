@@ -25,12 +25,12 @@ import (
 	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/crypto"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/logic"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/model"
-	msgpb "github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	"github.com/teamgram/teamgram-server/pkg/phonenumber"
+	"pwm-server/app/bff/authorization/internal/logic"
+	"pwm-server/app/bff/authorization/internal/model"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	"pwm-server/app/service/authsession/authsession"
+	userpb "pwm-server/app/service/biz/user/user"
+	"pwm-server/pkg/phonenumber"
 )
 
 /*

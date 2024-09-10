@@ -21,10 +21,10 @@ package core
 import (
 	"github.com/teamgram/marmota/pkg/container2/sets"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/internal/dal/dataobject"
+	"pwm-server/app/messenger/sync/sync"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 )
 
 // InboxReadChatMediaUnreadToInbox

@@ -11,9 +11,9 @@
 package configuration_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/configuration/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/configuration/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/configuration/internal/svc"
+	"pwm-server/app/bff/configuration/internal/config"
+	"pwm-server/app/bff/configuration/internal/server/grpc/service"
+	"pwm-server/app/bff/configuration/internal/svc"
 )
 
 type (

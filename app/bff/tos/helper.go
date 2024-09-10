@@ -11,9 +11,9 @@
 package tos_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/tos/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/tos/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/tos/internal/svc"
+	"pwm-server/app/bff/tos/internal/config"
+	"pwm-server/app/bff/tos/internal/server/grpc/service"
+	"pwm-server/app/bff/tos/internal/svc"
 )
 
 type (

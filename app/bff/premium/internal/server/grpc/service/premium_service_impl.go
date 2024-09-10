@@ -14,7 +14,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/bff/premium/internal/core"
+	"pwm-server/app/bff/premium/internal/core"
 )
 
 // HelpGetPremiumPromo

@@ -20,8 +20,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	userpb "pwm-server/app/service/biz/user/user"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )

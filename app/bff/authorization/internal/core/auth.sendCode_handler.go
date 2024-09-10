@@ -24,11 +24,11 @@ import (
 
 	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/logic"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/model"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	statuspb "github.com/teamgram/teamgram-server/app/service/status/status"
+	"pwm-server/app/bff/authorization/internal/logic"
+	"pwm-server/app/bff/authorization/internal/model"
+	"pwm-server/app/service/authsession/authsession"
+	userpb "pwm-server/app/service/biz/user/user"
+	statuspb "pwm-server/app/service/status/status"
 
 	"google.golang.org/grpc/status"
 )

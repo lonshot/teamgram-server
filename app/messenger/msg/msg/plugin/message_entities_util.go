@@ -11,8 +11,8 @@ import (
 	"sort"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/username"
-	"github.com/teamgram/teamgram-server/pkg/mention"
+	"pwm-server/app/service/biz/username/username"
+	"pwm-server/pkg/mention"
 
 	"mvdan.cc/xurls/v2"
 )

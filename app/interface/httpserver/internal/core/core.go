@@ -11,7 +11,7 @@ import (
 
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/svc"
+	"pwm-server/app/interface/httpserver/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

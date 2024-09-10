@@ -21,9 +21,9 @@ package core
 import (
 	"github.com/teamgram/marmota/pkg/utils"
 	"github.com/teamgram/proto/mtproto"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/dialog/dialog"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/dialog/dialog"
+	userpb "pwm-server/app/service/biz/user/user"
 
 	"github.com/zeromicro/go-zero/core/mr"
 )

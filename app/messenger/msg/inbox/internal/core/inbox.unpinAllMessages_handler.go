@@ -20,9 +20,9 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/internal/dal/dataobject"
+	"pwm-server/app/messenger/sync/sync"
 )
 
 // InboxUnpinAllMessages

@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	userpb "pwm-server/app/service/biz/user/user"
 	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/threading"
 )

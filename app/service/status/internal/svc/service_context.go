@@ -10,8 +10,8 @@
 package svc
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/status/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/status/internal/dao"
+	"pwm-server/app/service/status/internal/config"
+	"pwm-server/app/service/status/internal/dao"
 )
 
 type ServiceContext struct {

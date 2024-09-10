@@ -11,8 +11,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/updates"
+	"pwm-server/app/service/biz/updates/internal/dal/dataobject"
+	"pwm-server/app/service/biz/updates/updates"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"time"
 )

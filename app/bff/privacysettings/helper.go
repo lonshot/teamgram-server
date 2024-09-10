@@ -11,9 +11,9 @@
 package privacysettingshelper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/privacysettings/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/privacysettings/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/privacysettings/internal/svc"
+	"pwm-server/app/bff/privacysettings/internal/config"
+	"pwm-server/app/bff/privacysettings/internal/server/grpc/service"
+	"pwm-server/app/bff/privacysettings/internal/svc"
 )
 
 type (

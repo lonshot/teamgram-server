@@ -22,8 +22,8 @@ import (
 	"math/rand"
 
 	"github.com/teamgram/proto/mtproto"
-	msgpb "github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 )
 
 // MessagesEditChatTitle

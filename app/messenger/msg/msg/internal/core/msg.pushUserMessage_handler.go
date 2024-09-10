@@ -11,10 +11,10 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/msg/plugin"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/msg/msg"
+	"pwm-server/app/messenger/msg/msg/plugin"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
 // MsgPushUserMessage

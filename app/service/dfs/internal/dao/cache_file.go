@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/model"
+	"pwm-server/app/service/dfs/internal/model"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

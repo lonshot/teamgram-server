@@ -11,10 +11,10 @@
 package files_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/files/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/files/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/files/internal/svc"
-	"github.com/teamgram/teamgram-server/app/bff/files/plugin"
+	"pwm-server/app/bff/files/internal/config"
+	"pwm-server/app/bff/files/internal/server/grpc/service"
+	"pwm-server/app/bff/files/internal/svc"
+	"pwm-server/app/bff/files/plugin"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

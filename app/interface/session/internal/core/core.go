@@ -14,9 +14,9 @@ import (
 
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/sess"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/svc"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
+	"pwm-server/app/interface/session/internal/sess"
+	"pwm-server/app/interface/session/internal/svc"
+	"pwm-server/app/service/authsession/authsession"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

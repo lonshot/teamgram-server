@@ -24,7 +24,7 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/model"
+	"pwm-server/app/service/dfs/internal/model"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/encrypt"

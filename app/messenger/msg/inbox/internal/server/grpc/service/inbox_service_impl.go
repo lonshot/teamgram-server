@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/core"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/inbox/internal/core"
 )
 
 // InboxEditUserMessageToInbox

@@ -7,7 +7,7 @@
 package http
 
 import (
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/svc"
+	"pwm-server/app/interface/httpserver/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

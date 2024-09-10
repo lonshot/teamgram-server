@@ -16,10 +16,10 @@ import (
 	"github.com/teamgram/marmota/pkg/net/ip"
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	bff_proxy_client "github.com/teamgram/teamgram-server/app/bff/bff/client"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/config"
-	authsession_client "github.com/teamgram/teamgram-server/app/service/authsession/client"
-	status_client "github.com/teamgram/teamgram-server/app/service/status/client"
+	bff_proxy_client "pwm-server/app/bff/bff/client"
+	"pwm-server/app/interface/session/internal/config"
+	authsession_client "pwm-server/app/service/authsession/client"
+	status_client "pwm-server/app/service/status/client"
 
 	"github.com/zeromicro/go-zero/zrpc"
 )

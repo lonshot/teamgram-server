@@ -11,7 +11,7 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/media/media"
+	"pwm-server/app/service/media/media"
 )
 
 // MediaUploadEncryptedFile

@@ -19,7 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/server/gnet"
+	"pwm-server/app/interface/gnetway/internal/server/gnet"
 )
 
 var (

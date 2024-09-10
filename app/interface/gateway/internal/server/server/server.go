@@ -23,9 +23,9 @@ import (
 	"syscall"
 
 	"github.com/teamgram/marmota/pkg/commands"
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/config"
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/server"
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/server/grpc"
+	"pwm-server/app/interface/gateway/internal/config"
+	"pwm-server/app/interface/gateway/internal/server"
+	"pwm-server/app/interface/gateway/internal/server/grpc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

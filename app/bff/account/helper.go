@@ -11,9 +11,9 @@
 package account_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/account/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/account/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/account/internal/svc"
+	"pwm-server/app/bff/account/internal/config"
+	"pwm-server/app/bff/account/internal/server/grpc/service"
+	"pwm-server/app/bff/account/internal/svc"
 )
 
 type (

@@ -15,7 +15,7 @@ import (
 	"strconv"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/idgen/idgen"
+	"pwm-server/app/service/idgen/idgen"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"

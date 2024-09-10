@@ -22,7 +22,7 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/bff/dialogs/internal/svc"
+	"pwm-server/app/bff/dialogs/internal/svc"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 

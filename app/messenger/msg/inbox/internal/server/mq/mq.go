@@ -24,9 +24,9 @@ import (
 	"fmt"
 
 	kafka "github.com/teamgram/marmota/pkg/mq"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/core"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/internal/svc"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/inbox/internal/core"
+	"pwm-server/app/messenger/msg/inbox/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/threading"

@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	user_client "github.com/teamgram/teamgram-server/app/service/biz/user/client"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	media_client "github.com/teamgram/teamgram-server/app/service/media/client"
-	mediapb "github.com/teamgram/teamgram-server/app/service/media/media"
-	"github.com/teamgram/teamgram-server/pkg/phonenumber"
+	user_client "pwm-server/app/service/biz/user/client"
+	userpb "pwm-server/app/service/biz/user/user"
+	media_client "pwm-server/app/service/media/client"
+	mediapb "pwm-server/app/service/media/media"
+	"pwm-server/pkg/phonenumber"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

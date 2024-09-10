@@ -28,9 +28,9 @@ import (
 	"github.com/teamgram/marmota/pkg/hack"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	idgen_client "github.com/teamgram/teamgram-server/app/service/idgen/client"
+	"pwm-server/app/messenger/msg/internal/dal/dataobject"
+	"pwm-server/app/messenger/msg/msg/msg"
+	idgen_client "pwm-server/app/service/idgen/client"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"

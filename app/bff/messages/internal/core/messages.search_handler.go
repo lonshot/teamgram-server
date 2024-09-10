@@ -22,9 +22,9 @@ import (
 	"math"
 
 	"github.com/teamgram/proto/mtproto"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/message"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/message/message"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
 // MessagesSearch

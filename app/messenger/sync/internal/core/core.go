@@ -14,10 +14,10 @@ import (
 
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/internal/svc"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	"github.com/teamgram/teamgram-server/app/service/status/status"
+	"pwm-server/app/interface/session/session"
+	"pwm-server/app/messenger/sync/internal/svc"
+	"pwm-server/app/messenger/sync/sync"
+	"pwm-server/app/service/status/status"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/types/known/wrapperspb"

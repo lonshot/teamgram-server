@@ -21,7 +21,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/svc"
+	"pwm-server/app/service/dfs/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

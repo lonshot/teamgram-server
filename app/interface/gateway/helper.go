@@ -11,7 +11,7 @@
 package gateway_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/server/server"
+	"pwm-server/app/interface/gateway/internal/server/server"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

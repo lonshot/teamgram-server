@@ -12,9 +12,9 @@ package core
 import (
 	// "github.com/teamgram/marmota/pkg/container2"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	// channelpb "github.com/teamgram/teamgram-server/app/service/biz/channel/channel"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	"pwm-server/app/messenger/sync/sync"
+	// channelpb "pwm-server/app/service/biz/channel/channel"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 )
 
 // SyncBroadcastUpdates

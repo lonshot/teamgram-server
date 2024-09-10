@@ -11,7 +11,7 @@
 package httpserverhelper
 
 import (
-	"github.com/teamgram/teamgram-server/app/interface/httpserver/internal/server"
+	"pwm-server/app/interface/httpserver/internal/server"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

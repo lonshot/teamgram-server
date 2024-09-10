@@ -10,8 +10,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/pkg/env2"
+	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
+	"pwm-server/pkg/env2"
 )
 
 // MakeChatInviteExported

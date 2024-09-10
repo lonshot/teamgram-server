@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/teamgram/marmota/pkg/net/ip"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/config"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/dao"
+	"pwm-server/app/interface/session/internal/config"
+	"pwm-server/app/interface/session/internal/dao"
 
 	"github.com/zeromicro/go-zero/core/conf"
 )

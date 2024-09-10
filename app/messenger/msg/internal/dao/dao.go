@@ -14,14 +14,14 @@ import (
 	"fmt"
 
 	"github.com/teamgram/marmota/pkg/idempotent"
-	inbox_client "github.com/teamgram/teamgram-server/app/messenger/msg/inbox/client"
-	sync_client "github.com/teamgram/teamgram-server/app/messenger/sync/client"
-	chat_client "github.com/teamgram/teamgram-server/app/service/biz/chat/client"
-	dialog_client "github.com/teamgram/teamgram-server/app/service/biz/dialog/client"
-	user_client "github.com/teamgram/teamgram-server/app/service/biz/user/client"
-	username_client "github.com/teamgram/teamgram-server/app/service/biz/username/client"
-	idgen_client "github.com/teamgram/teamgram-server/app/service/idgen/client"
-	"github.com/teamgram/teamgram-server/pkg/deduplication"
+	inbox_client "pwm-server/app/messenger/msg/inbox/client"
+	sync_client "pwm-server/app/messenger/sync/client"
+	chat_client "pwm-server/app/service/biz/chat/client"
+	dialog_client "pwm-server/app/service/biz/dialog/client"
+	user_client "pwm-server/app/service/biz/user/client"
+	username_client "pwm-server/app/service/biz/username/client"
+	idgen_client "pwm-server/app/service/idgen/client"
+	"pwm-server/pkg/deduplication"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 )

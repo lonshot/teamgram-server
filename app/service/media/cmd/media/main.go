@@ -13,7 +13,7 @@ package main
 import (
 	"github.com/teamgram/marmota/pkg/commands"
 
-	"github.com/teamgram/teamgram-server/app/service/media/internal/server"
+	"pwm-server/app/service/media/internal/server"
 )
 
 func main() {

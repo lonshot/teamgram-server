@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/core"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
+	"pwm-server/app/interface/session/internal/core"
+	"pwm-server/app/interface/session/session"
 )
 
 // SessionQueryAuthKey

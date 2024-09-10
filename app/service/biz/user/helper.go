@@ -11,10 +11,10 @@
 package user_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/user/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/user/internal/svc"
+	"pwm-server/app/service/biz/user/internal/config"
+	"pwm-server/app/service/biz/user/internal/dao"
+	"pwm-server/app/service/biz/user/internal/server/grpc/service"
+	"pwm-server/app/service/biz/user/internal/svc"
 )
 
 type (

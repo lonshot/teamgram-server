@@ -27,9 +27,9 @@ import (
 	"github.com/teamgram/marmota/pkg/container2/sets"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/internal/dal/dataobject"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/internal/dal/dataobject"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"

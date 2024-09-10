@@ -11,9 +11,9 @@
 package savedmessagedialogshelper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/savedmessagedialogs/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/savedmessagedialogs/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/savedmessagedialogs/internal/svc"
+	"pwm-server/app/bff/savedmessagedialogs/internal/config"
+	"pwm-server/app/bff/savedmessagedialogs/internal/server/grpc/service"
+	"pwm-server/app/bff/savedmessagedialogs/internal/svc"
 )
 
 type (

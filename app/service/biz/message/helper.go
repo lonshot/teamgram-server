@@ -11,12 +11,12 @@
 package message_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/dal/dao/mysql_dao"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/dal/dataobject"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/plugin"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/svc"
+	"pwm-server/app/service/biz/message/internal/config"
+	"pwm-server/app/service/biz/message/internal/dal/dao/mysql_dao"
+	"pwm-server/app/service/biz/message/internal/dal/dataobject"
+	"pwm-server/app/service/biz/message/internal/plugin"
+	"pwm-server/app/service/biz/message/internal/server/grpc/service"
+	"pwm-server/app/service/biz/message/internal/svc"
 )
 
 type (

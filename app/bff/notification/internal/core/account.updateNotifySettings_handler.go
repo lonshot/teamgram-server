@@ -20,9 +20,9 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/messenger/sync/sync"
+	"pwm-server/app/service/biz/chat/chat"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
 /*

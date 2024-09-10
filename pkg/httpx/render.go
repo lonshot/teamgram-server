@@ -12,7 +12,7 @@ import (
 	"net/http"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/pkg/httpx/render"
+	"pwm-server/pkg/httpx/render"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"google.golang.org/protobuf/encoding/protojson"

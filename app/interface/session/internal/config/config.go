@@ -10,7 +10,7 @@
 package config
 
 import (
-	"github.com/teamgram/teamgram-server/pkg/conf"
+	"pwm-server/pkg/conf"
 
 	"github.com/zeromicro/go-zero/zrpc"
 )

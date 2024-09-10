@@ -24,7 +24,7 @@ import (
 
 	kafka "github.com/teamgram/marmota/pkg/mq"
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/inbox/inbox"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"google.golang.org/protobuf/proto"

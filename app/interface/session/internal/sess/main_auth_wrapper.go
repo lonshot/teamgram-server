@@ -18,9 +18,9 @@ import (
 	"github.com/teamgram/marmota/pkg/queue2"
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"github.com/teamgram/teamgram-server/app/interface/session/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
-	"github.com/teamgram/teamgram-server/app/service/status/status"
+	"pwm-server/app/interface/session/internal/dao"
+	"pwm-server/app/service/authsession/authsession"
+	"pwm-server/app/service/status/status"
 
 	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/jsonx"

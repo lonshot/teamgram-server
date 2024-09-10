@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/core"
+	"pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/chat/internal/core"
 )
 
 // ChatGetMutableChat

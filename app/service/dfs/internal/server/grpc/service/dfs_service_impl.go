@@ -14,8 +14,8 @@ import (
 	"context"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/dfs/dfs"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/core"
+	"pwm-server/app/service/dfs/dfs"
+	"pwm-server/app/service/dfs/internal/core"
 )
 
 // DfsWriteFilePartData

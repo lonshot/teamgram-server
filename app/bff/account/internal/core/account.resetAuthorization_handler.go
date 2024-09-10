@@ -20,8 +20,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
+	"pwm-server/app/messenger/sync/sync"
+	"pwm-server/app/service/authsession/authsession"
 )
 
 // AccountResetAuthorization

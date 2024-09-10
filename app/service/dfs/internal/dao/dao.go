@@ -10,9 +10,9 @@
 package dao
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/dfs/internal/minio_util"
-	idgen_client "github.com/teamgram/teamgram-server/app/service/idgen/client"
+	"pwm-server/app/service/dfs/internal/config"
+	"pwm-server/app/service/dfs/internal/minio_util"
+	idgen_client "pwm-server/app/service/idgen/client"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/zeromicro/go-zero/core/stores/kv"

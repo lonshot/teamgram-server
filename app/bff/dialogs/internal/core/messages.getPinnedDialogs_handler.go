@@ -23,11 +23,11 @@ import (
 	"sort"
 
 	"github.com/teamgram/proto/mtproto"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/dialog/dialog"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/message"
-	"github.com/teamgram/teamgram-server/app/service/biz/updates/updates"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/dialog/dialog"
+	"pwm-server/app/service/biz/message/message"
+	"pwm-server/app/service/biz/updates/updates"
+	userpb "pwm-server/app/service/biz/user/user"
 
 	"github.com/zeromicro/go-zero/core/mr"
 )

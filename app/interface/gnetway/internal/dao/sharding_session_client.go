@@ -9,8 +9,8 @@ package dao
 import (
 	"errors"
 
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/config"
-	sessionclient "github.com/teamgram/teamgram-server/app/interface/session/client"
+	"pwm-server/app/interface/gnetway/internal/config"
+	sessionclient "pwm-server/app/interface/session/client"
 
 	"github.com/zeromicro/go-zero/core/discov"
 	"github.com/zeromicro/go-zero/core/hash"

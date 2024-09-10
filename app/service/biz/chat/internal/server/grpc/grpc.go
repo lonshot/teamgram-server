@@ -10,9 +10,9 @@
 package grpc
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/svc"
+	"pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/chat/internal/server/grpc/service"
+	"pwm-server/app/service/biz/chat/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"

@@ -1,4 +1,4 @@
-module github.com/teamgram/teamgram-server
+module pwm-server
 
 go 1.19
 

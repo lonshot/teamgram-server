@@ -19,9 +19,9 @@
 package svc
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/dao"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/internal/plugin"
+	"pwm-server/app/service/biz/message/internal/config"
+	"pwm-server/app/service/biz/message/internal/dao"
+	"pwm-server/app/service/biz/message/internal/plugin"
 )
 
 type ServiceContext struct {

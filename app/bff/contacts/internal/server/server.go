@@ -21,9 +21,9 @@ package server
 import (
 	"flag"
 
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/server/grpc"
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/svc"
+	"pwm-server/app/bff/contacts/internal/config"
+	"pwm-server/app/bff/contacts/internal/server/grpc"
+	"pwm-server/app/bff/contacts/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"

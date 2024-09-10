@@ -11,7 +11,7 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/biz/code/code"
+	"pwm-server/app/service/biz/code/code"
 )
 
 // CodeDeletePhoneCode

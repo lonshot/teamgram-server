@@ -11,9 +11,9 @@
 package userprofilehelper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/userprofile/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/userprofile/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/userprofile/internal/svc"
+	"pwm-server/app/bff/userprofile/internal/config"
+	"pwm-server/app/bff/userprofile/internal/server/grpc/service"
+	"pwm-server/app/bff/userprofile/internal/svc"
 )
 
 type (

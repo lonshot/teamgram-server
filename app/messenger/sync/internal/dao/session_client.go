@@ -24,8 +24,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	sessionclient "github.com/teamgram/teamgram-server/app/interface/session/client"
-	"github.com/teamgram/teamgram-server/app/interface/session/session"
+	sessionclient "pwm-server/app/interface/session/client"
+	"pwm-server/app/interface/session/session"
 
 	"github.com/zeromicro/go-zero/core/discov"
 	"github.com/zeromicro/go-zero/core/logx"

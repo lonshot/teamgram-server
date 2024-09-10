@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/teamgram/teamgram-server/app/interface/gateway/internal/config"
-	sessionclient "github.com/teamgram/teamgram-server/app/interface/session/client"
+	"pwm-server/app/interface/gateway/internal/config"
+	sessionclient "pwm-server/app/interface/session/client"
 
 	"github.com/zeromicro/go-zero/core/discov"
 	"github.com/zeromicro/go-zero/core/hash"

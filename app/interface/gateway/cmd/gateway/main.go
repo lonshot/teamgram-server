@@ -20,7 +20,7 @@ package main
 
 import (
 	"github.com/teamgram/marmota/pkg/commands"
-	gateway_helper "github.com/teamgram/teamgram-server/app/interface/gateway"
+	gateway_helper "pwm-server/app/interface/gateway"
 )
 
 func main() {

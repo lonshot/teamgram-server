@@ -24,11 +24,11 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	msgpb "github.com/teamgram/teamgram-server/app/messenger/msg/msg/msg"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/message/message"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/username"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/message/message"
+	userpb "pwm-server/app/service/biz/user/user"
+	"pwm-server/app/service/biz/username/username"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )

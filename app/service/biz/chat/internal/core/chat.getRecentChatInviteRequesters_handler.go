@@ -19,8 +19,8 @@
 package core
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
-	"github.com/teamgram/teamgram-server/app/service/biz/chat/internal/dal/dataobject"
+	"pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
 )
 
 // ChatGetRecentChatInviteRequesters

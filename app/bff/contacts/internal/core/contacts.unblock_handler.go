@@ -20,8 +20,8 @@ package core
 
 import (
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/messenger/sync/sync"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
 // ContactsUnblock

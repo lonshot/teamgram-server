@@ -23,7 +23,7 @@ import (
 	"fmt"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/service/media/internal/dal/dataobject"
+	"pwm-server/app/service/media/internal/dal/dataobject"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )

@@ -24,10 +24,10 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/bff/qrcode/internal/model"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	"github.com/teamgram/teamgram-server/app/service/authsession/authsession"
-	userpb "github.com/teamgram/teamgram-server/app/service/biz/user/user"
+	"pwm-server/app/bff/qrcode/internal/model"
+	"pwm-server/app/messenger/sync/sync"
+	"pwm-server/app/service/authsession/authsession"
+	userpb "pwm-server/app/service/biz/user/user"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )

@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/teamgram-server/app/messenger/sync/sync"
-	chatpb "github.com/teamgram/teamgram-server/app/service/biz/chat/chat"
+	"pwm-server/app/messenger/sync/sync"
+	chatpb "pwm-server/app/service/biz/chat/chat"
 )
 
 // MessagesSetTyping

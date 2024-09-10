@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/teamgram/teamgram-server/pkg/goffmpeg/utils"
+	"pwm-server/pkg/goffmpeg/utils"
 )
 
 // Configuration ...

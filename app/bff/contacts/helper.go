@@ -11,10 +11,10 @@
 package contacts_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/contacts/internal/svc"
-	"github.com/teamgram/teamgram-server/app/bff/contacts/plugin"
+	"pwm-server/app/bff/contacts/internal/config"
+	"pwm-server/app/bff/contacts/internal/server/grpc/service"
+	"pwm-server/app/bff/contacts/internal/svc"
+	"pwm-server/app/bff/contacts/plugin"
 )
 
 type (

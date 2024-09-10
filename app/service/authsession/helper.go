@@ -11,7 +11,7 @@
 package authsession_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/authsession/internal/server"
+	"pwm-server/app/service/authsession/internal/server"
 )
 
 var (

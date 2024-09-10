@@ -11,11 +11,11 @@
 package authorization_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/internal/svc"
-	"github.com/teamgram/teamgram-server/app/bff/authorization/plugin"
-	"github.com/teamgram/teamgram-server/pkg/code"
+	"pwm-server/app/bff/authorization/internal/config"
+	"pwm-server/app/bff/authorization/internal/server/grpc/service"
+	"pwm-server/app/bff/authorization/internal/svc"
+	"pwm-server/app/bff/authorization/plugin"
+	"pwm-server/pkg/code"
 )
 
 type (

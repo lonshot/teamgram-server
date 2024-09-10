@@ -11,9 +11,9 @@
 package username_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/service/biz/username/internal/config"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/service/biz/username/internal/svc"
+	"pwm-server/app/service/biz/username/internal/config"
+	"pwm-server/app/service/biz/username/internal/server/grpc/service"
+	"pwm-server/app/service/biz/username/internal/svc"
 )
 
 type (

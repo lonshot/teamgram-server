@@ -13,8 +13,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/config"
-	"github.com/teamgram/teamgram-server/app/interface/gnetway/internal/dao"
+	"pwm-server/app/interface/gnetway/internal/config"
+	"pwm-server/app/interface/gnetway/internal/dao"
 
 	"github.com/zeromicro/go-zero/core/netx"
 )

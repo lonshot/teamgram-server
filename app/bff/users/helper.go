@@ -11,10 +11,10 @@
 package users_helper
 
 import (
-	"github.com/teamgram/teamgram-server/app/bff/users/internal/config"
-	"github.com/teamgram/teamgram-server/app/bff/users/internal/plugin"
-	"github.com/teamgram/teamgram-server/app/bff/users/internal/server/grpc/service"
-	"github.com/teamgram/teamgram-server/app/bff/users/internal/svc"
+	"pwm-server/app/bff/users/internal/config"
+	"pwm-server/app/bff/users/internal/plugin"
+	"pwm-server/app/bff/users/internal/server/grpc/service"
+	"pwm-server/app/bff/users/internal/svc"
 )
 
 type (
