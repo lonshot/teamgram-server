@@ -93,7 +93,7 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}  # Ensure this is correctly set
       MYSQL_DATABASE: teamgram
       MYSQL_USER: teamgram
       MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
@@ -112,10 +112,11 @@ services:
     networks:
       - pwm_net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
       interval: 30s
       timeout: 10s
       retries: 3
+
 
   # MinIO Object Storage
   minio:
