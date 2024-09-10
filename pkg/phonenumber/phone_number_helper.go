@@ -1,5 +1,5 @@
 // Copyright 2022 Teamgram Authors
-//  All rights reserved.
+// All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,69 +20,49 @@ package phonenumber
 
 import (
 	"errors"
-	"fmt"
-
-	"github.com/nyaruka/phonenumbers"
+	"strings"
 )
 
+// phoneNumberHelper struct now stores the raw phone number as a string
 type phoneNumberHelper struct {
-	*phonenumbers.PhoneNumber
+	PhoneNumber string
 }
 
-func MakePhoneNumberHelper(number, region string) (*phoneNumberHelper, error) {
-	var (
-		pNumber *phonenumbers.PhoneNumber
-		err     error
-	)
-
+// MakePhoneNumberHelper initializes phoneNumberHelper with the raw phone number
+func MakePhoneNumberHelper(number string) (*phoneNumberHelper, error) {
 	if number == "" {
 		return nil, errors.New("empty phone number")
 	}
 
-	// Android phone number format: 8611111111111, parse error: invalid country code
-	// convert +8611111111111
-	if region == "" && number[:1] != "+" {
-		number = "+" + number
-	}
-
-	// check phone invalid
-	pNumber, err = phonenumbers.Parse(number, region)
-	if err != nil {
-		err = fmt.Errorf("parse phone number %s err: %v", number, err)
-	} else {
-		if !phonenumbers.IsValidNumber(pNumber) {
-			err = fmt.Errorf("invalid phone number: %s - %v", number, pNumber)
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	} else {
-		return &phoneNumberHelper{pNumber}, nil
-	}
+	// Just store the raw phone number without validation
+	return &phoneNumberHelper{PhoneNumber: strings.TrimSpace(number)}, nil
 }
 
+// GetNormalizeDigits returns a constant value as we are not normalizing
 func (p *phoneNumberHelper) GetNormalizeDigits() string {
-	// DB store normalize phone number
-	return phonenumbers.NormalizeDigitsOnly(phonenumbers.Format(p.PhoneNumber, phonenumbers.E164))
+	// Return a constant placeholder or the raw number, based on your preference
+	return p.PhoneNumber // or return "0000000000" as a placeholder
 }
 
+// GetRegionCode returns a constant value
 func (p *phoneNumberHelper) GetRegionCode() string {
-	return phonenumbers.GetRegionCodeForNumber(p.PhoneNumber)
+	// Return a constant placeholder region code
+	return "ZZ" // 'ZZ' is used as an undefined region code in some contexts
 }
 
+// GetCountryCode returns a constant value
 func (p *phoneNumberHelper) GetCountryCode() int32 {
-	return p.PhoneNumber.GetCountryCode()
+	// Return a constant placeholder country code
+	return 0 // Use 0 as a placeholder for unknown country code
 }
 
-// Check number
-// receive from client : "+86 111 1111 1111", need normalize
+// CheckAndGetPhoneNumber simply returns the raw phone number without any validation
 func CheckAndGetPhoneNumber(number string) (phoneNumber string, err error) {
 	var (
 		pNumber *phoneNumberHelper
 	)
 
-	pNumber, err = MakePhoneNumberHelper(number, "")
+	pNumber, err = MakePhoneNumberHelper(number)
 	if err != nil {
 		return
 	}

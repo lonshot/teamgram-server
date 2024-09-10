@@ -9,7 +9,6 @@ require (
 	github.com/gobwas/httphead v0.1.0
 	github.com/gobwas/ws v1.4.0
 	github.com/minio/minio-go/v7 v7.0.49
-	github.com/nyaruka/phonenumbers v1.3.0
 	github.com/oschwald/geoip2-golang v1.8.0
 	github.com/panjf2000/gnet/v2 v2.5.1
 	github.com/stretchr/testify v1.9.0

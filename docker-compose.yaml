@@ -1,7 +1,5 @@
-version: "3"
-
 services:
-  #zookeeper是kafka的依赖 - Zookeeper is the dependencies of Kafka
+  # Zookeeper is the dependency for Kafka
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper
@@ -11,10 +9,8 @@ services:
     restart: always
     ports:
       - 127.0.0.1:2181:2181
-    networks:
-      - pwm_net
 
-  #消息队列 - Message queue
+  # Message Queue - Kafka
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
@@ -29,8 +25,6 @@ services:
     restart: always
     volumes:
       - ./data/kafka/data:/data
-    networks:
-      - pwm_net
     depends_on:
       - zookeeper
 
@@ -58,8 +52,6 @@ services:
       ETCD_AUTO_COMPACTION_RETENTION: 1
     restart: always
     command: /usr/local/bin/etcd
-    networks:
-      - pwm_net
 
   redis:
     image: redis
@@ -68,43 +60,32 @@ services:
       - 127.0.0.1:6379:6379
     volumes:
       - ./data/redis/data:/data:rw
-      #redis config file
-      #- ./deploy/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Europe/Moscow
     restart: always
     privileged: true
     command: redis-server --appendonly yes
-    networks:
-      - pwm_net
 
   mysql:
     image: mysql:5.7
     container_name: mysql
     environment:
-      # 时区上海 - Time zone Shanghai (Change if needed)
-      #TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}
       MYSQL_DATABASE: teamgram
       MYSQL_USER: teamgram
       MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
-      # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - 127.0.0.1:3306:3306
     volumes:
-      # 数据挂载 - Data mounting
       - ./data/mysql/data:/var/lib/mysql:Z
       - ./teamgramd/sql:/docker-entrypoint-initdb.d/:Z
-      #- /etc/localtime:/etc/localtime
-    command:  # Fixed command to ensure it is a list format
+    command:
       - "--default-authentication-plugin=mysql_native_password"
       - "--character-set-server=utf8mb4"
       - "--collation-server=utf8mb4_general_ci"
       - "--explicit_defaults_for_timestamp=true"
       - "--lower_case_table_names=1"
     restart: always
-    networks:
-      - pwm_net
 
   minio:
     image: minio/minio
@@ -119,8 +100,6 @@ services:
       MINIO_SECRET_KEY: miniostorage
     command: server /data --console-address ":9001"
     restart: always
-    networks:
-      - pwm_net
 
   minio_mc:
     image: minio/mc:latest
@@ -128,8 +107,6 @@ services:
     volumes:
       - ./minio_init.sh:/minio_init.sh
     entrypoint: /minio_init.sh
-    networks:
-      - pwm_net
 
   teamgram:
     build: .
@@ -150,8 +127,6 @@ services:
       - "20120:20120"
       - "20670:20670"
       - "20420:20420"
-    networks:
-      - pwm_net
     depends_on:
       - zookeeper
       - kafka
@@ -159,8 +134,3 @@ services:
       - redis
       - minio
       - mysql
-
-networks:
-  pwm_net:
-    driver: bridge
-
