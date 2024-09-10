@@ -33,7 +33,7 @@ enum TLConstructor {
     CRC32_message_search = 251910661;
     CRC32_message_searchGlobal = 1113214626;
     CRC32_message_searchByPinned = 721580084;
-    CRC32_message_getSearchCounter = -489963706;
+    CRC32_message_getSearchCounter = -489963796;
     CRC32_message_searchV2 = -356633351;
     CRC32_message_getLastTwoPinnedMessageId = -1348859861;
     CRC32_message_updatePinnedMessageId = -182391344;

@@ -91,9 +91,9 @@ var clazzIdRegisters2 = map[int32]func() mtproto.TLObject{
 			Constructor: 721580084,
 		}
 	},
-	-489963706: func() mtproto.TLObject { // 0xe2cbbf46
+	-489963796: func() mtproto.TLObject { // 0xe2cbbf46
 		return &TLMessageGetSearchCounter{
-			Constructor: -489963706,
+			Constructor: -489963796,
 		}
 	},
 	-356633351: func() mtproto.TLObject { // 0xeabe34f9
