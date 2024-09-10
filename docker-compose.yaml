@@ -91,7 +91,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
       # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
-      - 127.0.0.1:3306:3306
+      - 127.0.0.1:4406:4406
     volumes:
       # 数据挂载 - Data mounting
       - ./data/mysql/data:/var/lib/mysql:Z
@@ -136,14 +136,14 @@ services:
     build: .
     restart: always
     ports:
-      - "10443:9443"
+      - "10443:10443"
       - "11443:11443"
       - "20450:20450"
       - "20010:20010"
       - "20020:20020"
       - "20640:20640"
       - "20110:20110"
-      - "5222:9080"
+      - "5222:5222"
       - "8801:8801"
       - "20660:20660"
       - "20650:20650"
@@ -163,4 +163,5 @@ services:
 
 networks:
   pwm_net:
-    driver: bridge
+    driver: 
+      bridge
