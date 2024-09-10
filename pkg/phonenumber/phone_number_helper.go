@@ -1,70 +1,117 @@
-// Copyright 2022 Teamgram Authors
-// All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Author: teamgramio (teamgram.io@gmail.com)
-//
-
 package phonenumber
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
-// phoneNumberHelper struct now stores the raw phone number as a string
-type phoneNumberHelper struct {
-	PhoneNumber string
+// Simulated PhoneNumber struct to replace `phonenumbers.PhoneNumber`
+type PhoneNumber struct {
+	CountryCode   int32
+	NationalNumber string
+	RawInput      string
 }
 
-// MakePhoneNumberHelper initializes phoneNumberHelper with the raw phone number
-func MakePhoneNumberHelper(number string) (*phoneNumberHelper, error) {
+// phoneNumberHelper struct with the custom PhoneNumber type
+type phoneNumberHelper struct {
+	*PhoneNumber
+}
+
+// MakePhoneNumberHelper function to create a phoneNumberHelper instance
+func MakePhoneNumberHelper(number, region string) (*phoneNumberHelper, error) {
 	if number == "" {
 		return nil, errors.New("empty phone number")
 	}
 
-	// Just store the raw phone number without validation
-	return &phoneNumberHelper{PhoneNumber: strings.TrimSpace(number)}, nil
+	// Store the raw input directly
+	rawInput := number
+
+	// Ensure the phone number starts with a "+" if no region is provided
+	if region == "" && number[:1] != "+" {
+		number = "+" + number
+	}
+
+	// Simulate parsing logic
+	pNumber := parsePhoneNumber(number, region)
+
+	// Create the phoneNumberHelper instance with the parsed phone number
+	return &phoneNumberHelper{
+		PhoneNumber: pNumber,
+	}, nil
 }
 
-// GetNormalizeDigits returns a constant value as we are not normalizing
+// Simulated phone number parsing function
+func parsePhoneNumber(number, region string) *PhoneNumber {
+	// Extract country code and national number based on the phone number prefix
+	countryCode := extractCountryCode(number)
+	nationalNumber := strings.TrimPrefix(number, fmt.Sprintf("+%d", countryCode))
+
+	return &PhoneNumber{
+		CountryCode:   countryCode,
+		NationalNumber: nationalNumber,
+		RawInput:      number,
+	}
+}
+
+// Simulate extracting the country code from the phone number
+func extractCountryCode(number string) int32 {
+	switch {
+	case strings.HasPrefix(number, "+1"):
+		return 1 // US
+	case strings.HasPrefix(number, "+84"):
+		return 84 // Vietnam
+	case strings.HasPrefix(number, "+44"):
+		return 44 // England
+	case strings.HasPrefix(number, "+972"):
+		return 972 // Israel
+	// Add more cases as needed
+	default:
+		return 0 // Default for invalid or unsupported numbers
+	}
+}
+
+// GetNormalizeDigits returns the raw input phone number as is
 func (p *phoneNumberHelper) GetNormalizeDigits() string {
-	// Return a constant placeholder or the raw number, based on your preference
-	return p.PhoneNumber // or return "0000000000" as a placeholder
+	// Simply return the raw input without any normalization
+	return p.RawInput
 }
 
-// GetRegionCode returns a constant value
+// GetRegionCode mimics phonenumbers.GetRegionCodeForNumber
 func (p *phoneNumberHelper) GetRegionCode() string {
-	// Return a constant placeholder region code
-	return "ZZ" // 'ZZ' is used as an undefined region code in some contexts
+	// Return region codes based on country codes
+	switch p.CountryCode {
+	case 1:
+		return "US"
+	case 84:
+		return "VI"
+	case 44:
+		return "EN"
+	case 972:
+		return "IL"
+	// Add more cases as needed
+	default:
+		return "Unknown"
+	}
 }
 
-// GetCountryCode returns a constant value
+// GetCountryCode mimics phonenumbers.GetCountryCode
 func (p *phoneNumberHelper) GetCountryCode() int32 {
-	// Return a constant placeholder country code
-	return 0 // Use 0 as a placeholder for unknown country code
+	return p.CountryCode
 }
 
-// CheckAndGetPhoneNumber simply returns the raw phone number without any validation
-func CheckAndGetPhoneNumber(number string) (phoneNumber string, err error) {
-	var (
-		pNumber *phoneNumberHelper
-	)
+// GetRawInput returns the raw input phone number
+func (p *phoneNumberHelper) GetRawInput() string {
+	return p.RawInput
+}
 
-	pNumber, err = MakePhoneNumberHelper(number)
+// CheckAndGetPhoneNumber function remains the same, using the new implementation
+func CheckAndGetPhoneNumber(number string) (phoneNumber string, err error) {
+	var pNumber *phoneNumberHelper
+
+	pNumber, err = MakePhoneNumberHelper(number, "")
 	if err != nil {
-		return
+		return "", err
 	}
 
 	return pNumber.GetNormalizeDigits(), nil
