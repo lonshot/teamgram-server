@@ -22,10 +22,7 @@ type phoneNumberHelper struct {
 func MakePhoneNumberHelper(number, region string) (*phoneNumberHelper, error) {
 	if number == "" {
 		return nil, errors.New("empty phone number")
-	}
-
-	// Store the raw input directly
-	rawInput := number
+	} 
 
 	// Ensure the phone number starts with a "+" if no region is provided
 	if region == "" && number[:1] != "+" {
