@@ -40,51 +40,81 @@ func NewShardingSessionClient(c config.Config) *ShardingSessionClient {
 }
 
 func (sess *ShardingSessionClient) watch(c zrpc.RpcClientConf) {
-	sub, _ := discov.NewSubscriber(c.Etcd.Hosts, c.Etcd.Key)
-	update := func() {
-		var (
-			addClis    []string
-			removeClis []string
-		)
+    // Initialize Subscriber and check for errors
+    sub, err := discov.NewSubscriber(c.Etcd.Hosts, c.Etcd.Key)
+    if err != nil {
+        logx.Errorf("Failed to initialize Subscriber: %v", err)
+        return
+    }
 
-		values := sub.Values()
-		sessions := map[string]sessionclient.SessionClient{}
-		for _, v := range values {
-			if old, ok := sess.sessions[v]; ok {
-				sessions[v] = old
-				continue
-			}
-			c.Endpoints = []string{v}
-			cli, err := zrpc.NewClient(c)
-			if err != nil {
-				logx.Error("watchComet NewClient(%+v) error(%v)", values, err)
-				return
-			}
-			sessionCli := sessionclient.NewSessionClient(cli)
-			sessions[v] = sessionCli
+    update := func() {
+        var (
+            addClis    []string
+            removeClis []string
+        )
 
-			addClis = append(addClis, v)
-		}
+        // Check if the subscriber is properly initialized
+        if sub == nil {
+            logx.Error("Subscriber is nil")
+            return
+        }
 
-		for key, _ := range sess.sessions {
-			if !stringx.Contains(values, key) {
-				removeClis = append(removeClis, key)
-			}
-		}
+        values := sub.Values()
+        if values == nil {
+            logx.Error("Subscriber returned nil values")
+            return
+        }
 
-		for _, n := range addClis {
-			sess.dispatcher.Add(n)
-		}
+        sessions := map[string]sessionclient.SessionClient{}
+        for _, v := range values {
+            if old, ok := sess.sessions[v]; ok {
+                sessions[v] = old
+                continue
+            }
 
-		for _, n := range removeClis {
-			sess.dispatcher.Remove(n)
-		}
+            // Ensure endpoints are not empty before creating a new client
+            c.Endpoints = []string{v}
+            cli, err := zrpc.NewClient(c)
+            if err != nil {
+                logx.Errorf("watchComet NewClient(%+v) error(%v)", values, err)
+                continue
+            }
 
-		sess.sessions = sessions
-	}
+            sessionCli := sessionclient.NewSessionClient(cli)
+            sessions[v] = sessionCli
 
-	sub.AddListener(update)
-	update()
+            addClis = append(addClis, v)
+        }
+
+        // Handle sessions to remove
+        for key := range sess.sessions {
+            if !stringx.Contains(values, key) {
+                removeClis = append(removeClis, key)
+            }
+        }
+
+        // Update dispatcher with added and removed clients
+        for _, n := range addClis {
+            sess.dispatcher.Add(n)
+        }
+
+        for _, n := range removeClis {
+            sess.dispatcher.Remove(n)
+        }
+
+        // Update sessions map
+        sess.sessions = sessions
+    }
+
+    // Add listener to subscriber with error handling
+    if sub != nil {
+        sub.AddListener(update)
+    } else {
+        logx.Error("Cannot add listener to a nil Subscriber")
+    }
+
+    // Initial update call to set up clients
+    update()
 }
 
 func (sess *ShardingSessionClient) InvokeByKey(key string, cb func(client sessionclient.SessionClient) (err error)) error {

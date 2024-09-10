@@ -49,7 +49,7 @@ image: mysql:8.0.29
 container_name: mysql
 restart: always
 ports:
-- 4406:4406
+- 3306:3306
 networks:
 - teamgram-net
 volumes:
@@ -75,7 +75,7 @@ image: redis:6.2.7
 container_name: redis
 restart: always
 ports:
-- 6370:6370
+- 6379:6379
 networks:
 - teamgram-net
 volumes:
@@ -209,15 +209,15 @@ mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "$CHANGE_AUTHENTICATION $CHANGE_PAS
 ![image.png](./image/23165610-55bb467a0603c2b3.webp)
 
 ```
-127.0.0.1:4406
-=>mysql:4406
+127.0.0.1:3306
+=>mysql:3306
 
 127.0.0.1:2379
 =>etcd:2379
 
-127.0.0.1:6370
-localhost:6370
-=>redis:6370
+127.0.0.1:6379
+localhost:6379
+=>redis:6379
 
 127.0.0.1:9092
 =>kafka:9092
@@ -240,8 +240,8 @@ Log:
 Mode: file
 Path: ../logs/authsession
 Mysql:
-Addr: mysql:4406
-DSN: root:@tcp(mysql:4406)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+Addr: mysql:3306
+DSN: root:@tcp(mysql:3306)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 Active: 64
 Idle: 64
 IdleTimeout: 4h
@@ -249,9 +249,9 @@ QueryTimeout: 5s
 ExecTimeout: 5s
 TranTimeout: 5s
 Cache:
-- Host: redis:6370
+- Host: redis:6379
   KV:
-- Host: redis:6370
+- Host: redis:6379
 ```
 
 ## 5、teamgram在主机部署

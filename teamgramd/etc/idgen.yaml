@@ -10,4 +10,4 @@ Log:
   Level: debug
 NodeId: 1
 SeqIDGen:
-  - Host: 127.0.0.1:6370
+  - Host: 127.0.0.1:6379

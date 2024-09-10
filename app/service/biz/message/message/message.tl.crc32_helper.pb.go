@@ -24,7 +24,7 @@ const (
 	CRC32_message_search                               TLConstructor = 251910661   // 0xf03da05
 	CRC32_message_searchGlobal                         TLConstructor = 1113214626  // 0x425a4ea2
 	CRC32_message_searchByPinned                       TLConstructor = 721580084   // 0x2b027034
-	CRC32_message_getSearchCounter                     TLConstructor = -489963706  // 0xe2cbbf46
+	CRC32_message_getSearchCounter                     TLConstructor = -489963796  // 0xe2cbbf46
 	CRC32_message_searchV2                             TLConstructor = -356633351  // 0xeabe34f9
 	CRC32_message_getLastTwoPinnedMessageId            TLConstructor = -1348859861 // 0xaf9a082b
 	CRC32_message_updatePinnedMessageId                TLConstructor = -182391344  // 0xf520edd0

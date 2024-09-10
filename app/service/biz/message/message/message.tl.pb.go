@@ -47,7 +47,7 @@ const (
 	TLConstructor_CRC32_message_search                               TLConstructor = 251910661
 	TLConstructor_CRC32_message_searchGlobal                         TLConstructor = 1113214626
 	TLConstructor_CRC32_message_searchByPinned                       TLConstructor = 721580084
-	TLConstructor_CRC32_message_getSearchCounter                     TLConstructor = -489963706
+	TLConstructor_CRC32_message_getSearchCounter                     TLConstructor = -489963796
 	TLConstructor_CRC32_message_searchV2                             TLConstructor = -356633351
 	TLConstructor_CRC32_message_getLastTwoPinnedMessageId            TLConstructor = -1348859861
 	TLConstructor_CRC32_message_updatePinnedMessageId                TLConstructor = -182391344
@@ -74,7 +74,7 @@ var (
 		251910661:   "CRC32_message_search",
 		1113214626:  "CRC32_message_searchGlobal",
 		721580084:   "CRC32_message_searchByPinned",
-		-489963706:  "CRC32_message_getSearchCounter",
+		-489963796:  "CRC32_message_getSearchCounter",
 		-356633351:  "CRC32_message_searchV2",
 		-1348859861: "CRC32_message_getLastTwoPinnedMessageId",
 		-182391344:  "CRC32_message_updatePinnedMessageId",
@@ -98,7 +98,7 @@ var (
 		"CRC32_message_search":                               251910661,
 		"CRC32_message_searchGlobal":                         1113214626,
 		"CRC32_message_searchByPinned":                       721580084,
-		"CRC32_message_getSearchCounter":                     -489963706,
+		"CRC32_message_getSearchCounter":                     -489963796,
 		"CRC32_message_searchV2":                             -356633351,
 		"CRC32_message_getLastTwoPinnedMessageId":            -1348859861,
 		"CRC32_message_updatePinnedMessageId":                -182391344,

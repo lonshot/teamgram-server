@@ -13,8 +13,8 @@ InboxConsumer:
   Group: "Inbox-MainCommunity-S"
 
 Mysql:
-  Addr: 127.0.0.1:4406
-  DSN: root:@tcp(127.0.0.1:4406)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  Addr: 127.0.0.1:3306
+  DSN: root:@tcp(127.0.0.1:3306)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
   Active: 64
   Idle: 64
   IdleTimeout: 4h
@@ -22,7 +22,7 @@ Mysql:
   ExecTimeout: 5s
   TranTimeout: 5s
 KV:
-  - Host: 127.0.0.1:6370
+  - Host: 127.0.0.1:6379
 
 IdgenClient:
   Etcd:

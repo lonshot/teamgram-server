@@ -10,12 +10,12 @@ Log:
   Path: ../logs/msg
   Level: debug
 Mysql:
-  DSN: root:@tcp(127.0.0.1:4406)/teamgram?charset=utf8mb4&parseTime=true
+  DSN: root:@tcp(127.0.0.1:3306)/teamgram?charset=utf8mb4&parseTime=true
   Active: 64
   Idle: 64
   IdleTimeout: 4h
 KV:
-  - Host: 127.0.0.1:6370
+  - Host: 127.0.0.1:6379
 
 InboxConsumer:
   Topics:
@@ -47,5 +47,5 @@ SyncClient:
     - 127.0.0.1:9092
 
 Redis2:
-  Host: 127.0.0.1:6370
+  Host: 127.0.0.1:6379
   Type: node
