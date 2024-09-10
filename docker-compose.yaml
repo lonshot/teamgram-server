@@ -64,9 +64,9 @@ services:
 
   redis:
     image: redis
-    container_name: redis
+    container_name: redis-pwm
     ports:
-      - 127.0.0.1:6379:6379
+      - 127.0.0.1:6370:6370
     volumes:
       - ./data/redis/data:/data:rw
       #redis config file
