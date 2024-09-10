@@ -1,24 +1,20 @@
-version: "3.9"
+version: "3"
 
 services:
-  # Zookeeper is a dependency for Kafka
+  #zookeeper是kafka的依赖 - Zookeeper is the dependencies of Kafka
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper
     volumes:
       - ./data/zookeeper/data:/data
+      - /etc/localtime:/etc/localtime
     restart: always
     ports:
       - 127.0.0.1:2181:2181
     networks:
       - pwm_net
-    healthcheck:
-      test: ["CMD", "echo", "ruok", "|", "nc", "127.0.0.1", "2181", "|", "grep", "imok"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # Kafka Message Queue
+  #消息队列 - Message queue
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
@@ -36,18 +32,18 @@ services:
     networks:
       - pwm_net
     depends_on:
-      zookeeper:
-        condition: service_healthy
+      - zookeeper
 
-  # etcd Service
   etcd:
     image: quay.io/coreos/etcd:v3.5.2
-    container_name: etcd
     ports:
       - 127.0.0.1:2379:2379
       - 127.0.0.1:2380:2380
+    container_name: etcd
     volumes:
       - ./data/etcd/data:/data
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime:ro
     environment:
       ETCDCTL_API: 3
       ETCD_DATA_DIR: /data
@@ -64,13 +60,7 @@ services:
     command: /usr/local/bin/etcd
     networks:
       - pwm_net
-    healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # Redis Service
   redis:
     image: redis
     container_name: redis-pwm
@@ -78,31 +68,35 @@ services:
       - 127.0.0.1:6379:6379
     volumes:
       - ./data/redis/data:/data:rw
+      #redis config file
+      #- ./deploy/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+    environment:
+      TZ: Europe/Moscow
     restart: always
+    privileged: true
     command: redis-server --appendonly yes
     networks:
       - pwm_net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # MySQL Database
   mysql:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}  # Ensure this is correctly set
+      # 时区上海 - Time zone Shanghai (Change if needed)
+      #TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-my_root_secret}
       MYSQL_DATABASE: teamgram
       MYSQL_USER: teamgram
       MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
+      # MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - 127.0.0.1:3306:3306
     volumes:
+      # 数据挂载 - Data mounting
       - ./data/mysql/data:/var/lib/mysql:Z
       - ./teamgramd/sql:/docker-entrypoint-initdb.d/:Z
-    command:
+      #- /etc/localtime:/etc/localtime
+    command:  # Fixed command to ensure it is a list format
       - "--default-authentication-plugin=mysql_native_password"
       - "--character-set-server=utf8mb4"
       - "--collation-server=utf8mb4_general_ci"
@@ -111,14 +105,7 @@ services:
     restart: always
     networks:
       - pwm_net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-
-  # MinIO Object Storage
   minio:
     image: minio/minio
     container_name: minio
@@ -134,13 +121,7 @@ services:
     restart: always
     networks:
       - pwm_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # MinIO MC for Initialization
   minio_mc:
     image: minio/mc:latest
     container_name: minio_mc
@@ -150,10 +131,8 @@ services:
     networks:
       - pwm_net
 
-  # Teamgram Service
   teamgram:
     build: .
-    container_name: teamgram
     restart: always
     ports:
       - "10443:10443"
@@ -174,19 +153,14 @@ services:
     networks:
       - pwm_net
     depends_on:
-      zookeeper:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      etcd:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
+      - zookeeper
+      - kafka
+      - etcd
+      - redis
+      - minio
+      - mysql
 
 networks:
   pwm_net:
     driver: bridge
+
