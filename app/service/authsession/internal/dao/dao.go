@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&mmdb, "mmdb", "./GeoLite2-City.mmdb", "mmdb")
+	flag.StringVar(&mmdb, "mmdb", "assets/GeoLite2-City.mmdb", "mmdb")
 }
 
 type Dao struct {

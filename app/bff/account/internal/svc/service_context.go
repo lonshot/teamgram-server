@@ -11,6 +11,8 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	// Initialize the Redis client
+
 	return &ServiceContext{
 		Config: c,
 		Dao:    dao.New(c),

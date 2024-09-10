@@ -12,4 +12,3 @@ func (c *AccountCore) AccountChangePhone(in *mtproto.TLAccountChangePhone) (*mtp
 
 	return nil, mtproto.ErrEnterpriseIsBlocked
 }
- 

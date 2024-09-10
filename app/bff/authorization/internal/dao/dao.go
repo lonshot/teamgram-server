@@ -5,6 +5,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	kafka "github.com/teamgram/marmota/pkg/mq"
 	"github.com/teamgram/marmota/pkg/net/rpcx"
+	"github.com/zeromicro/go-zero/core/stores/kv"
 	"pwm-server/app/bff/authorization/internal/config"
 	msg_client "pwm-server/app/messenger/msg/msg/client"
 	sync_client "pwm-server/app/messenger/sync/client"
@@ -13,7 +14,6 @@ import (
 	user_client "pwm-server/app/service/biz/user/client"
 	username_client "pwm-server/app/service/biz/username/client"
 	status_client "pwm-server/app/service/status/client"
-	"github.com/zeromicro/go-zero/core/stores/kv"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&mmdb, "mmdb", "./GeoLite2-City.mmdb", "mmdb")
+	flag.StringVar(&mmdb, "mmdb", "assets/GeoLite2-City.mmdb", "mmdb")
 }
 
 type Dao struct {
