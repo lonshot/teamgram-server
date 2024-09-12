@@ -12,7 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
-var configFile = flag.String("f", "etc/miscellaneous.yaml", "the config file")
+var configFile = flag.String("f", "etc/pwm.yaml", "the config file")
 
 type Server struct {
 	grpcSrv *zrpc.RpcServer

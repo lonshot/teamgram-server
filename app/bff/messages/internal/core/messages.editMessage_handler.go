@@ -31,10 +31,12 @@ func (c *MessagesCore) MessagesEditMessage(in *mtproto.TLMessagesEditMessage) (*
 			//	hasBot = s.UserFacade.IsBot(ctx, peer.PeerId)
 			//}
 		}
-		editMessages, _ = c.svcCtx.MessageClient.MessageGetUserMessageList(c.ctx, &message.TLMessageGetUserMessageList{
-			UserId: c.MD.UserId,
-			IdList: []int32{in.Id},
-		})
+		editMessages, _ = c.svcCtx.MessageClient.MessageGetUserMessageList(
+			c.ctx, &message.TLMessageGetUserMessageList{
+				UserId: c.MD.UserId,
+				IdList: []int32{in.Id},
+			},
+		)
 	case mtproto.PEER_CHANNEL:
 		c.Logger.Errorf("messages.editMessage blocked, License key from https://teamgram.net required to unlock enterprise features.")
 
@@ -92,34 +94,40 @@ func (c *MessagesCore) MessagesEditMessage(in *mtproto.TLMessagesEditMessage) (*
 		}
 		outMessage.Message = in.Message.Value
 		outMessage.Entities = nil
-		//outMessage, _ = c.fixMessageEntities(c.MD.UserId, peer, in.NoWebpage, outMessage, func() bool {
-		//	hasBot := c.MD.IsBot
-		//	if !hasBot {
-		//		//isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(c.ctx, &userpb.TLUserIsBot{
-		//		//	Id: peer.PeerId,
-		//		//})
-		//		//hasBot = mtproto.FromBool(isBot)
-		//	}
-		//
-		//	return hasBot
-		//})
+		outMessage, _ = c.fixMessageEntities(
+			c.MD.UserId, peer, in.NoWebpage, outMessage, func() bool {
+				hasBot := c.MD.IsBot
+				if !hasBot {
+					//isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(c.ctx, &userpb.TLUserIsBot{
+					//	Id: peer.PeerId,
+					//})
+					//hasBot = mtproto.FromBool(isBot)
+				}
+
+				return hasBot
+			},
+		)
 	}
 
-	rUpdates, err := c.svcCtx.Dao.MsgClient.MsgEditMessageV2(c.ctx, &msgpb.TLMsgEditMessageV2{
-		UserId:    c.MD.UserId,
-		AuthKeyId: c.MD.PermAuthKeyId,
-		PeerType:  peer.PeerType,
-		PeerId:    peer.PeerId,
-		EditType:  msgpb.EditTypeNormal,
-		NewMessage: msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{
-			NoWebpage:    in.NoWebpage,
-			Background:   false,
-			RandomId:     0,
-			Message:      outMessage,
-			ScheduleDate: in.ScheduleDate,
-		}).To_OutboxMessage(),
-		DstMessage: dstMessage,
-	})
+	rUpdates, err := c.svcCtx.Dao.MsgClient.MsgEditMessageV2(
+		c.ctx, &msgpb.TLMsgEditMessageV2{
+			UserId:    c.MD.UserId,
+			AuthKeyId: c.MD.PermAuthKeyId,
+			PeerType:  peer.PeerType,
+			PeerId:    peer.PeerId,
+			EditType:  msgpb.EditTypeNormal,
+			NewMessage: msgpb.MakeTLOutboxMessage(
+				&msgpb.OutboxMessage{
+					NoWebpage:    in.NoWebpage,
+					Background:   false,
+					RandomId:     0,
+					Message:      outMessage,
+					ScheduleDate: in.ScheduleDate,
+				},
+			).To_OutboxMessage(),
+			DstMessage: dstMessage,
+		},
+	)
 	if err != nil {
 		c.Logger.Errorf("messages.editMessage - error: %v", err)
 		return nil, err

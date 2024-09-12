@@ -1,12 +1,13 @@
 package core
 
 import (
+	userpb "pwm-server/app/service/biz/user/user"
 	"time"
 
 	"github.com/teamgram/proto/mtproto"
-	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/threading"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
 )
 
 // MessagesSendMessage
@@ -38,40 +39,42 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 	//	return
 	//}
 
-	outMessage := mtproto.MakeTLMessage(&mtproto.Message{
-		Out:               true,
-		Mentioned:         false,
-		MediaUnread:       false,
-		Silent:            in.Silent,
-		Post:              false,
-		FromScheduled:     false,
-		Legacy:            false,
-		EditHide:          false,
-		Pinned:            false,
-		Noforwards:        in.Noforwards,
-		InvertMedia:       in.InvertMedia,
-		Id:                0,
-		FromId:            mtproto.MakePeerUser(c.MD.UserId),
-		PeerId:            peer.ToPeer(),
-		SavedPeerId:       nil,
-		FwdFrom:           nil,
-		ViaBotId:          nil,
-		ReplyTo:           nil,
-		Date:              int32(time.Now().Unix()),
-		Message:           in.Message,
-		Media:             nil,
-		ReplyMarkup:       in.ReplyMarkup,
-		Entities:          in.Entities,
-		Views:             nil,
-		Forwards:          nil,
-		Replies:           nil,
-		EditDate:          nil,
-		PostAuthor:        nil,
-		GroupedId:         nil,
-		Reactions:         nil,
-		RestrictionReason: nil,
-		TtlPeriod:         nil,
-	}).To_Message()
+	outMessage := mtproto.MakeTLMessage(
+		&mtproto.Message{
+			Out:               true,
+			Mentioned:         false,
+			MediaUnread:       false,
+			Silent:            in.Silent,
+			Post:              false,
+			FromScheduled:     false,
+			Legacy:            false,
+			EditHide:          false,
+			Pinned:            false,
+			Noforwards:        in.Noforwards,
+			InvertMedia:       in.InvertMedia,
+			Id:                0,
+			FromId:            mtproto.MakePeerUser(c.MD.UserId),
+			PeerId:            peer.ToPeer(),
+			SavedPeerId:       nil,
+			FwdFrom:           nil,
+			ViaBotId:          nil,
+			ReplyTo:           nil,
+			Date:              int32(time.Now().Unix()),
+			Message:           in.Message,
+			Media:             nil,
+			ReplyMarkup:       in.ReplyMarkup,
+			Entities:          in.Entities,
+			Views:             nil,
+			Forwards:          nil,
+			Replies:           nil,
+			EditDate:          nil,
+			PostAuthor:        nil,
+			GroupedId:         nil,
+			Reactions:         nil,
+			RestrictionReason: nil,
+			TtlPeriod:         nil,
+		},
+	).To_Message()
 
 	// Fix SavedPeerId
 	if peer.IsSelfUser(c.MD.UserId) {
@@ -80,32 +83,14 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 
 	// Fix ReplyToMsgId
 	if in.GetReplyToMsgId() != nil {
-		outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(&mtproto.MessageReplyHeader{
-			ReplyToScheduled:       false,
-			ForumTopic:             false,
-			Quote:                  false,
-			ReplyToMsgId:           in.GetReplyToMsgId().GetValue(),
-			ReplyToMsgId_INT32:     in.GetReplyToMsgId().GetValue(),
-			ReplyToMsgId_FLAGINT32: in.GetReplyToMsgId(),
-			ReplyToPeerId:          nil,
-			ReplyFrom:              nil,
-			ReplyMedia:             nil,
-			ReplyToTopId:           nil,
-			QuoteText:              nil,
-			QuoteEntities:          nil,
-			QuoteOffset:            nil,
-		}).To_MessageReplyHeader()
-	} else if in.GetReplyTo() != nil {
-		replyTo := in.GetReplyTo()
-		switch in.ReplyTo.PredicateName {
-		case mtproto.Predicate_inputReplyToMessage:
-			outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(&mtproto.MessageReplyHeader{
+		outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(
+			&mtproto.MessageReplyHeader{
 				ReplyToScheduled:       false,
 				ForumTopic:             false,
 				Quote:                  false,
-				ReplyToMsgId:           replyTo.GetReplyToMsgId(),
-				ReplyToMsgId_INT32:     replyTo.GetReplyToMsgId(),
-				ReplyToMsgId_FLAGINT32: mtproto.MakeFlagsInt32(replyTo.GetReplyToMsgId()),
+				ReplyToMsgId:           in.GetReplyToMsgId().GetValue(),
+				ReplyToMsgId_INT32:     in.GetReplyToMsgId().GetValue(),
+				ReplyToMsgId_FLAGINT32: in.GetReplyToMsgId(),
 				ReplyToPeerId:          nil,
 				ReplyFrom:              nil,
 				ReplyMedia:             nil,
@@ -113,7 +98,29 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 				QuoteText:              nil,
 				QuoteEntities:          nil,
 				QuoteOffset:            nil,
-			}).To_MessageReplyHeader()
+			},
+		).To_MessageReplyHeader()
+	} else if in.GetReplyTo() != nil {
+		replyTo := in.GetReplyTo()
+		switch in.ReplyTo.PredicateName {
+		case mtproto.Predicate_inputReplyToMessage:
+			outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(
+				&mtproto.MessageReplyHeader{
+					ReplyToScheduled:       false,
+					ForumTopic:             false,
+					Quote:                  false,
+					ReplyToMsgId:           replyTo.GetReplyToMsgId(),
+					ReplyToMsgId_INT32:     replyTo.GetReplyToMsgId(),
+					ReplyToMsgId_FLAGINT32: mtproto.MakeFlagsInt32(replyTo.GetReplyToMsgId()),
+					ReplyToPeerId:          nil,
+					ReplyFrom:              nil,
+					ReplyMedia:             nil,
+					ReplyToTopId:           nil,
+					QuoteText:              nil,
+					QuoteEntities:          nil,
+					QuoteOffset:            nil,
+				},
+			).To_MessageReplyHeader()
 			if replyTo.GetQuoteText() != nil {
 				outMessage.ReplyTo.Quote = true
 				outMessage.ReplyTo.QuoteText = replyTo.GetQuoteText()
@@ -145,41 +152,51 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 			}
 
 			if rPeer != nil {
-				outMessage.ReplyTo = mtproto.MakeTLMessageReplyStoryHeader(&mtproto.MessageReplyHeader{
-					UserId:  userId,
-					Peer:    rPeer.ToPeer(),
-					StoryId: replyTo.GetStoryId(),
-				}).To_MessageReplyHeader()
+				outMessage.ReplyTo = mtproto.MakeTLMessageReplyStoryHeader(
+					&mtproto.MessageReplyHeader{
+						UserId:  userId,
+						Peer:    rPeer.ToPeer(),
+						StoryId: replyTo.GetStoryId(),
+					},
+				).To_MessageReplyHeader()
 			}
 		}
 	}
 
-	//outMessage, _ = c.fixMessageEntities(c.MD.UserId, peer, in.NoWebpage, outMessage, func() bool {
-	//	hasBot := c.MD.IsBot
-	//	if !hasBot {
-	//		isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(c.ctx, &userpb.TLUserIsBot{
-	//			Id: peer.PeerId,
-	//		})
-	//		hasBot = mtproto.FromBool(isBot)
-	//	}
-	//
-	//	return hasBot
-	//})
-	rUpdate, err := c.svcCtx.Dao.MsgClient.MsgSendMessageV2(c.ctx, &msgpb.TLMsgSendMessageV2{
-		UserId:    c.MD.UserId,
-		AuthKeyId: c.MD.PermAuthKeyId,
-		PeerType:  peer.PeerType,
-		PeerId:    peer.PeerId,
-		Message: []*msgpb.OutboxMessage{
-			msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{
-				NoWebpage:    in.NoWebpage,
-				Background:   in.Background,
-				RandomId:     in.RandomId,
-				Message:      outMessage,
-				ScheduleDate: in.ScheduleDate,
-			}).To_OutboxMessage(),
+	outMessage, _ = c.fixMessageEntities(
+		c.MD.UserId, peer, in.NoWebpage, outMessage, func() bool {
+			hasBot := c.MD.IsBot
+			if !hasBot {
+				isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(
+					c.ctx, &userpb.TLUserIsBot{
+						Id: peer.PeerId,
+					},
+				)
+				hasBot = mtproto.FromBool(isBot)
+			}
+
+			return hasBot
 		},
-	})
+	)
+	rUpdate, err := c.svcCtx.Dao.MsgClient.MsgSendMessageV2(
+		c.ctx, &msgpb.TLMsgSendMessageV2{
+			UserId:    c.MD.UserId,
+			AuthKeyId: c.MD.PermAuthKeyId,
+			PeerType:  peer.PeerType,
+			PeerId:    peer.PeerId,
+			Message: []*msgpb.OutboxMessage{
+				msgpb.MakeTLOutboxMessage(
+					&msgpb.OutboxMessage{
+						NoWebpage:    in.NoWebpage,
+						Background:   in.Background,
+						RandomId:     in.RandomId,
+						Message:      outMessage,
+						ScheduleDate: in.ScheduleDate,
+					},
+				).To_OutboxMessage(),
+			},
+		},
+	)
 
 	if err != nil {
 		c.Logger.Errorf("messages.sendMessage#fa88427a - error: %v", err)
@@ -188,9 +205,11 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 
 	if in.ClearDraft {
 		ctx := contextx.ValueOnlyFrom(c.ctx)
-		threading.GoSafe(func() {
-			c.doClearDraft(ctx, c.MD.UserId, c.MD.PermAuthKeyId, peer)
-		})
+		threading.GoSafe(
+			func() {
+				c.doClearDraft(ctx, c.MD.UserId, c.MD.PermAuthKeyId, peer)
+			},
+		)
 	}
 
 	return rUpdate, nil

@@ -21,6 +21,7 @@ import (
 	nsfw_helper "pwm-server/app/bff/nsfw"
 	premium_helper "pwm-server/app/bff/premium"
 	privacysettingshelper "pwm-server/app/bff/privacysettings"
+	pwm_helper "pwm-server/app/bff/pwm"
 	qrcode_helper "pwm-server/app/bff/qrcode"
 	savedmessagedialogshelper "pwm-server/app/bff/savedmessagedialogs"
 	sponsoredmessages_helper "pwm-server/app/bff/sponsoredmessages"
@@ -54,267 +55,412 @@ func (s *Server) Initialize() error {
 	// ctx := svc.NewServiceContext(c)
 	// s.grpcSrv = grpc.New(ctx, c.RpcServerConf)
 
-	s.grpcSrv = zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		// tos_helper
-		mtproto.RegisterRPCTosServer(
-			grpcServer,
-			tos_helper.New(tos_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+	s.grpcSrv = zrpc.MustNewServer(
+		c.RpcServerConf, func(grpcServer *grpc.Server) {
+			// tos_helper
+			mtproto.RegisterRPCTosServer(
+				grpcServer,
+				tos_helper.New(
+					tos_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// configuration_helper
-		mtproto.RegisterRPCConfigurationServer(
-			grpcServer,
-			configuration_helper.New(configuration_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+			// configuration_helper
+			mtproto.RegisterRPCConfigurationServer(
+				grpcServer,
+				configuration_helper.New(
+					configuration_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// qrcode_helper
-		mtproto.RegisterRPCQrCodeServer(
-			grpcServer,
-			qrcode_helper.New(
-				qrcode_helper.Config{
-					RpcServerConf:     c.RpcServerConf,
-					KV:                c.KV,
-					UserClient:        c.BizServiceClient,
-					AuthSessionClient: c.AuthSessionClient,
-					SyncClient:        c.SyncClient,
-				},
-				nil))
+			// qrcode_helper
+			mtproto.RegisterRPCQrCodeServer(
+				grpcServer,
+				qrcode_helper.New(
+					qrcode_helper.Config{
+						RpcServerConf:     c.RpcServerConf,
+						KV:                c.KV,
+						UserClient:        c.BizServiceClient,
+						AuthSessionClient: c.AuthSessionClient,
+						SyncClient:        c.SyncClient,
+					},
+					nil,
+				),
+			)
 
-		// miscellaneous_helper
-		mtproto.RegisterRPCMiscellaneousServer(
-			grpcServer,
-			miscellaneous_helper.New(miscellaneous_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+			// miscellaneous_helper
+			mtproto.RegisterRPCMiscellaneousServer(
+				grpcServer,
+				miscellaneous_helper.New(
+					miscellaneous_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// authorization_helper
-		mtproto.RegisterRPCAuthorizationServer(
-			grpcServer,
-			authorization_helper.New(
-				authorization_helper.Config{
-					RpcServerConf:             c.RpcServerConf,
-					KV:                        c.KV,
-					Code:                      c.Code,
-					UserClient:                c.BizServiceClient,
-					AuthsessionClient:         c.AuthSessionClient,
-					ChatClient:                c.BizServiceClient,
-					StatusClient:              c.StatusClient,
-					SyncClient:                c.SyncClient,
-					MsgClient:                 c.MsgClient,
-					SignInMessage:             c.SignInMessage,
-					SignInServiceNotification: c.SignInServiceNotification,
-					UsernameClient:            c.BizServiceClient,
-				},
-				nil,
-				nil))
+			// authorization_helper
+			mtproto.RegisterRPCAuthorizationServer(
+				grpcServer,
+				authorization_helper.New(
+					authorization_helper.Config{
+						RpcServerConf:             c.RpcServerConf,
+						KV:                        c.KV,
+						Code:                      c.Code,
+						UserClient:                c.BizServiceClient,
+						AuthsessionClient:         c.AuthSessionClient,
+						ChatClient:                c.BizServiceClient,
+						StatusClient:              c.StatusClient,
+						SyncClient:                c.SyncClient,
+						MsgClient:                 c.MsgClient,
+						SignInMessage:             c.SignInMessage,
+						SignInServiceNotification: c.SignInServiceNotification,
+						UsernameClient:            c.BizServiceClient,
+					},
+					nil,
+					nil,
+				),
+			)
 
-		// premium_helper
-		mtproto.RegisterRPCPremiumServer(
-			grpcServer,
-			premium_helper.New(premium_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+			// premium_helper
+			mtproto.RegisterRPCPremiumServer(
+				grpcServer,
+				premium_helper.New(
+					premium_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// chatinvites_helper
-		mtproto.RegisterRPCChatInvitesServer(
-			grpcServer,
-			chatinvites_helper.New(chatinvites_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UserClient:    c.BizServiceClient,
-				ChatClient:    c.BizServiceClient,
-				MsgClient:     c.MsgClient,
-				SyncClient:    c.SyncClient,
-			}))
+			// chatinvites_helper
+			mtproto.RegisterRPCChatInvitesServer(
+				grpcServer,
+				chatinvites_helper.New(
+					chatinvites_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UserClient:    c.BizServiceClient,
+						ChatClient:    c.BizServiceClient,
+						MsgClient:     c.MsgClient,
+						SyncClient:    c.SyncClient,
+					},
+				),
+			)
 
-		// chats_helper
-		mtproto.RegisterRPCChatsServer(
-			grpcServer,
-			chats_helper.New(chats_helper.Config{
-				RpcServerConf:     c.RpcServerConf,
-				UserClient:        c.BizServiceClient,
-				ChatClient:        c.BizServiceClient,
-				MsgClient:         c.MsgClient,
-				DialogClient:      c.BizServiceClient,
-				SyncClient:        c.SyncClient,
-				MediaClient:       c.MediaClient,
-				AuthsessionClient: c.AuthSessionClient,
-				IdgenClient:       c.IdgenClient,
-				MessageClient:     c.BizServiceClient,
-			}))
+			// chats_helper
+			mtproto.RegisterRPCChatsServer(
+				grpcServer,
+				chats_helper.New(
+					chats_helper.Config{
+						RpcServerConf:     c.RpcServerConf,
+						UserClient:        c.BizServiceClient,
+						ChatClient:        c.BizServiceClient,
+						MsgClient:         c.MsgClient,
+						DialogClient:      c.BizServiceClient,
+						SyncClient:        c.SyncClient,
+						MediaClient:       c.MediaClient,
+						AuthsessionClient: c.AuthSessionClient,
+						IdgenClient:       c.IdgenClient,
+						MessageClient:     c.BizServiceClient,
+					},
+				),
+			)
 
-		// files_helper
-		mtproto.RegisterRPCFilesServer(
-			grpcServer,
-			files_helper.New(files_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				DfsClient:     c.DfsClient,
-				UserClient:    c.BizServiceClient,
-				MediaClient:   c.MediaClient,
-			}, nil, nil))
+			// files_helper
+			mtproto.RegisterRPCFilesServer(
+				grpcServer,
+				files_helper.New(
+					files_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						DfsClient:     c.DfsClient,
+						UserClient:    c.BizServiceClient,
+						MediaClient:   c.MediaClient,
+					}, nil, nil,
+				),
+			)
 
-		// updates_helper
-		mtproto.RegisterRPCUpdatesServer(
-			grpcServer,
-			updates_helper.New(updates_helper.Config{
-				RpcServerConf:     c.RpcServerConf,
-				UpdatesClient:     c.BizServiceClient,
-				UserClient:        c.BizServiceClient,
-				ChatClient:        c.BizServiceClient,
-				AuthsessionClient: c.AuthSessionClient,
-			}))
+			// updates_helper
+			mtproto.RegisterRPCUpdatesServer(
+				grpcServer,
+				updates_helper.New(
+					updates_helper.Config{
+						RpcServerConf:     c.RpcServerConf,
+						UpdatesClient:     c.BizServiceClient,
+						UserClient:        c.BizServiceClient,
+						ChatClient:        c.BizServiceClient,
+						AuthsessionClient: c.AuthSessionClient,
+					},
+				),
+			)
 
-		// contacts_helper
-		mtproto.RegisterRPCContactsServer(
-			grpcServer,
-			contacts_helper.New(
-				contacts_helper.Config{
-					RpcServerConf:  c.RpcServerConf,
-					UserClient:     c.BizServiceClient,
-					ChatClient:     c.BizServiceClient,
-					UsernameClient: c.BizServiceClient,
-					SyncClient:     c.SyncClient,
-				},
-				nil))
+			// contacts_helper
+			mtproto.RegisterRPCContactsServer(
+				grpcServer,
+				contacts_helper.New(
+					contacts_helper.Config{
+						RpcServerConf:  c.RpcServerConf,
+						UserClient:     c.BizServiceClient,
+						ChatClient:     c.BizServiceClient,
+						UsernameClient: c.BizServiceClient,
+						SyncClient:     c.SyncClient,
+					},
+					nil,
+				),
+			)
 
-		// dialogs_helper
-		mtproto.RegisterRPCDialogsServer(
-			grpcServer,
-			dialogs_helper.New(dialogs_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UpdatesClient: c.BizServiceClient,
-				UserClient:    c.BizServiceClient,
-				ChatClient:    c.BizServiceClient,
-				DialogClient:  c.BizServiceClient,
-				SyncClient:    c.SyncClient,
-				MessageClient: c.BizServiceClient,
-			}, nil))
+			// dialogs_helper
+			mtproto.RegisterRPCDialogsServer(
+				grpcServer,
+				dialogs_helper.New(
+					dialogs_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UpdatesClient: c.BizServiceClient,
+						UserClient:    c.BizServiceClient,
+						ChatClient:    c.BizServiceClient,
+						DialogClient:  c.BizServiceClient,
+						SyncClient:    c.SyncClient,
+						MessageClient: c.BizServiceClient,
+					}, nil,
+				),
+			)
 
-		// drafts_helper
-		mtproto.RegisterRPCDraftsServer(
-			grpcServer,
-			drafts_helper.New(drafts_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				DialogClient:  c.BizServiceClient,
-				UserClient:    c.BizServiceClient,
-				SyncClient:    c.SyncClient,
-				ChatClient:    c.BizServiceClient,
-			}, nil))
+			// drafts_helper
+			mtproto.RegisterRPCDraftsServer(
+				grpcServer,
+				drafts_helper.New(
+					drafts_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						DialogClient:  c.BizServiceClient,
+						UserClient:    c.BizServiceClient,
+						SyncClient:    c.SyncClient,
+						ChatClient:    c.BizServiceClient,
+					}, nil,
+				),
+			)
 
-		// autodownload_helper
-		mtproto.RegisterRPCAutoDownloadServer(
-			grpcServer,
-			autodownload_helper.New(autodownload_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+			// autodownload_helper
+			mtproto.RegisterRPCAutoDownloadServer(
+				grpcServer,
+				autodownload_helper.New(
+					autodownload_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// messages_helper
-		mtproto.RegisterRPCMessagesServer(
-			grpcServer,
-			messages_helper.New(messages_helper.Config{
-				RpcServerConf:  c.RpcServerConf,
-				UserClient:     c.BizServiceClient,
-				ChatClient:     c.BizServiceClient,
-				MsgClient:      c.MsgClient,
-				DialogClient:   c.BizServiceClient,
-				IdgenClient:    c.IdgenClient,
-				MessageClient:  c.BizServiceClient,
-				MediaClient:    c.MediaClient,
-				UsernameClient: c.BizServiceClient,
-				SyncClient:     c.SyncClient,
-			}, nil))
+			// messages_helper
+			mtproto.RegisterRPCMessagesServer(
+				grpcServer,
+				messages_helper.New(
+					messages_helper.Config{
+						RpcServerConf:  c.RpcServerConf,
+						UserClient:     c.BizServiceClient,
+						ChatClient:     c.BizServiceClient,
+						MsgClient:      c.MsgClient,
+						DialogClient:   c.BizServiceClient,
+						IdgenClient:    c.IdgenClient,
+						MessageClient:  c.BizServiceClient,
+						MediaClient:    c.MediaClient,
+						UsernameClient: c.BizServiceClient,
+						SyncClient:     c.SyncClient,
+					}, nil,
+				),
+			)
 
-		// notification_helper
-		mtproto.RegisterRPCNotificationServer(
-			grpcServer,
-			notification_helper.New(notification_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UserClient:    c.BizServiceClient,
-				ChatClient:    c.BizServiceClient,
-				SyncClient:    c.SyncClient,
-			}, nil))
+			// notification_helper
+			mtproto.RegisterRPCNotificationServer(
+				grpcServer,
+				notification_helper.New(
+					notification_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UserClient:    c.BizServiceClient,
+						ChatClient:    c.BizServiceClient,
+						SyncClient:    c.SyncClient,
+					}, nil,
+				),
+			)
 
-		// users_helper
-		mtproto.RegisterRPCUsersServer(
-			grpcServer,
-			users_helper.New(users_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UserClient:    c.BizServiceClient,
-				ChatClient:    c.BizServiceClient,
-				DialogClient:  c.BizServiceClient,
-			}, nil))
+			// users_helper
+			mtproto.RegisterRPCUsersServer(
+				grpcServer,
+				users_helper.New(
+					users_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UserClient:    c.BizServiceClient,
+						ChatClient:    c.BizServiceClient,
+						DialogClient:  c.BizServiceClient,
+					}, nil,
+				),
+			)
 
-		// nsfw_helper
-		mtproto.RegisterRPCNsfwServer(
-			grpcServer,
-			nsfw_helper.New(nsfw_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UserClient:    c.BizServiceClient,
-			}))
+			// nsfw_helper
+			mtproto.RegisterRPCNsfwServer(
+				grpcServer,
+				nsfw_helper.New(
+					nsfw_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UserClient:    c.BizServiceClient,
+					},
+				),
+			)
 
-		// sponsoredmessages_helper
-		mtproto.RegisterRPCSponsoredMessagesServer(
-			grpcServer,
-			sponsoredmessages_helper.New(sponsoredmessages_helper.Config{
-				RpcServerConf: c.RpcServerConf,
-			}))
+			// sponsoredmessages_helper
+			mtproto.RegisterRPCSponsoredMessagesServer(
+				grpcServer,
+				sponsoredmessages_helper.New(
+					sponsoredmessages_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
 
-		// account_helper
-		mtproto.RegisterRPCAccountServer(
-			grpcServer,
-			account_helper.New(account_helper.Config{
-				RpcServerConf:     c.RpcServerConf,
-				UserClient:        c.BizServiceClient,
-				AuthsessionClient: c.AuthSessionClient,
-				ChatClient:        c.BizServiceClient,
-				SyncClient:        c.SyncClient,
-			}))
-		// usernames_helper
-		mtproto.RegisterRPCUsernamesServer(
-			grpcServer,
-			usernames_helper.New(usernames_helper.Config{
-				RpcServerConf:  c.RpcServerConf,
-				UserClient:     c.BizServiceClient,
-				UsernameClient: c.BizServiceClient,
-				ChatClient:     c.BizServiceClient,
-				SyncClient:     c.SyncClient,
-			}, nil))
+			// account_helper
+			mtproto.RegisterRPCAccountServer(
+				grpcServer,
+				account_helper.New(
+					account_helper.Config{
+						RpcServerConf:     c.RpcServerConf,
+						UserClient:        c.BizServiceClient,
+						AuthsessionClient: c.AuthSessionClient,
+						ChatClient:        c.BizServiceClient,
+						SyncClient:        c.SyncClient,
+					},
+				),
+			)
+			// usernames_helper
+			mtproto.RegisterRPCUsernamesServer(
+				grpcServer,
+				usernames_helper.New(
+					usernames_helper.Config{
+						RpcServerConf:  c.RpcServerConf,
+						UserClient:     c.BizServiceClient,
+						UsernameClient: c.BizServiceClient,
+						ChatClient:     c.BizServiceClient,
+						SyncClient:     c.SyncClient,
+					}, nil,
+				),
+			)
 
-		// privacysettingshelper
-		mtproto.RegisterRPCPrivacySettingsServer(
-			grpcServer,
-			privacysettingshelper.New(privacysettingshelper.Config{
-				RpcServerConf:     c.RpcServerConf,
-				UserClient:        c.BizServiceClient,
-				AuthsessionClient: c.AuthSessionClient,
-				ChatClient:        c.BizServiceClient,
-				SyncClient:        c.SyncClient,
-			}))
+			// privacysettingshelper
+			mtproto.RegisterRPCPrivacySettingsServer(
+				grpcServer,
+				privacysettingshelper.New(
+					privacysettingshelper.Config{
+						RpcServerConf:     c.RpcServerConf,
+						UserClient:        c.BizServiceClient,
+						AuthsessionClient: c.AuthSessionClient,
+						ChatClient:        c.BizServiceClient,
+						SyncClient:        c.SyncClient,
+					},
+				),
+			)
 
-		// savedmessagedialogshelper
-		mtproto.RegisterRPCSavedMessageDialogsServer(
-			grpcServer,
-			savedmessagedialogshelper.New(savedmessagedialogshelper.Config{
-				RpcServerConf: c.RpcServerConf,
-				UpdatesClient: c.BizServiceClient,
-				UserClient:    c.BizServiceClient,
-				ChatClient:    c.BizServiceClient,
-				DialogClient:  c.BizServiceClient,
-				SyncClient:    c.SyncClient,
-				MessageClient: c.BizServiceClient,
-			}))
+			// savedmessagedialogshelper
+			mtproto.RegisterRPCSavedMessageDialogsServer(
+				grpcServer,
+				savedmessagedialogshelper.New(
+					savedmessagedialogshelper.Config{
+						RpcServerConf: c.RpcServerConf,
+						UpdatesClient: c.BizServiceClient,
+						UserClient:    c.BizServiceClient,
+						ChatClient:    c.BizServiceClient,
+						DialogClient:  c.BizServiceClient,
+						SyncClient:    c.SyncClient,
+						MessageClient: c.BizServiceClient,
+					},
+				),
+			)
 
-		// userprofilehelper
-		mtproto.RegisterRPCUserProfileServer(
-			grpcServer,
-			userprofilehelper.New(userprofilehelper.Config{
-				RpcServerConf: c.RpcServerConf,
-				MediaClient:   c.MediaClient,
-				UserClient:    c.BizServiceClient,
-				SyncClient:    c.SyncClient,
-			}))
-	})
+			// userprofilehelper
+			mtproto.RegisterRPCUserProfileServer(
+				grpcServer,
+				userprofilehelper.New(
+					userprofilehelper.Config{
+						RpcServerConf: c.RpcServerConf,
+						MediaClient:   c.MediaClient,
+						UserClient:    c.BizServiceClient,
+						SyncClient:    c.SyncClient,
+					},
+				),
+			)
+
+			mtproto.RegisterRPCWallpapersServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCStickersServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCWebPageServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCEmojiServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCLangpackServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+
+			mtproto.RegisterRPCGifsServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCReactionsServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCFoldersServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+			mtproto.RegisterRPCThemesServer(
+				grpcServer,
+				pwm_helper.New(
+					pwm_helper.Config{
+						RpcServerConf: c.RpcServerConf,
+					},
+				),
+			)
+		},
+	)
 
 	// logx.Must(err)
 

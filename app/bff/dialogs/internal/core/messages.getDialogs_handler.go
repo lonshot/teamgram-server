@@ -24,10 +24,12 @@ func (c *DialogsCore) MessagesGetDialogs(in *mtproto.TLMessagesGetDialogs) (*mtp
 		notifySettingsList []*userpb.PeerPeerNotifySettings
 	)
 
+	// Cap the limit to 500 if it's larger
 	if limit > 500 {
 		limit = 500
 	}
 
+	// Fetch dialogs and notification settings in parallel
 	mr.FinishVoid(
 		func() {
 			dialogs, err := c.svcCtx.Dao.DialogClient.DialogGetDialogs(c.ctx, &dialog.TLDialogGetDialogs{
@@ -36,7 +38,7 @@ func (c *DialogsCore) MessagesGetDialogs(in *mtproto.TLMessagesGetDialogs) (*mtp
 				FolderId:      folderId,
 			})
 			if err != nil {
-				c.Logger.Errorf("messages.getDialogs - error: %v", err)
+				c.Logger.Errorf("messages.getDialogs - error fetching dialogs: %v", err)
 			} else {
 				dialogExtList = dialogs.GetDatas()
 			}
@@ -46,12 +48,13 @@ func (c *DialogsCore) MessagesGetDialogs(in *mtproto.TLMessagesGetDialogs) (*mtp
 				UserId: c.MD.UserId,
 			})
 			if err != nil {
-				c.Logger.Errorf("messages.getDialogs - error: %v", err)
+				c.Logger.Errorf("messages.getDialogs - error fetching notification settings: %v", err)
 			} else {
 				notifySettingsList = settingsList.GetDatas()
 			}
 		})
 
+	// Return an empty result if no dialogs were found
 	if len(dialogExtList) == 0 {
 		return mtproto.MakeTLMessagesDialogsSlice(&mtproto.Messages_Dialogs{
 			Dialogs:  []*mtproto.Dialog{},
@@ -62,75 +65,112 @@ func (c *DialogsCore) MessagesGetDialogs(in *mtproto.TLMessagesGetDialogs) (*mtp
 		}).To_Messages_Dialogs(), nil
 	}
 
-	var (
-		dialogCount = int32(dialogExtList.Len())
-	)
-
+	// Apply notification settings to dialogs
 	for _, dialogEx := range dialogExtList {
 		peer2 := mtproto.FromPeer(dialogEx.GetDialog().GetPeer())
 
-		if peer2.IsChannel() {
-			c.Logger.Errorf("messages.getDialogs blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		// Handle both channels and regular chats
+		if peer2.IsChannel() || peer2.IsChat() {
+			_, err := c.fetchChannelDetails(c.ctx, peer2.PeerId)
+			if err != nil {
+				c.Logger.Errorf("messages.getDialogs - error fetching channel details: %v", err)
+				continue
+			}
+			// Attach the channel or chat info to the dialog's peer
+			dialogEx.Dialog.Peer = mtproto.MakeTLPeerChannel(&mtproto.Peer{
+				UserId: peer2.PeerId,
+			}).To_Peer()
 		}
 
+		// Attach notify settings to the dialog
 		dialogEx.Dialog.NotifySettings = userpb.FindPeerPeerNotifySettings(notifySettingsList, peer2)
 	}
 
+	// Sort dialogs by reverse order and apply limit and offset
 	sort.Sort(sort.Reverse(dialogExtList))
 
 	dialogExtList = dialogExtList.GetDialogsByOffsetLimit(
 		in.OffsetDate,
 		in.OffsetId,
 		offsetPeer,
-		in.Limit)
+		limit)
 
+	// Fetch messages, users, and chats for the dialogs
 	messageDialogs := dialogExtList.DoGetMessagesDialogs(
 		c.ctx,
 		c.MD.UserId,
-		func(ctx context.Context, selfUserId int64, id ...dialog.TopMessageId) []*mtproto.Message {
-			var (
-				msgList   = make([]*mtproto.Message, 0, len(id))
-				msgIdList = make([]int32, 0, len(id))
-			)
-			for _, id2 := range id {
-				if !id2.Peer.IsChannel() {
-					msgIdList = append(msgIdList, id2.TopMessage)
-				} else {
-					c.Logger.Errorf("blocked, License key from https://teamgram.net required to unlock enterprise features.")
-				}
-			}
-			if len(msgIdList) > 0 {
-				boxList, _ := c.svcCtx.Dao.MessageClient.MessageGetUserMessageList(c.ctx, &message.TLMessageGetUserMessageList{
-					UserId: c.MD.UserId,
-					IdList: msgIdList,
-				})
-				boxList.Walk(func(idx int, v *mtproto.MessageBox) {
-					msgList = append(msgList, v.ToMessage(c.MD.UserId))
-				})
-			}
+		fetchMessages(c),
+		fetchUsers(c),
+		fetchChats(c),
+		fetchChannels(c))
 
-			return msgList
-		},
-		func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.User {
-			users, _ := c.svcCtx.Dao.UserClient.UserGetMutableUsers(c.ctx,
-				&userpb.TLUserGetMutableUsers{
-					Id: id,
-				})
+	// Return the final dialog data
+	return messageDialogs.ToMessagesDialogs(int32(dialogExtList.Len())), nil
+}
 
-			return users.GetUserListByIdList(c.MD.UserId, id...)
-		},
-		func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
-			chats, _ := c.svcCtx.Dao.ChatClient.ChatGetChatListByIdList(c.ctx,
-				&chatpb.TLChatGetChatListByIdList{
-					IdList: id,
-				})
+// fetchChannelDetails handles fetching the channel details (e.g., participants, settings)
+func (c *DialogsCore) fetchChannelDetails(ctx context.Context, channelId int64) (*mtproto.Chat, error) {
+	channel, err := c.svcCtx.Dao.ChatClient.ChatGetChatListByIdList(ctx, &chatpb.TLChatGetChatListByIdList{
+		IdList: []int64{channelId},
+	})
+	if err != nil || len(channel.GetChatListByIdList(c.MD.UserId, channelId)) == 0 {
+		return nil, err
+	}
+	return channel.GetChatListByIdList(c.MD.UserId, channelId)[0], nil
+}
 
-			return chats.GetChatListByIdList(c.MD.UserId, id...)
-		},
-		func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
-			c.Logger.Errorf("blocked, License key from https://teamgram.net required to unlock enterprise features.")
-			return []*mtproto.Chat{}
+// fetchMessages handles fetching messages for the given top message IDs
+func fetchMessages(c *DialogsCore) func(ctx context.Context, selfUserId int64, id ...dialog.TopMessageId) []*mtproto.Message {
+	return func(ctx context.Context, selfUserId int64, id ...dialog.TopMessageId) []*mtproto.Message {
+		var (
+			msgList   []*mtproto.Message
+			msgIdList []int32
+		)
+
+		for _, id2 := range id {
+			msgIdList = append(msgIdList, id2.TopMessage)
+		}
+
+		if len(msgIdList) > 0 {
+			boxList, _ := c.svcCtx.Dao.MessageClient.MessageGetUserMessageList(c.ctx, &message.TLMessageGetUserMessageList{
+				UserId: selfUserId,
+				IdList: msgIdList,
+			})
+			boxList.Walk(func(idx int, v *mtproto.MessageBox) {
+				msgList = append(msgList, v.ToMessage(c.MD.UserId))
+			})
+		}
+
+		return msgList
+	}
+}
+
+// fetchUsers handles fetching users by their IDs
+func fetchUsers(c *DialogsCore) func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.User {
+	return func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.User {
+		users, _ := c.svcCtx.Dao.UserClient.UserGetMutableUsers(c.ctx, &userpb.TLUserGetMutableUsers{
+			Id: id,
 		})
+		return users.GetUserListByIdList(c.MD.UserId, id...)
+	}
+}
 
-	return messageDialogs.ToMessagesDialogs(dialogCount), nil
+// fetchChats handles fetching chats by their IDs
+func fetchChats(c *DialogsCore) func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
+	return func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
+		chats, _ := c.svcCtx.Dao.ChatClient.ChatGetChatListByIdList(c.ctx, &chatpb.TLChatGetChatListByIdList{
+			IdList: id,
+		})
+		return chats.GetChatListByIdList(c.MD.UserId, id...)
+	}
+}
+
+// fetchChannels handles fetching channel information (if necessary)
+func fetchChannels(c *DialogsCore) func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
+	return func(ctx context.Context, selfUserId int64, id ...int64) []*mtproto.Chat {
+		chats, _ := c.svcCtx.Dao.ChatClient.ChatGetChatListByIdList(ctx, &chatpb.TLChatGetChatListByIdList{
+			IdList: id,
+		})
+		return chats.GetChatListByIdList(c.MD.UserId, id...)
+	}
 }

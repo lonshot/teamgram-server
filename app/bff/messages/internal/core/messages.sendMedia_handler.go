@@ -45,40 +45,42 @@ func (c *MessagesCore) MessagesSendMedia(in *mtproto.TLMessagesSendMedia) (*mtpr
 		return nil, err
 	}
 
-	outMessage := mtproto.MakeTLMessage(&mtproto.Message{
-		Out:               true,
-		Mentioned:         false,
-		MediaUnread:       false,
-		Silent:            in.Silent,
-		Post:              false,
-		FromScheduled:     false,
-		Legacy:            false,
-		EditHide:          false,
-		Pinned:            false,
-		Noforwards:        in.Noforwards,
-		InvertMedia:       in.InvertMedia,
-		Id:                0,
-		FromId:            mtproto.MakePeerUser(c.MD.UserId),
-		PeerId:            peer.ToPeer(),
-		SavedPeerId:       nil,
-		FwdFrom:           nil,
-		ViaBotId:          nil,
-		ReplyTo:           nil,
-		Date:              int32(time.Now().Unix()),
-		Media:             nil,
-		Message:           in.Message,
-		ReplyMarkup:       in.ReplyMarkup,
-		Entities:          in.Entities,
-		Views:             nil,
-		Forwards:          nil,
-		Replies:           nil,
-		EditDate:          nil,
-		PostAuthor:        nil,
-		GroupedId:         nil,
-		Reactions:         nil,
-		RestrictionReason: nil,
-		TtlPeriod:         nil,
-	}).To_Message()
+	outMessage := mtproto.MakeTLMessage(
+		&mtproto.Message{
+			Out:               true,
+			Mentioned:         false,
+			MediaUnread:       false,
+			Silent:            in.Silent,
+			Post:              false,
+			FromScheduled:     false,
+			Legacy:            false,
+			EditHide:          false,
+			Pinned:            false,
+			Noforwards:        in.Noforwards,
+			InvertMedia:       in.InvertMedia,
+			Id:                0,
+			FromId:            mtproto.MakePeerUser(c.MD.UserId),
+			PeerId:            peer.ToPeer(),
+			SavedPeerId:       nil,
+			FwdFrom:           nil,
+			ViaBotId:          nil,
+			ReplyTo:           nil,
+			Date:              int32(time.Now().Unix()),
+			Media:             nil,
+			Message:           in.Message,
+			ReplyMarkup:       in.ReplyMarkup,
+			Entities:          in.Entities,
+			Views:             nil,
+			Forwards:          nil,
+			Replies:           nil,
+			EditDate:          nil,
+			PostAuthor:        nil,
+			GroupedId:         nil,
+			Reactions:         nil,
+			RestrictionReason: nil,
+			TtlPeriod:         nil,
+		},
+	).To_Message()
 
 	// Fix SavedPeerId
 	if peer.IsSelfUser(c.MD.UserId) {
@@ -87,38 +89,44 @@ func (c *MessagesCore) MessagesSendMedia(in *mtproto.TLMessagesSendMedia) (*mtpr
 
 	// Fix ReplyToMsgId
 	if in.GetReplyToMsgId() != nil {
-		outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(&mtproto.MessageReplyHeader{
-			ReplyToMsgId:           in.GetReplyToMsgId().GetValue(),
-			ReplyToMsgId_INT32:     in.GetReplyToMsgId().GetValue(),
-			ReplyToMsgId_FLAGINT32: in.GetReplyToMsgId(),
-			ReplyToPeerId:          nil,
-			ReplyToTopId:           nil,
-		}).To_MessageReplyHeader()
+		outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(
+			&mtproto.MessageReplyHeader{
+				ReplyToMsgId:           in.GetReplyToMsgId().GetValue(),
+				ReplyToMsgId_INT32:     in.GetReplyToMsgId().GetValue(),
+				ReplyToMsgId_FLAGINT32: in.GetReplyToMsgId(),
+				ReplyToPeerId:          nil,
+				ReplyToTopId:           nil,
+			},
+		).To_MessageReplyHeader()
 	} else if in.GetReplyTo() != nil {
 		switch in.ReplyTo.PredicateName {
 		case mtproto.Predicate_inputReplyToMessage:
-			outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(&mtproto.MessageReplyHeader{
-				ReplyToMsgId:           in.GetReplyTo().GetReplyToMsgId(),
-				ReplyToMsgId_INT32:     in.GetReplyTo().GetReplyToMsgId(),
-				ReplyToMsgId_FLAGINT32: mtproto.MakeFlagsInt32(in.GetReplyTo().GetReplyToMsgId()),
-				ReplyToPeerId:          nil,
-				ReplyToTopId:           nil,
-			}).To_MessageReplyHeader()
+			outMessage.ReplyTo = mtproto.MakeTLMessageReplyHeader(
+				&mtproto.MessageReplyHeader{
+					ReplyToMsgId:           in.GetReplyTo().GetReplyToMsgId(),
+					ReplyToMsgId_INT32:     in.GetReplyTo().GetReplyToMsgId(),
+					ReplyToMsgId_FLAGINT32: mtproto.MakeFlagsInt32(in.GetReplyTo().GetReplyToMsgId()),
+					ReplyToPeerId:          nil,
+					ReplyToTopId:           nil,
+				},
+			).To_MessageReplyHeader()
 		case mtproto.Predicate_inputReplyToStory:
 			// TODO:
 		}
 	}
 
 	if linkChatId > 0 {
-		outMessage.Replies = mtproto.MakeTLMessageReplies(&mtproto.MessageReplies{
-			Comments:       true,
-			Replies:        0,
-			RepliesPts:     0,
-			RecentRepliers: nil,
-			ChannelId:      mtproto.MakeFlagsInt64(linkChatId),
-			MaxId:          nil,
-			ReadMaxId:      nil,
-		}).To_MessageReplies()
+		outMessage.Replies = mtproto.MakeTLMessageReplies(
+			&mtproto.MessageReplies{
+				Comments:       true,
+				Replies:        0,
+				RepliesPts:     0,
+				RecentRepliers: nil,
+				ChannelId:      mtproto.MakeFlagsInt64(linkChatId),
+				MaxId:          nil,
+				ReadMaxId:      nil,
+			},
+		).To_MessageReplies()
 	}
 
 	outMessage.Media, err = c.makeMediaByInputMedia(in.Media)
@@ -127,32 +135,38 @@ func (c *MessagesCore) MessagesSendMedia(in *mtproto.TLMessagesSendMedia) (*mtpr
 		return nil, err
 	}
 
-	//outMessage, _ = c.fixMessageEntities(c.MD.UserId, peer, true, outMessage, func() bool {
-	//	hasBot := c.MD.IsBot
-	//	if !hasBot {
-	//		//isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(c.ctx, &userpb.TLUserIsBot{
-	//		//	Id: peer.PeerId,
-	//		//})
-	//		//hasBot = mtproto.FromBool(isBot)
-	//	}
-	//
-	//	return hasBot
-	//})
-	rUpdate, err := c.svcCtx.Dao.MsgClient.MsgSendMessageV2(c.ctx, &msgpb.TLMsgSendMessageV2{
-		UserId:    c.MD.UserId,
-		AuthKeyId: c.MD.PermAuthKeyId,
-		PeerType:  peer.PeerType,
-		PeerId:    peer.PeerId,
-		Message: []*msgpb.OutboxMessage{
-			msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{
-				NoWebpage:    true,
-				Background:   in.Background,
-				RandomId:     in.RandomId,
-				Message:      outMessage,
-				ScheduleDate: in.ScheduleDate,
-			}).To_OutboxMessage(),
+	outMessage, _ = c.fixMessageEntities(
+		c.MD.UserId, peer, true, outMessage, func() bool {
+			hasBot := c.MD.IsBot
+			if !hasBot {
+				//isBot, _ := c.svcCtx.Dao.UserClient.UserIsBot(c.ctx, &userpb.TLUserIsBot{
+				//	Id: peer.PeerId,
+				//})
+				//hasBot = mtproto.FromBool(isBot)
+			}
+
+			return hasBot
 		},
-	})
+	)
+	rUpdate, err := c.svcCtx.Dao.MsgClient.MsgSendMessageV2(
+		c.ctx, &msgpb.TLMsgSendMessageV2{
+			UserId:    c.MD.UserId,
+			AuthKeyId: c.MD.PermAuthKeyId,
+			PeerType:  peer.PeerType,
+			PeerId:    peer.PeerId,
+			Message: []*msgpb.OutboxMessage{
+				msgpb.MakeTLOutboxMessage(
+					&msgpb.OutboxMessage{
+						NoWebpage:    true,
+						Background:   in.Background,
+						RandomId:     in.RandomId,
+						Message:      outMessage,
+						ScheduleDate: in.ScheduleDate,
+					},
+				).To_OutboxMessage(),
+			},
+		},
+	)
 
 	if err != nil {
 		c.Logger.Errorf("messages.sendMedia#c8f16791 - error: %v", err)
@@ -161,9 +175,11 @@ func (c *MessagesCore) MessagesSendMedia(in *mtproto.TLMessagesSendMedia) (*mtpr
 
 	if in.ClearDraft {
 		ctx := contextx.ValueOnlyFrom(c.ctx)
-		threading.GoSafe(func() {
-			c.doClearDraft(ctx, c.MD.UserId, c.MD.PermAuthKeyId, peer)
-		})
+		threading.GoSafe(
+			func() {
+				c.doClearDraft(ctx, c.MD.UserId, c.MD.PermAuthKeyId, peer)
+			},
+		)
 	}
 
 	return rUpdate, nil

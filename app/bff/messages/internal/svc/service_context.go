@@ -12,7 +12,8 @@ type ServiceContext struct {
 	Plugin plugin.MessagesPlugin
 }
 
-func NewServiceContext(c config.Config, plugin plugin.MessagesPlugin) *ServiceContext {
+func NewServiceContext(c config.Config) *ServiceContext {
+	plugin := plugin.NewMessagesPlugin(c.MediaClient)
 	return &ServiceContext{
 		Config: c,
 		Dao:    dao.New(c),

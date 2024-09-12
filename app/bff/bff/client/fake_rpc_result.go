@@ -18,7 +18,9 @@ import (
 
 var (
 	gNewAlgoSalt1 = []byte{0xEC, 0xF8, 0x73, 0x76, 0x65, 0xBC, 0x77, 0x5A}
-	gNewAlgoSalt2 = []byte{0xBE, 0xDE, 0x48, 0x88, 0x8C, 0x0F, 0x42, 0xAC, 0x34, 0xFF, 0xD1, 0xD4, 0x93, 0x5D, 0x8B, 0x21}
+	gNewAlgoSalt2 = []byte{
+		0xBE, 0xDE, 0x48, 0x88, 0x8C, 0x0F, 0x42, 0xAC, 0x34, 0xFF, 0xD1, 0xD4, 0x93, 0x5D, 0x8B, 0x21,
+	}
 
 	gNewAlgoP = []byte{
 		0xc7, 0x1c, 0xae, 0xb9, 0xc6, 0xb1, 0xc9, 0x04, 0x8e, 0x6c, 0x52, 0x2f,
@@ -57,18 +59,21 @@ var (
 )
 
 func init() {
-	gNewAlgo = mtproto.MakeTLPasswordKdfAlgoModPow(&mtproto.PasswordKdfAlgo{
-		Salt1: gNewAlgoSalt1,
-		Salt2: gNewAlgoSalt2,
-		G:     gNewAlgoG,
-		P:     gNewAlgoP,
-	}).To_PasswordKdfAlgo()
+	gNewAlgo = mtproto.MakeTLPasswordKdfAlgoModPow(
+		&mtproto.PasswordKdfAlgo{
+			Salt1: gNewAlgoSalt1,
+			Salt2: gNewAlgoSalt2,
+			G:     gNewAlgoG,
+			P:     gNewAlgoP,
+		},
+	).To_PasswordKdfAlgo()
 
-	gNewSecureAlgo = mtproto.MakeTLSecurePasswordKdfAlgoPBKDF2(&mtproto.SecurePasswordKdfAlgo{
-		Salt: gNewSecureAlgoSalt,
-	}).To_SecurePasswordKdfAlgo()
+	gNewSecureAlgo = mtproto.MakeTLSecurePasswordKdfAlgoPBKDF2(
+		&mtproto.SecurePasswordKdfAlgo{
+			Salt: gNewSecureAlgoSalt,
+		},
+	).To_SecurePasswordKdfAlgo()
 }
-
 func (c *BFFProxyClient) TryReturnFakeRpcResult(object mtproto.TLObject) (mtproto.TLObject, error) {
 	rt := reflect.TypeOf(object)
 	if rt.Kind() == reflect.Ptr {
@@ -76,150 +81,145 @@ func (c *BFFProxyClient) TryReturnFakeRpcResult(object mtproto.TLObject) (mtprot
 	}
 
 	switch rt.Name() {
-	// langpack
-	case "TLLangpackGetDifference":
-		in := object.(*mtproto.TLLangpackGetDifference)
-		return mtproto.MakeTLLangPackDifference(&mtproto.LangPackDifference{
-			LangCode:    in.GetLangCode(),
-			FromVersion: in.GetFromVersion(),
-			Version:     in.GetFromVersion(),
-			Strings:     []*mtproto.LangPackString{},
-		}).To_LangPackDifference(), nil
-	case "TLLangpackGetLangPack":
-		in := object.(*mtproto.TLLangpackGetLangPack)
-		return mtproto.MakeTLLangPackDifference(&mtproto.LangPackDifference{
-			LangCode:    in.GetLangCode(),
-			FromVersion: 0,
-			Version:     0,
-			Strings:     []*mtproto.LangPackString{},
-		}).To_LangPackDifference(), nil
-	case "TLLangpackGetLanguages":
-		return &mtproto.Vector_LangPackLanguage{
-			Datas: []*mtproto.LangPackLanguage{},
-		}, nil
-	case "TLLangpackGetStrings":
-		return &mtproto.Vector_LangPackString{
-			Datas: []*mtproto.LangPackString{},
-		}, nil
-
-	// webpage
-	case "TLMessagesGetWebPage":
-		return mtproto.MakeTLWebPageEmpty(&mtproto.WebPage{
-			Id: 0,
-		}).To_WebPage(), nil
-	case "TLMessagesGetWebPageView":
-		return mtproto.MakeTLMessageMediaEmpty(&mtproto.MessageMedia{
-			//
-		}).To_MessageMedia(), nil
 
 	// wallpaper
 	case "TLAccountGetWallPapers":
-		return mtproto.MakeTLAccountWallPapers(&mtproto.Account_WallPapers{
-			Hash:       0,
-			Wallpapers: []*mtproto.WallPaper{},
-		}).To_Account_WallPapers(), nil
+		return mtproto.MakeTLAccountWallPapers(
+			&mtproto.Account_WallPapers{
+				Hash:       0,
+				Wallpapers: []*mtproto.WallPaper{},
+			},
+		).To_Account_WallPapers(), nil
 
 	// twofa
 	case "TLAccountGetPassword":
-		return mtproto.MakeTLAccountPassword(&mtproto.Account_Password{
-			HasRecovery:             false,
-			HasSecureValues:         false,
-			HasPassword:             false,
-			CurrentAlgo:             nil,
-			Srp_B:                   nil,
-			SrpId:                   nil,
-			Hint:                    nil,
-			EmailUnconfirmedPattern: nil,
-			NewAlgo:                 gNewAlgo,
-			NewSecureAlgo:           gNewSecureAlgo,
-			SecureRandom:            crypto.RandomBytes(256),
-		}).To_Account_Password(), nil
+		return mtproto.MakeTLAccountPassword(
+			&mtproto.Account_Password{
+				HasRecovery:             false,
+				HasSecureValues:         false,
+				HasPassword:             false,
+				CurrentAlgo:             nil,
+				Srp_B:                   nil,
+				SrpId:                   nil,
+				Hint:                    nil,
+				EmailUnconfirmedPattern: nil,
+				NewAlgo:                 gNewAlgo,
+				NewSecureAlgo:           gNewSecureAlgo,
+				SecureRandom:            crypto.RandomBytes(256),
+			},
+		).To_Account_Password(), nil
 
 	// tos
 	case "TLHelpAcceptTermsOfService":
 		return mtproto.BoolTrue, nil
 	case "TLHelpGetTermsOfServiceUpdate":
-		return mtproto.MakeTLHelpTermsOfServiceUpdateEmpty(&mtproto.Help_TermsOfServiceUpdate{
-			Expires: int32(time.Now().Unix() + 3600),
-		}).To_Help_TermsOfServiceUpdate(), nil
+		return mtproto.MakeTLHelpTermsOfServiceUpdateEmpty(
+			&mtproto.Help_TermsOfServiceUpdate{
+				Expires: int32(time.Now().Unix() + 3600),
+			},
+		).To_Help_TermsOfServiceUpdate(), nil
 
 	// themes
 	case "TLAccountGetThemes":
-		return mtproto.MakeTLAccountThemes(&mtproto.Account_Themes{
-			Hash:   0,
-			Themes: []*mtproto.Theme{},
-		}).To_Account_Themes(), nil
+		return mtproto.MakeTLAccountThemes(
+			&mtproto.Account_Themes{
+				Hash:   0,
+				Themes: []*mtproto.Theme{},
+			},
+		).To_Account_Themes(), nil
 	case "TLAccountGetChatThemes":
-		return mtproto.MakeTLAccountThemes(&mtproto.Account_Themes{
-			Hash:   0,
-			Themes: []*mtproto.Theme{},
-		}).To_Account_Themes(), nil
+		return mtproto.MakeTLAccountThemes(
+			&mtproto.Account_Themes{
+				Hash:   0,
+				Themes: []*mtproto.Theme{},
+			},
+		).To_Account_Themes(), nil
 
 	// stickers
 	case "TLMessagesGetAllStickers":
-		return mtproto.MakeTLMessagesAllStickers(&mtproto.Messages_AllStickers{
-			Hash: 0,
-			Sets: []*mtproto.StickerSet{},
-		}).To_Messages_AllStickers(), nil
+		return mtproto.MakeTLMessagesAllStickers(
+			&mtproto.Messages_AllStickers{
+				Hash: 0,
+				Sets: []*mtproto.StickerSet{},
+			},
+		).To_Messages_AllStickers(), nil
 	case "TLMessagesGetArchivedStickers":
-		return mtproto.MakeTLMessagesArchivedStickers(&mtproto.Messages_ArchivedStickers{
-			Count: 0,
-			Sets:  []*mtproto.StickerSetCovered{},
-		}).To_Messages_ArchivedStickers(), nil
+		return mtproto.MakeTLMessagesArchivedStickers(
+			&mtproto.Messages_ArchivedStickers{
+				Count: 0,
+				Sets:  []*mtproto.StickerSetCovered{},
+			},
+		).To_Messages_ArchivedStickers(), nil
 	case "TLMessagesGetFavedStickers":
-		return mtproto.MakeTLMessagesFavedStickers(&mtproto.Messages_FavedStickers{
-			Hash:     0,
-			Packs:    []*mtproto.StickerPack{},
-			Stickers: []*mtproto.Document{},
-		}).To_Messages_FavedStickers(), nil
+		return mtproto.MakeTLMessagesFavedStickers(
+			&mtproto.Messages_FavedStickers{
+				Hash:     0,
+				Packs:    []*mtproto.StickerPack{},
+				Stickers: []*mtproto.Document{},
+			},
+		).To_Messages_FavedStickers(), nil
 	case "TLMessagesGetMaskStickers":
-		return mtproto.MakeTLMessagesAllStickers(&mtproto.Messages_AllStickers{
-			Hash: 0,
-			Sets: []*mtproto.StickerSet{},
-		}).To_Messages_AllStickers(), nil
+		return mtproto.MakeTLMessagesAllStickers(
+			&mtproto.Messages_AllStickers{
+				Hash: 0,
+				Sets: []*mtproto.StickerSet{},
+			},
+		).To_Messages_AllStickers(), nil
 	case "TLMessagesGetOldFeaturedStickers":
-		return mtproto.MakeTLMessagesFeaturedStickers(&mtproto.Messages_FeaturedStickers{
-			Count:  0,
-			Hash:   0,
-			Sets:   []*mtproto.StickerSetCovered{},
-			Unread: []int64{},
-		}).To_Messages_FeaturedStickers(), nil
+		return mtproto.MakeTLMessagesFeaturedStickers(
+			&mtproto.Messages_FeaturedStickers{
+				Count:  0,
+				Hash:   0,
+				Sets:   []*mtproto.StickerSetCovered{},
+				Unread: []int64{},
+			},
+		).To_Messages_FeaturedStickers(), nil
 	case "TLMessagesGetRecentStickers":
-		return mtproto.MakeTLMessagesRecentStickers(&mtproto.Messages_RecentStickers{
-			Hash:     0,
-			Packs:    []*mtproto.StickerPack{},
-			Stickers: []*mtproto.Document{},
-			Dates:    []int32{},
-		}).To_Messages_RecentStickers(), nil
+		return mtproto.MakeTLMessagesRecentStickers(
+			&mtproto.Messages_RecentStickers{
+				Hash:     0,
+				Packs:    []*mtproto.StickerPack{},
+				Stickers: []*mtproto.Document{},
+				Dates:    []int32{},
+			},
+		).To_Messages_RecentStickers(), nil
 	case "TLMessagesGetStickers":
-		return mtproto.MakeTLMessagesStickers(&mtproto.Messages_Stickers{
-			Hash:     0,
-			Stickers: []*mtproto.Document{},
-		}).To_Messages_Stickers(), nil
+		return mtproto.MakeTLMessagesStickers(
+			&mtproto.Messages_Stickers{
+				Hash:     0,
+				Stickers: []*mtproto.Document{},
+			},
+		).To_Messages_Stickers(), nil
 	case "TLMessagesGetFeaturedStickers":
-		return mtproto.MakeTLMessagesFeaturedStickers(&mtproto.Messages_FeaturedStickers{
-			Count:  0,
-			Hash:   0,
-			Sets:   []*mtproto.StickerSetCovered{},
-			Unread: []int64{},
-		}).To_Messages_FeaturedStickers(), nil
+		return mtproto.MakeTLMessagesFeaturedStickers(
+			&mtproto.Messages_FeaturedStickers{
+				Count:  0,
+				Hash:   0,
+				Sets:   []*mtproto.StickerSetCovered{},
+				Unread: []int64{},
+			},
+		).To_Messages_FeaturedStickers(), nil
 	case "TLMessagesGetStickerSet":
 		return nil, mtproto.ErrStickerIdInvalid
 
 	// 	scheduledmessages
 	case "TLMessagesGetScheduledMessages":
-		return mtproto.MakeTLMessagesMessages(&mtproto.Messages_Messages{
-			Messages: []*mtproto.Message{},
-			Chats:    []*mtproto.Chat{},
-			Users:    []*mtproto.User{},
-		}).To_Messages_Messages(), nil
+		return mtproto.MakeTLMessagesMessages(
+			&mtproto.Messages_Messages{
+				Messages: []*mtproto.Message{},
+				Chats:    []*mtproto.Chat{},
+				Users:    []*mtproto.User{},
+			},
+		).To_Messages_Messages(), nil
 
 	// reactions
 	case "TLMessagesGetAvailableReactions":
-		return mtproto.MakeTLMessagesAvailableReactions(&mtproto.Messages_AvailableReactions{
-			Hash:      0,
-			Reactions: []*mtproto.AvailableReaction{},
-		}).To_Messages_AvailableReactions(), nil
+		return mtproto.MakeTLMessagesAvailableReactions(
+			&mtproto.Messages_AvailableReactions{
+				Hash:      0,
+				Reactions: []*mtproto.AvailableReaction{},
+			},
+		).To_Messages_AvailableReactions(), nil
 
 	// folders
 	case "TLMessagesGetDialogFilters":
@@ -229,38 +229,46 @@ func (c *BFFProxyClient) TryReturnFakeRpcResult(object mtproto.TLObject) (mtprot
 
 	// gifs
 	case "TLMessagesGetSavedGifs":
-		return mtproto.MakeTLMessagesSavedGifs(&mtproto.Messages_SavedGifs{
-			Hash: 0,
-			Gifs: []*mtproto.Document{},
-		}).To_Messages_SavedGifs(), nil
+		return mtproto.MakeTLMessagesSavedGifs(
+			&mtproto.Messages_SavedGifs{
+				Hash: 0,
+				Gifs: []*mtproto.Document{},
+			},
+		).To_Messages_SavedGifs(), nil
 	case "TLMessagesSaveGif":
 		return mtproto.BoolTrue, nil
 
 	// promodata
 	case "TLHelpGetPromoData":
-		return mtproto.MakeTLHelpPromoDataEmpty(&mtproto.Help_PromoData{
-			Expires: int32(time.Now().Unix() + 60*60),
-		}).To_Help_PromoData(), nil
+		return mtproto.MakeTLHelpPromoDataEmpty(
+			&mtproto.Help_PromoData{
+				Expires: int32(time.Now().Unix() + 60*60),
+			},
+		).To_Help_PromoData(), nil
 	case "TLHelpHidePromoData":
 		return mtproto.BoolTrue, nil
 
 	// emoji
 	case "TLMessagesGetEmojiKeywords":
 		in := object.(*mtproto.TLMessagesGetEmojiKeywords)
-		return mtproto.MakeTLEmojiKeywordsDifference(&mtproto.EmojiKeywordsDifference{
-			LangCode:    in.LangCode,
-			FromVersion: 0,
-			Version:     0,
-			Keywords:    []*mtproto.EmojiKeyword{},
-		}).To_EmojiKeywordsDifference(), nil
+		return mtproto.MakeTLEmojiKeywordsDifference(
+			&mtproto.EmojiKeywordsDifference{
+				LangCode:    in.LangCode,
+				FromVersion: 0,
+				Version:     0,
+				Keywords:    []*mtproto.EmojiKeyword{},
+			},
+		).To_EmojiKeywordsDifference(), nil
 	case "TLMessagesGetEmojiKeywordsDifference":
 		in := object.(*mtproto.TLMessagesGetEmojiKeywordsDifference)
-		return mtproto.MakeTLEmojiKeywordsDifference(&mtproto.EmojiKeywordsDifference{
-			LangCode:    in.LangCode,
-			FromVersion: in.FromVersion,
-			Version:     in.FromVersion,
-			Keywords:    []*mtproto.EmojiKeyword{},
-		}).To_EmojiKeywordsDifference(), nil
+		return mtproto.MakeTLEmojiKeywordsDifference(
+			&mtproto.EmojiKeywordsDifference{
+				LangCode:    in.LangCode,
+				FromVersion: in.FromVersion,
+				Version:     in.FromVersion,
+				Keywords:    []*mtproto.EmojiKeyword{},
+			},
+		).To_EmojiKeywordsDifference(), nil
 	case "TLMessagesGetEmojiKeywordsLanguages":
 		return &mtproto.Vector_EmojiLanguage{
 			Datas: []*mtproto.EmojiLanguage{},
@@ -280,21 +288,27 @@ func (c *BFFProxyClient) TryReturnFakeRpcResult(object mtproto.TLObject) (mtprot
 
 	// phone
 	case "TLPhoneGetCallConfig":
-		return mtproto.MakeTLDataJSON(&mtproto.DataJSON{
-			Data: "{}",
-		}).To_DataJSON(), nil
+		return mtproto.MakeTLDataJSON(
+			&mtproto.DataJSON{
+				Data: "{}",
+			},
+		).To_DataJSON(), nil
 
 	case "TLAccountGetAuthorizations":
-		return mtproto.MakeTLAccountAuthorizations(&mtproto.Account_Authorizations{
-			AuthorizationTtlDays: 0,
-			Authorizations:       []*mtproto.Authorization{},
-		}).To_Account_Authorizations(), nil
+		return mtproto.MakeTLAccountAuthorizations(
+			&mtproto.Account_Authorizations{
+				AuthorizationTtlDays: 0,
+				Authorizations:       []*mtproto.Authorization{},
+			},
+		).To_Account_Authorizations(), nil
 
 	case "TLAccountGetWebAuthorizations":
-		return mtproto.MakeTLAccountWebAuthorizations(&mtproto.Account_WebAuthorizations{
-			Authorizations: []*mtproto.WebAuthorization{},
-			Users:          []*mtproto.User{},
-		}).To_Account_WebAuthorizations(), nil
+		return mtproto.MakeTLAccountWebAuthorizations(
+			&mtproto.Account_WebAuthorizations{
+				Authorizations: []*mtproto.WebAuthorization{},
+				Users:          []*mtproto.User{},
+			},
+		).To_Account_WebAuthorizations(), nil
 	}
 
 	logx.Errorf("%s blocked, License key from https://teamgram.net required to unlock enterprise features.", rt.Name())
