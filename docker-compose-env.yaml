@@ -77,7 +77,7 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: pwm
       MYSQL_USER: pwm
       MYSQL_PASSWORD: ${DB_USER_PASSWORD}
