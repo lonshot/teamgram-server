@@ -2,15 +2,13 @@ package phonenumber
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 )
 
 // Simulated PhoneNumber struct to replace `phonenumbers.PhoneNumber`
 type PhoneNumber struct {
-	CountryCode    int32
-	NationalNumber string
-	RawInput       string
+	CountryCode int32
+	//NationalNumber string
+	RawInput string
 }
 
 // phoneNumberHelper struct with the custom PhoneNumber type
@@ -42,12 +40,12 @@ func MakePhoneNumberHelper(number, region string) (*phoneNumberHelper, error) {
 func parsePhoneNumber(number, region string) *PhoneNumber {
 	// Extract country code and national number based on the phone number prefix
 	countryCode := extractCountryCode(number)
-	nationalNumber := strings.TrimPrefix(number, fmt.Sprintf("+%d", countryCode))
+	//nationalNumber := strings.TrimPrefix(number, fmt.Sprintf("+%d", countryCode))
 
 	return &PhoneNumber{
-		CountryCode:    countryCode,
-		NationalNumber: nationalNumber,
-		RawInput:       number,
+		CountryCode: countryCode,
+		//NationalNumber: nationalNumber,
+		RawInput: number,
 	}
 }
 

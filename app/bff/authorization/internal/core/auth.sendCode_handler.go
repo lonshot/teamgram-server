@@ -104,19 +104,23 @@ func (c *AuthorizationCore) AuthSendCode(in *mtproto.TLAuthSendCode) (*mtproto.A
 	}
 
 	if c.svcCtx.Plugin != nil {
-		c.svcCtx.Plugin.OnAuthAction(c.ctx,
+		c.svcCtx.Plugin.OnAuthAction(
+			c.ctx,
 			c.MD.PermAuthKeyId,
 			c.MD.ClientMsgId,
 			c.MD.ClientAddr,
 			in.PhoneNumber,
 			logic.GetActionType(in),
-			"auth.sendCode")
+			"auth.sendCode",
+		)
 	}
 
 	return rValue, nil
 }
 
-func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mtproto.TLAuthSendCode) (reply *mtproto.Auth_SentCode, err error) {
+func (c *AuthorizationCore) authSendCode(
+	authKeyId, sessionId int64, request *mtproto.TLAuthSendCode,
+) (reply *mtproto.Auth_SentCode, err error) {
 	// 1. check api_id and api_hash
 	if err = c.svcCtx.Dao.CheckApiIdAndHash(request.ApiId, request.ApiHash); err != nil {
 		c.Logger.Errorf("invalid api: {api_id: %d, api_hash: %s}", request.ApiId, request.ApiHash)
@@ -216,9 +220,11 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 		user            *mtproto.ImmutableUser
 	)
 
-	if user, err = c.svcCtx.Dao.UserClient.UserGetImmutableUserByPhone(c.ctx, &userpb.TLUserGetImmutableUserByPhone{
-		Phone: phoneNumber,
-	}); err != nil {
+	if user, err = c.svcCtx.Dao.UserClient.UserGetImmutableUserByPhone(
+		c.ctx, &userpb.TLUserGetImmutableUserByPhone{
+			Phone: phoneNumber,
+		},
+	); err != nil {
 		if nErr, ok := status.FromError(err); ok {
 			// mtproto.ErrPhoneNumberUnoccupied
 			_ = nErr
@@ -247,7 +253,7 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 		//	return
 		//}
 	} else {
-		phoneRegistered = true
+		phoneRegistered = user != nil
 	}
 
 	if phoneRegistered {
@@ -259,10 +265,12 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 			id, _ := c.svcCtx.Dao.GetFutureAuthToken(c.ctx, v)
 			if id == user.Id() {
 				// Bind authKeyId and userId
-				c.svcCtx.Dao.AuthsessionClient.AuthsessionBindAuthKeyUser(c.ctx, &authsession.TLAuthsessionBindAuthKeyUser{
-					AuthKeyId: c.MD.PermAuthKeyId,
-					UserId:    user.User.Id,
-				})
+				c.svcCtx.Dao.AuthsessionClient.AuthsessionBindAuthKeyUser(
+					c.ctx, &authsession.TLAuthsessionBindAuthKeyUser{
+						AuthKeyId: c.MD.PermAuthKeyId,
+						UserId:    user.User.Id,
+					},
+				)
 
 				// Del
 				c.svcCtx.Dao.DelFutureAuthToken(c.ctx, v)
@@ -272,28 +280,35 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 					if c.svcCtx.Plugin.CheckSessionPasswordNeeded(c.ctx, user.User.Id) {
 						// hack
 						// err = mtproto.ErrSessionPasswordNeeded
-						err = status.Error(mtproto.ErrUnauthorized, fmt.Sprintf("SESSION_PASSWORD_NEEDED_%d", user.Id()))
+						err = status.Error(
+							mtproto.ErrUnauthorized, fmt.Sprintf("SESSION_PASSWORD_NEEDED_%d", user.Id()),
+						)
 						c.Logger.Infof("auth.sendCode - future-auth-tokens, next step auth.checkPassword: %v", err)
 						return nil, err
 					}
 				}
 
-				return mtproto.MakeTLAuthSentCodeSuccess(&mtproto.Auth_SentCode{
-					Authorization: mtproto.MakeTLAuthAuthorization(&mtproto.Auth_Authorization{
-						SetupPasswordRequired: false,
-						OtherwiseReloginDays:  nil,
-						TmpSessions:           nil,
-						FutureAuthToken:       nil,
-						User:                  user.ToSelfUser(),
-					}).To_Auth_Authorization(),
-				}).To_Auth_SentCode(), nil
+				return mtproto.MakeTLAuthSentCodeSuccess(
+					&mtproto.Auth_SentCode{
+						Authorization: mtproto.MakeTLAuthAuthorization(
+							&mtproto.Auth_Authorization{
+								SetupPasswordRequired: false,
+								OtherwiseReloginDays:  nil,
+								TmpSessions:           nil,
+								FutureAuthToken:       nil,
+								User:                  user.ToSelfUser(),
+							},
+						).To_Auth_Authorization(),
+					},
+				).To_Auth_SentCode(), nil
 			}
 		}
 	}
 	// phoneRegistered = user != nil
 
 	// codeLogic := logic.NewAuthSignLogic(s.AuthCore)
-	codeData, err2 := c.svcCtx.AuthLogic.DoAuthSendCode(c.ctx,
+	codeData, err2 := c.svcCtx.AuthLogic.DoAuthSendCode(
+		c.ctx,
 		authKeyId,
 		sessionId,
 		phoneNumber,
@@ -320,18 +335,22 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 					codeData2.PhoneCodeExtraData = "12345"
 					c.Logger.Infof("is test server: %v", codeData2)
 				} else {
-					if status, _ := c.svcCtx.StatusClient.StatusGetUserOnlineSessions(c.ctx, &statuspb.TLStatusGetUserOnlineSessions{
-						UserId: user.User.Id,
-					}); len(status.GetUserSessions()) > 0 {
+					if status, _ := c.svcCtx.StatusClient.StatusGetUserOnlineSessions(
+						c.ctx, &statuspb.TLStatusGetUserOnlineSessions{
+							UserId: user.User.Id,
+						},
+					); len(status.GetUserSessions()) > 0 {
 						c.Logger.Infof("user online")
 						needSendSms = false
 						codeData2.SentCodeType = model.SentCodeTypeApp
 						codeData2.PhoneCodeExtraData = codeData2.PhoneCode
 					}
 				}
-				threading2.WrapperGoFunc(c.ctx, nil, func(ctx context.Context) {
-					c.pushSignInMessage(ctx, user.Id(), codeData2.PhoneCode)
-				})
+				threading2.WrapperGoFunc(
+					c.ctx, nil, func(ctx context.Context) {
+						c.pushSignInMessage(ctx, user.Id(), codeData2.PhoneCode)
+					},
+				)
 			}
 
 			if needSendSms {
@@ -340,7 +359,8 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 					context.Background(),
 					phoneNumber,
 					codeData2.PhoneCode,
-					codeData2.PhoneCodeHash)
+					codeData2.PhoneCodeHash,
+				)
 				if err2 != nil {
 					c.Logger.Errorf("send sms code error: %v", err2)
 					return err2
@@ -400,7 +420,8 @@ func (c *AuthorizationCore) authSendCode(authKeyId, sessionId int64, request *mt
 			codeData2.PhoneNumberRegistered = phoneRegistered
 
 			return nil
-		})
+		},
+	)
 
 	if err2 != nil {
 		c.Logger.Errorf("auth.sendCode - error: %v", err2)
