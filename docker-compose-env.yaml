@@ -83,7 +83,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-@1234$a}
       MYSQL_DATABASE: teamgram
       MYSQL_USER: teamgram
-      MYSQL_PASSWORD: ${DB_PASSWORD:-teamgram}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-@1234$a}
     ports:
       - 3306:3306
     volumes:
@@ -95,7 +95,6 @@ services:
       --collation-server=utf8mb4_general_ci
       --explicit_defaults_for_timestamp=true
       --lower_case_table_names=1
-      --skip-networking
     privileged: true
     restart: always
     networks:
@@ -131,8 +130,6 @@ services:
     container_name: phpmyadmin
     environment:
       PMA_HOST: mysql
-      PMA_USER: teamgram
-      PMA_PASSWORD: ${DB_PASSWORD:-teamgram}
       PMA_PORT: 3306
     restart: always
     ports:
