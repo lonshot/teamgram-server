@@ -77,10 +77,10 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: pass123456a
       MYSQL_DATABASE: pwm
       MYSQL_USER: pwm
-      MYSQL_PASSWORD: ${DB_USER_PASSWORD}
+      MYSQL_PASSWORD: pass123456a
     ports:
       - 3306:3306
     volumes:
