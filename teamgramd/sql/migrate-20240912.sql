@@ -1,4 +1,3 @@
-
 -- Creating the wallpapers table to store predefined wallpapers
 CREATE TABLE `wallpapers` (
                               `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -14,7 +13,7 @@ CREATE TABLE `wallpapers` (
                               `fourth_background_color` INT DEFAULT NULL,
                               `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                              CONSTRAINT `fk_document_id` FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE SET NULL
+                              CONSTRAINT `fk_wallpapers_document_id` FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Creating the user_wallpapers table to store user-specific wallpaper selections
@@ -28,11 +27,10 @@ CREATE TABLE `user_wallpapers` (
                                    PRIMARY KEY (`id`),
                                    KEY `user_wallpapers_user_id_idx` (`user_id`),
                                    KEY `user_wallpapers_wallpaper_id_idx` (`wallpaper_id`),
-                                   CONSTRAINT `fk_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+                                   CONSTRAINT `fk_user_wallpapers_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
--- Create wallpaper_settings table
+-- Creating the wallpaper_settings table
 CREATE TABLE `wallpaper_settings` (
                                       `id` BIGINT NOT NULL AUTO_INCREMENT,
                                       `wallpaper_id` BIGINT NOT NULL,
@@ -48,15 +46,10 @@ CREATE TABLE `wallpaper_settings` (
                                       `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                       `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                       PRIMARY KEY (`id`),
-                                      CONSTRAINT `fk_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+                                      CONSTRAINT `fk_wallpaper_settings_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
--- --------------------------------------------------------
--- Table for Themes
--- --------------------------------------------------------
-
--- Create the `themes` table
+-- Creating the themes table
 CREATE TABLE `themes` (
                           `id` BIGINT NOT NULL AUTO_INCREMENT,
                           `slug` VARCHAR(255) NOT NULL,
@@ -71,7 +64,7 @@ CREATE TABLE `themes` (
                           PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create the `theme_settings` table
+-- Creating the theme_settings table
 CREATE TABLE `theme_settings` (
                                   `id` BIGINT NOT NULL AUTO_INCREMENT,
                                   `theme_id` BIGINT NOT NULL,
@@ -84,13 +77,11 @@ CREATE TABLE `theme_settings` (
                                   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                   PRIMARY KEY (`id`),
-                                  CONSTRAINT `fk_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-                                  CONSTRAINT `fk_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
+                                  CONSTRAINT `fk_theme_settings_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                  CONSTRAINT `fk_theme_settings_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
--- Table for User Themes (User's Custom Themes)
--- --------------------------------------------------------
+-- Creating the user_themes table (User's Custom Themes)
 CREATE TABLE `user_themes` (
                                `id` BIGINT NOT NULL AUTO_INCREMENT,
                                `user_id` BIGINT NOT NULL,
@@ -101,5 +92,5 @@ CREATE TABLE `user_themes` (
                                PRIMARY KEY (`id`),
                                KEY `user_themes_user_id_idx` (`user_id`),
                                KEY `user_themes_theme_id_idx` (`theme_id`),
-                               CONSTRAINT `fk_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+                               CONSTRAINT `fk_user_themes_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
