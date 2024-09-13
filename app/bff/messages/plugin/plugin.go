@@ -5,7 +5,8 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/html"
+
 	"github.com/teamgram/marmota/pkg/net/rpcx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -60,17 +61,54 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 	hash := md5.Sum(bodyBytes)
 	contentHash := int32(hash[0]) // A simple hash to int32 conversion (adjust if necessary)
 
-	// Parse the HTML content using goquery
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(bodyBytes))
+	// Parse the HTML content using net/html
+	doc, err := html.Parse(bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse web page content: %v", err)
 	}
 
 	// Extract metadata
-	title := doc.Find("title").Text()
-	description, _ := doc.Find("meta[name='description']").Attr("content")
-	image, _ := doc.Find("meta[property='og:image']").Attr("content")
-	siteName, _ := doc.Find("meta[property='og:site_name']").Attr("content")
+	var title, description, image, siteName string
+	var extractMeta func(*html.Node)
+
+	// Function to traverse the HTML tree and extract meta tags
+	extractMeta = func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			switch n.Data {
+			case "title":
+				if n.FirstChild != nil {
+					title = n.FirstChild.Data
+				}
+			case "meta":
+				// Look for description and other meta tags
+				var nameAttr, contentAttr string
+				for _, attr := range n.Attr {
+					if attr.Key == "name" || attr.Key == "property" {
+						nameAttr = attr.Val
+					} else if attr.Key == "content" {
+						contentAttr = attr.Val
+					}
+				}
+
+				switch nameAttr {
+				case "description", "og:description":
+					description = contentAttr
+				case "og:image":
+					image = contentAttr
+				case "og:site_name":
+					siteName = contentAttr
+				}
+			}
+		}
+
+		// Recursively traverse the child nodes
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			extractMeta(c)
+		}
+	}
+
+	// Start parsing the HTML tree
+	extractMeta(doc)
 
 	// If site name is empty, use the title as a fallback
 	if siteName == "" {
@@ -104,7 +142,6 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 		},
 	).To_WebPage(), nil
 }
-
 func (d defaultMessagesPlugin) GetMessageMedia(
 	ctx context.Context, userId, ownerId int64, media *mtproto.InputMedia,
 ) (*mtproto.MessageMedia, error) {

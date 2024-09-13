@@ -3,7 +3,6 @@ module pwm-server
 go 1.19
 
 require (
-	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/bwmarrin/snowflake v0.3.1-0.20221123153919-bc74ab286f15
 	github.com/chai2010/webp v1.1.2-0.20240612091223-aa1b379218b7
 	github.com/disintegration/imaging v1.6.2
@@ -24,7 +23,6 @@ require (
 
 require (
 	github.com/IBM/sarama v1.43.2 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
