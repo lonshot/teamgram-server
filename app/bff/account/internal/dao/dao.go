@@ -15,19 +15,12 @@ type Dao struct {
 	user_client.UserClient
 	sync_client.SyncClient
 	chat_client.ChatClient
-	//RedisClient *redis.Redis // Redis client for managing temporary data
 }
 
 // New initializes the Dao object with clients
 func New(c config.Config) *Dao {
-	// Initialize the Redis client using MustNewRedis
-	//redisClient := redis.MustNewRedis(redis.RedisConf{
-	//	Host: c.Redis.Host,
-	//	Type: c.Redis.Type, // Set Redis type (e.g., "node" or "cluster")
-	//})
 
 	return &Dao{
-		//RedisClient:       redisClient,
 		UserClient:        user_client.NewUserClient(rpcx.GetCachedRpcClient(c.UserClient)),
 		AuthsessionClient: authsession_client.NewAuthsessionClient(rpcx.GetCachedRpcClient(c.AuthsessionClient)),
 		ChatClient:        chat_client.NewChatClient(rpcx.GetCachedRpcClient(c.ChatClient)),
