@@ -193,10 +193,10 @@ func (s *Service) MessagesSetChatWallPaper(
 	ctx context.Context, paper *mtproto.TLMessagesSetChatWallPaper,
 ) (*mtproto.Updates, error) {
 	// Apply the wallpaper to a specific chat
-	err := s.svcCtx.Dao.InsertWallPaper(ctx, paper.GetWallpaper())
-	if err != nil {
-		return nil, err
-	}
+	//err := s.svcCtx.Dao.InsertWallPaper(ctx, paper.GetWallpaper())
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	// Create an update response (this is just an example; actual logic depends on your updates mechanism)
 	updates := mtproto.MakeTLUpdates(
