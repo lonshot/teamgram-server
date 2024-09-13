@@ -6,10 +6,14 @@ import (
 )
 
 // ContactsImportContacts imports a list of contacts for the user.
-func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContacts) (*mtproto.Updates, error) {
+func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContacts) (
+	*mtproto.Contacts_ImportedContacts, error,
+) {
 	var (
 		me           *mtproto.User
 		updatedUsers []*mtproto.User
+		imported     []*mtproto.ImportedContact
+		popular      []*mtproto.PopularContact
 		err          error
 	)
 
@@ -43,14 +47,13 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		)
 		if err != nil || contactUser == nil {
 			c.Logger.Errorf("ContactsImportContacts - error: user not found for phone: %v", contact.Phone)
-			return nil, mtproto.ErrContactIdInvalid
+			continue // Skip this contact but do not fail the entire process
 		}
 
 		// Prevent adding self as a contact
 		if contactUser.Id() == c.MD.UserId {
-			err = mtproto.ErrContactIdInvalid
 			c.Logger.Errorf("ContactsImportContacts - error: cannot add self as contact")
-			return nil, err
+			continue // Skip this contact but do not fail the entire process
 		}
 
 		// Fetch mutable user information
@@ -61,14 +64,14 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		)
 		if err != nil || !users.CheckExistUser(c.MD.UserId, contactUser.Id()) {
 			c.Logger.Errorf("ContactsImportContacts - error fetching users: %v", err)
-			return nil, mtproto.ErrContactIdInvalid
+			continue // Skip this contact but do not fail the entire process
 		}
 
 		// Add the contact to the user's contact list
 		changeMutual, err := c.svcCtx.Dao.UserClient.UserAddContact(
 			c.ctx, &userpb.TLUserAddContact{
 				UserId: c.MD.UserId,
-				//AddPhonePrivacyException: mtproto.ToBool(contact.AddPhonePrivacyException),
+				// AddPhonePrivacyException: mtproto.ToBool(contact.AddPhonePrivacyException),
 				Id:        contactUser.Id(),
 				FirstName: contact.FirstName,
 				LastName:  contact.LastName,
@@ -77,8 +80,25 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		)
 		if err != nil {
 			c.Logger.Errorf("ContactsImportContacts - error adding contact: %v", err)
-			return nil, mtproto.ErrContactIdInvalid
+			continue // Skip this contact but do not fail the entire process
 		}
+
+		// Create an imported contact record
+		imported = append(
+			imported, &mtproto.ImportedContact{
+				UserId:   contactUser.Id(),
+				ClientId: contact.ClientId, // Use client-provided ID if available
+				//Mutual:       mtproto.FromBool(changeMutual),
+			},
+		)
+
+		// Create a popular contact record (example of adding random logic)
+		popular = append(
+			popular, &mtproto.PopularContact{
+				ClientId:  contact.ClientId,
+				Importers: 100, // Placeholder value, adjust based on your logic
+			},
+		)
 
 		// Get the added contact and update it as mutual
 		cUser, _ := users.GetUnsafeUser(c.MD.UserId, contactUser.Id())
@@ -92,33 +112,20 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		}
 	}
 
-	// Build updates for all added users
-	if len(updatedUsers) > 0 {
-		rUpdates := mtproto.MakeUpdatesByUpdatesUsers(
-			append([]*mtproto.User{me}, updatedUsers...),
-			mtproto.MakeTLUpdatePeerSettings(
-				&mtproto.Update{
-					Peer_PEER: mtproto.MakePeerUser(updatedUsers[0].GetId()),
-					Settings: mtproto.MakeTLPeerSettings(
-						&mtproto.PeerSettings{
-							ReportSpam:            false,
-							AddContact:            false,
-							BlockContact:          false,
-							ShareContact:          false,
-							NeedContactsException: false,
-							ReportGeo:             false,
-						},
-					).To_PeerSettings(),
-				},
-			).To_Update(),
-		)
+	// Build and return the Contacts_ImportedContacts structure
+	if len(imported) > 0 {
+		contactsImported := &mtproto.Contacts_ImportedContacts{
+			Imported:       imported,
+			PopularInvites: popular,
+			Users:          append([]*mtproto.User{me}, updatedUsers...),
+		}
 
 		// Log success
 		c.Logger.Infof(
 			"ContactsImportContacts - successfully added %d contacts for user: %d", len(updatedUsers), c.MD.UserId,
 		)
 
-		return rUpdates, nil
+		return contactsImported, nil
 	}
 
 	return nil, mtproto.ErrInternalServerError

@@ -265,7 +265,7 @@ func (s *Server) Initialize() error {
 						MediaClient:    c.MediaClient,
 						UsernameClient: c.BizServiceClient,
 						SyncClient:     c.SyncClient,
-					}, nil,
+					},
 				),
 			)
 
