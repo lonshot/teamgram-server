@@ -15,6 +15,7 @@ require (
 	github.com/teamgram/marmota v0.1.21-0.20240701031225-b44e1eec161b
 	github.com/teamgram/proto v0.186.1
 	github.com/zeromicro/go-zero v1.6.3
+	golang.org/x/net v0.29.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
@@ -114,7 +115,6 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
