@@ -2,9 +2,10 @@ package config
 
 import (
 	kafka "github.com/teamgram/marmota/pkg/mq"
-	"pwm-server/pkg/code/conf"
+	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"github.com/zeromicro/go-zero/zrpc"
+	"pwm-server/pkg/code/conf"
 )
 
 type Config struct {
@@ -21,4 +22,5 @@ type Config struct {
 	StatusClient              zrpc.RpcClientConf
 	SignInServiceNotification []conf.MessageEntityConfig `json:",optional"`
 	SignInMessage             []conf.MessageEntityConfig `json:",optional"`
+	Mysql                     sqlx.Config
 }

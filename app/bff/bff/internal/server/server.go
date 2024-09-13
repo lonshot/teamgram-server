@@ -2,7 +2,6 @@ package server
 
 import (
 	"flag"
-
 	"github.com/teamgram/proto/mtproto"
 	account_helper "pwm-server/app/bff/account"
 	authorization_helper "pwm-server/app/bff/authorization"
@@ -391,6 +390,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -399,6 +400,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -407,6 +410,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -415,6 +420,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -423,6 +430,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -432,6 +441,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -440,6 +451,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -448,6 +461,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)
@@ -456,6 +471,8 @@ func (s *Server) Initialize() error {
 				pwm_helper.New(
 					pwm_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
+						MediaClient:   c.MediaClient,
 					},
 				),
 			)

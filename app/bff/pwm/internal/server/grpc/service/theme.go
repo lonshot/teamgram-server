@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/pwm/internal/core"
-	"pwm-server/app/service/media/media"
 )
 
 // AccountGetThemes retrieves a list of themes available for the user.
@@ -31,7 +30,7 @@ func (s *Service) AccountUploadTheme(ctx context.Context, theme *mtproto.TLAccou
 	var (
 		document *mtproto.Document
 		msgMedia *mtproto.MessageMedia
-		err      error
+		//err      error
 	)
 
 	// Check if the theme file is valid
@@ -40,18 +39,18 @@ func (s *Service) AccountUploadTheme(ctx context.Context, theme *mtproto.TLAccou
 	}
 
 	// Upload the theme file using MediaClient
-	msgMedia, err = s.svcCtx.MediaClient.MediaUploadedDocumentMedia(
-		ctx, &media.TLMediaUploadedDocumentMedia{
-			OwnerId: c.MD.PermAuthKeyId, // Assuming ownerId is passed in context
-			Media: &mtproto.InputMedia{
-				File:     theme.GetFile(),
-				MimeType: theme.GetMimeType(),
-			},
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
+	//msgMedia, err = s.svcCtx.Plugin.MediaUploadedDocumentMedia(
+	//	ctx, &media.TLMediaUploadedDocumentMedia{
+	//		OwnerId: c.MD.PermAuthKeyId, // Assuming ownerId is passed in context
+	//		Media: &mtproto.InputMedia{
+	//			File:     theme.GetFile(),
+	//			MimeType: theme.GetMimeType(),
+	//		},
+	//	},
+	//)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	document = msgMedia.GetDocument()
 	if document == nil {

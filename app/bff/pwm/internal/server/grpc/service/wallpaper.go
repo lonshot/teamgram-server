@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/teamgram/proto/mtproto"
 	"github.com/zeromicro/go-zero/core/logx"
-	"pwm-server/app/bff/pwm/internal/core"
-	"pwm-server/app/service/media/media"
 )
 
 // AccountGetWallPapers retrieves a list of wallpapers available for the user.
@@ -54,15 +52,15 @@ func (s *Service) AccountGetWallPaper(
 func (s *Service) AccountUploadWallPaper(
 	ctx context.Context, paper *mtproto.TLAccountUploadWallPaper,
 ) (*mtproto.WallPaper, error) {
-	c := core.New(ctx, s.svcCtx)
+	//c := core.New(ctx, s.svcCtx)
 	var (
 		inputFile = paper.GetFile()
-		mimeType  = paper.GetMimeType()
-		settings  = paper.GetSettings()
-		ownerId   = c.MD.PermAuthKeyId
-		msgMedia  *mtproto.MessageMedia
-		document  *mtproto.Document
-		err       error
+		//mimeType  = paper.GetMimeType()
+		//settings  = paper.GetSettings()
+		//ownerId   = c.MD.PermAuthKeyId
+		//msgMedia  *mtproto.MessageMedia
+		//document  *mtproto.Document
+		//err       error
 	)
 
 	// Check if the file is valid
@@ -71,41 +69,41 @@ func (s *Service) AccountUploadWallPaper(
 	}
 
 	// Use MediaUploadedDocumentMedia to upload the wallpaper document
-	msgMedia, err = s.svcCtx.Dao.MediaClient.MediaUploadedDocumentMedia(
-		ctx, &media.TLMediaUploadedDocumentMedia{
-			OwnerId: ownerId,
-			Media: &mtproto.InputMedia{
-				File:     inputFile,
-				MimeType: mimeType,
-				// Add other fields as needed from InputMedia
-			},
-		},
-	)
-	if err != nil {
-		c.Logger.Errorf("AccountUploadWallPaper - error uploading document: %v", err)
-		return nil, err
-	}
-
-	// Check if msgMedia contains a valid document
-	document = msgMedia.GetDocument()
-	if document == nil {
-		c.Logger.Errorf("AccountUploadWallPaper - document not found in message media")
-		return nil, mtproto.ErrDocumentInvalid
-	}
-
-	// Create the wallpaper object
-	wallpaper := mtproto.MakeTLWallPaper(
-		&mtproto.WallPaper{
-			Id:         document.GetId(),
-			Slug:       inputFile.GetName(),
-			Settings:   settings,
-			Document:   document,
-			AccessHash: document.GetAccessHash(),
-		},
-	).To_WallPaper()
+	//msgMedia, err = s.svcCtx.Dao.MediaClient.MediaUploadedDocumentMedia(
+	//	ctx, &media.TLMediaUploadedDocumentMedia{
+	//		OwnerId: ownerId,
+	//		Media: &mtproto.InputMedia{
+	//			File:     inputFile,
+	//			MimeType: mimeType,
+	//			// Add other fields as needed from InputMedia
+	//		},
+	//	},
+	//)
+	//if err != nil {
+	//	c.Logger.Errorf("AccountUploadWallPaper - error uploading document: %v", err)
+	//	return nil, err
+	//}
+	//
+	//// Check if msgMedia contains a valid document
+	//document = msgMedia.GetDocument()
+	//if document == nil {
+	//	c.Logger.Errorf("AccountUploadWallPaper - document not found in message media")
+	//	return nil, mtproto.ErrDocumentInvalid
+	//}
+	//
+	//// Create the wallpaper object
+	//wallpaper := mtproto.MakeTLWallPaper(
+	//	&mtproto.WallPaper{
+	//		Id:         document.GetId(),
+	//		Slug:       inputFile.GetName(),
+	//		Settings:   settings,
+	//		Document:   document,
+	//		AccessHash: document.GetAccessHash(),
+	//	},
+	//).To_WallPaper()
 
 	// Return the uploaded wallpaper object
-	return wallpaper, nil
+	return nil, nil
 }
 
 // AccountSaveWallPaper saves a wallpaper for a user.

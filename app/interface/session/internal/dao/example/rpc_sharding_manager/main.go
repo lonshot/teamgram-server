@@ -16,7 +16,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/teamgram/marmota/pkg/net/ip"
@@ -35,16 +34,18 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 
 	pubListenOn := ip.FigureOutListenOn(c.ListenOn)
-	sharding := dao.NewRpcShardingManager(pubListenOn, c.Etcd, func(sharding *dao.RpcShardingManager, oldList, addList, removeList []string) {
-		for i := 0; i < 100; i++ {
-			k := fmt.Sprintf("127.0.0.%d:8080", i)
-			if sharding.ShardingVIsListenOn(k) {
-				fmt.Println(k, "is listen on", pubListenOn)
-			} else {
-				fmt.Println(k, "not listen on", pubListenOn)
+	sharding := dao.NewRpcShardingManager(
+		pubListenOn, c.Etcd, /*, func(sharding *dao.RpcShardingManager, oldList, addList, removeList []string) {
+			for i := 0; i < 100; i++ {
+				k := fmt.Sprintf("127.0.0.%d:8080", i)
+				if sharding.ShardingVIsListenOn(k) {
+					fmt.Println(k, "is listen on", pubListenOn)
+				} else {
+					fmt.Println(k, "not listen on", pubListenOn)
+				}
 			}
-		}
-	})
+		}*/
+	)
 
 	_ = sharding
 	sharding.Start()

@@ -3,24 +3,20 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"github.com/teamgram/marmota/pkg/net/rpcx"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/pwm/internal/config"
-	media_client "pwm-server/app/service/media/client"
 )
 
 type Dao struct {
 	db *sqlx.DB
-	media_client.MediaClient
 }
 
 // New initializes a new instance of the Dao struct
 func New(c config.Config) *Dao {
 	db := sqlx.NewMySQL(&c.Mysql)
 	return &Dao{
-		db:          db,
-		MediaClient: media_client.NewMediaClient(rpcx.GetCachedRpcClient(c.MediaClient)),
+		db: db,
 	}
 }
 
