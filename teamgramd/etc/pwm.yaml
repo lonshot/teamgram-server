@@ -22,3 +22,8 @@ Dfs:
       - 127.0.0.1:2379
     Key: service.dfs
   Timeout: 0
+MediaClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.media
