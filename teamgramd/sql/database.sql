@@ -1,4 +1,4 @@
-use teamgram;
+use pwm;
 
 SET
   SQL_MODE = "NO_AUTO_VALUE_ON_ZERO"; 
@@ -7,7 +7,7 @@ SET
   time_zone = "+00:00";
 
 --
--- 数据库： `teamgram2`
+-- 数据库： `pwm2`
 --
 -- --------------------------------------------------------
 --
@@ -1248,7 +1248,7 @@ ALTER TABLE `messages` ADD `reaction_unread` BOOLEAN NOT NULL DEFAULT FALSE AFTE
 
 ALTER TABLE `messages` ADD `has_reaction` BOOLEAN NOT NULL DEFAULT FALSE AFTER `pinned`;
  
-ALTER TABLE `teamgram`.`documents`
+ALTER TABLE `pwm`.`documents`
 DROP INDEX `document_id`,
 ADD UNIQUE `document_id` (`document_id`) USING BTREE;
 

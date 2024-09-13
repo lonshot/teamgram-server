@@ -241,7 +241,7 @@ Mode: file
 Path: ../logs/authsession
 Mysql:
 Addr: mysql:3306
-DSN: root:@tcp(mysql:3306)/teamgram?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+DSN: root:@tcp(mysql:3306)/pwm?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 Active: 64
 Idle: 64
 IdleTimeout: 4h
