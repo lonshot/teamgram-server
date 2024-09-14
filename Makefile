@@ -81,3 +81,6 @@ clean:
 	@rm -rf pwm/bin/gateway
 	@rm -rf pwm/bin/gnetway
 	@rm -rf pwm/bin/httpserver
+
+clean-logs:
+	@rm -rf pwm/logs/* 
