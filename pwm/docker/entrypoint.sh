@@ -37,7 +37,7 @@ createConfigs() {
 
 createConfigs
 
-cd /app/bin
+cd /root/pwm/bin
 ./runall-docker.sh
 
 tail -f /dev/null
