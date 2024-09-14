@@ -9,7 +9,6 @@ services:
       - "8801:8801"
       - "40000:40000"  # Delve debugging port
     volumes:
-      - ~/:/mnt  # Mount the host's home directory to /mnt in the container
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
     command: bash -c "chmod +x /app/docker/entrypoint.sh && dlv debug --headless --listen=:40000 --api-version=2 --log --accept-multiclient -- /app/docker/entrypoint.sh"
     networks:
