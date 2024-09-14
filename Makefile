@@ -115,3 +115,7 @@ prune:
 run:
 	docker compose up -d 
 	docker compose logs --tail 100 -f
+
+pull:
+	git reset --hard
+	git pull
