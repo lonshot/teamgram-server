@@ -119,3 +119,5 @@ run:
 pull:
 	git reset --hard
 	git pull
+
+restart: stop pull run
