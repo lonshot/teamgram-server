@@ -107,7 +107,7 @@ services:
       - ./data/minio/data:/data
     environment:
       MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: miniostorage
+      MINIO_SECRET_KEY: pwm1234aa
     command: server /data --console-address ":9001"
     restart: always
     networks:

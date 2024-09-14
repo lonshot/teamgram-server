@@ -102,7 +102,7 @@ volumes:
 - /Volumes/data/teamgram/volumes/minio/config:/root/.minio
 environment:
 MINIO_ROOT_USER: minio
-MINIO_ROOT_PASSWORD: miniostorage
+MINIO_ROOT_PASSWORD: pwm1234aa
 
 zookeeper:
 image: wurstmeister/zookeeper
@@ -241,7 +241,7 @@ Mode: file
 Path: ../logs/authsession
 Mysql:
 Addr: mysql:3306
-DSN: root:@tcp(mysql:3306)/pwm?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+DSN: root:@tcp(mysql:3306)/pwm?charset=utf8mb4&parseTime=true
 Active: 64
 Idle: 64
 IdleTimeout: 4h

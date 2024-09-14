@@ -19,7 +19,7 @@ Cache:
 Minio:
   Endpoint: localhost:9000
   AccessKeyID: minio
-  SecretAccessKey: miniostorage
+  SecretAccessKey: pwm1234aa
   UseSSL: false
 IdGen:
   Etcd:

@@ -11,7 +11,7 @@ export KAFKA_HOST=${KAFKA_HOST:-"kafka:9092"}
 export MYSQL_URI=${MYSQL_URI:-"teamgram:teamgram@tcp(mysql:3306)/pwm?charset=utf8mb4"}
 export MINIO_URI=${MINIO_URI:-"minio:9000"}
 export MINIO_KEY=${MINIO_KEY:-"minio"}
-export MINIO_SECRET=${MINIO_SECRET:-"miniostorage"}
+export MINIO_SECRET=${MINIO_SECRET:-"pwm1234aa"}
 export MINIO_SSL=${MINIO_SSL:-"false"}
 #export MTZ=${MTZ:-"Asia%2FTehran"}
 
@@ -27,7 +27,7 @@ createConfigs() {
       | sed "s#localhost:6379#$REDIS_HOST#g" \
       | sed "s#root:@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4#$MYSQL_URI#g" \
       | sed 's#AccessKeyID: minio#AccessKeyID: '"$MINIO_KEY"'#g' \
-      | sed 's#SecretAccessKey: miniostorage#SecretAccessKey: '"$MINIO_SECRET"'#g' \
+      | sed 's#SecretAccessKey: pwm1234aa#SecretAccessKey: '"$MINIO_SECRET"'#g' \
       | sed 's#UseSSL: false#UseSSL: '"$MINIO_SSL"'#g' \
       | sed "s#localhost:9000#$MINIO_URI#g" \
       | sed "s#127.0.0.1:9092#$KAFKA_HOST#g" \
