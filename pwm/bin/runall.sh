@@ -2,18 +2,26 @@
 
 # Directory for configs
 CONFIG_DIR="../etc2"
+LOG_DIR="../logs"
 
-# Function to run a service
+# Create log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+# Function to run a service in detached mode and tail the logs
 run_service() {
   local service_name=$1
   local config_file=$2
 
   echo "Starting $service_name ..."
-  ./$service_name -f="$CONFIG_DIR/$config_file"  # No redirection, logs will appear in the console
+
+  # Start the service in the background and redirect logs to a file
+  ./$service_name -f="$CONFIG_DIR/$config_file" > "$LOG_DIR/$service_name.log" 2>&1 &
 
   # Check if the service started successfully
   if [ $? -eq 0 ]; then
-    echo "$service_name started successfully."
+    echo "$service_name started successfully. Logs:"
+    # Tail the log file to show output in the console
+    tail -f "$LOG_DIR/$service_name.log" &
   else
     echo "Error starting $service_name."
   fi
