@@ -8,14 +8,9 @@ WORKDIR /app
 RUN apt update -y && \
     apt install -y ffmpeg curl git tar
 
-# Mount the host's home directory to /mnt inside the container
-# You will need to set this up when running the container using -v ~/:/mnt
-# The next step will check for the Go tarball in /mnt (host home directory)
-
 # Remove any existing Go installation and download/install Go
-RUN rm -rf /usr/local/go && \
-    echo "Downloading Go" && \
-    curl -o /tmp/go1.21.13.linux-amd64.tar.gz https://go.dev/dl/go1.21.13.linux-amd64.tar.gz && \
+RUN echo "Downloading Go" && \
+    curl -o /tmp/go1.21.13.linux-amd64.tar.gz https://dl.google.com/go/go1.21.13.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf /tmp/go1.21.13.linux-amd64.tar.gz && \
     rm /tmp/go1.21.13.linux-amd64.tar.gz
 
