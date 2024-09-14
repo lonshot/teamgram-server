@@ -1,23 +1,29 @@
+# First stage: Build Delve using Golang Alpine
 FROM golang:1.14.3-alpine3.11 AS build-env
 
 ENV CGO_ENABLED 0
 
-# Allow Go to retreive the dependencies for the build step
+# Allow Go to retrieve the dependencies for the build step
 RUN apk add --no-cache git
 
-# Get Delve from a GOPATH not from a Go Modules project
+# Set the working directory
 WORKDIR /go/src/
+
+# Get Delve debugger from GOPATH (not from Go Modules)
 RUN go get github.com/go-delve/delve/cmd/dlv
 
+# Second stage: Final container using Ubuntu
 FROM ubuntu:22.04
+
 # Set the working directory
 WORKDIR /app
 
 # Install FFmpeg, curl, and other dependencies
 RUN apt update -y && \
-    apt install -y ffmpeg curl git \
+    apt install -y ffmpeg curl git
 
-COPY --from=build-env /go/bin/dlv /app
+# Copy the Delve binary from the build stage
+COPY --from=build-env /go/bin/dlv /usr/local/bin/dlv
 
-# Expose ports for the application and Delve debugger
+# Expose the Delve debugging port
 EXPOSE 40000
