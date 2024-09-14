@@ -1,2 +1,2 @@
 #!/bin/bash
-telegramd/bin/runall2.sh
+./telegramd/bin/runall2.sh
