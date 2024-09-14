@@ -8,7 +8,6 @@ services:
       - "5222:5222"
       - "8801:8801"
       - "40000:40000"  # Delve debugging port
-      - "8080:8080"    # Application port (if needed)
     volumes:
       - ~/:/mnt  # Mount the host's home directory to /mnt in the container
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
