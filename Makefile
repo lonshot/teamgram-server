@@ -105,6 +105,9 @@ run-force:
 	docker compose up --build -d
 	docker compose logs --tail 100 -f
 
+prune:
+	docker system prune -a
+
 run:
 	docker compose up -d 
 	docker compose logs --tail 100 -f
