@@ -101,6 +101,10 @@ reset:
 deps:
 	docker compose -f ./docker-compose-env.yaml up -d
 
+run-force:
+	docker compose up --build -d
+	docker compose logs --tail 100 -f
+
 run:
 	docker compose up -d 
 	docker compose logs --tail 100 -f
