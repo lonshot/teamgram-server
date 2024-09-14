@@ -9,8 +9,8 @@ RUN apk add --no-cache git
 # Set the working directory
 WORKDIR /go/src/
 
-# Get Delve debugger using Go Modules (Go 1.16+ uses 'go install' for binaries)
-RUN go get github.com/go-delve/delve/cmd/dlv
+# Install Delve using 'go install' (the preferred method in Go 1.16+)
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 # Second stage: Final container using Ubuntu 22.04
 FROM ubuntu:22.04
