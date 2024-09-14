@@ -12,7 +12,6 @@ RUN apt update -y && \
 # You will need to set this up when running the container using -v ~/:/mnt
 # The next step will check for the Go tarball in /mnt (host home directory)
 
-# Check if go1.21.13.linux-amd64.tar.gz exists in /mnt (mounted from host home)
 # Check if go1.21.13.linux-amd64.tar.gz exists in /mnt (mounted from host home) and install Go
 RUN rm -rf /usr/local/go && \
     if [ -f /mnt/go1.21.13.linux-amd64.tar.gz ]; then \
@@ -29,8 +28,9 @@ RUN rm -rf /usr/local/go && \
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV CGO_ENABLED=0
 
-# Install Delve using 'go install'
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+# Install Delve using 'go install' and copy the binary to /usr/local/bin
+RUN /usr/local/go/bin/go install github.com/go-delve/delve/cmd/dlv@latest && \
+    cp /root/go/bin/dlv /usr/local/bin/dlv
 
 # Expose the Delve debugging port
 EXPOSE 40000
