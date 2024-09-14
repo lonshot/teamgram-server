@@ -38,7 +38,7 @@ createConfigs() {
 createConfigs
 
 cd /root/pwm/bin
-chmod +x ./runall-docker.sh
-./runall-docker.sh
+chmod +x ./runall.sh
+./runall.sh
 
 tail -f /dev/null
