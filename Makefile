@@ -83,16 +83,16 @@ clean:
 	rm -rf pwm/bin/httpserver
 
 clean-logs:
-	echo "Cleaning logs..."
+	@echo "Cleaning logs..."
 	rm -rf pwm/logs/* 
 
 stop:
-	echo "Stopping all dockers..."
+	@echo "Stopping all dockers..."
 	docker compose down
 	docker compose -f ./docker-compose-env.yaml down
 
 reset:
-	echo "Resetting all data..."
+	@echo "Resetting all data..."
 	docker compose down
 	docker compose -f ./docker-compose-env.yaml down
 	rm -rf data
