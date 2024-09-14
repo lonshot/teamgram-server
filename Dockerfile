@@ -8,11 +8,11 @@ RUN apt update -y && \
     apt install -y ffmpeg curl git
 
 # Check if Go tarball exists in the mounted directory, otherwise download it
-RUN if [ ! -f /mnt/go1.19.13.linux-amd64.tar.gz ]; then \
-        curl -OL https://go.dev/dl/go1.19.13.linux-amd64.tar.gz && \
-        tar -C /usr/local -xzf go1.19.13.linux-amd64.tar.gz; \
+RUN if [ ! -f /mnt/go1.21.13.linux-amd64.tar.gz ]; then \
+        curl -OL https://go.dev/dl/go1.21.13.linux-amd64.tar.gz && \
+        tar -C /usr/local -xzf go1.21.13.linux-amd64.tar.gz; \
     else \
-        tar -C /usr/local -xzf /mnt/go1.19.13.linux-amd64.tar.gz; \
+        tar -C /usr/local -xzf /mnt/go1.21.13.linux-amd64.tar.gz; \
     fi
 
 # Set the Go binary in the PATH
