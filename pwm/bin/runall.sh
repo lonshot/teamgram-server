@@ -1,53 +1,44 @@
 #!/usr/bin/env bash
 
-echo "run idgen ..."
-nohup ./idgen -f=../etc2/idgen.yaml
-sleep 1
+# Directory for configs
+CONFIG_DIR="../etc2"
 
-echo "run status ..."
-nohup ./status -f=../etc2/status.yaml
-sleep 1
+# Function to run a service
+run_service() {
+  local service_name=$1
+  local config_file=$2
 
-echo "run authsession ..."
-nohup ./authsession -f=../etc2/authsession.yaml
-sleep 1
+  echo "Starting $service_name ..."
+  ./$service_name -f="$CONFIG_DIR/$config_file"  # No redirection, logs will appear in the console
 
-echo "run dfs ..."
-nohup ./dfs -f=../etc2/dfs.yaml
-sleep 1
+  # Check if the service started successfully
+  if [ $? -eq 0 ]; then
+    echo "$service_name started successfully."
+  else
+    echo "Error starting $service_name."
+  fi
 
-echo "run media ..."
-nohup ./media -f=../etc2/media.yaml
-sleep 1
+  sleep 1
+}
 
-echo "run biz ..."
-nohup ./biz -f=../etc2/biz.yaml
-sleep 1
+# Run services with their respective config files
+run_service "idgen" "idgen.yaml"
+run_service "status" "status.yaml"
+run_service "authsession" "authsession.yaml"
+run_service "dfs" "dfs.yaml"
+run_service "media" "media.yaml"
+run_service "biz" "biz.yaml"
+run_service "msg" "msg.yaml"
+run_service "sync" "sync.yaml"
+run_service "bff" "bff.yaml"
 
-echo "run msg ..."
-nohup ./msg -f=../etc2/msg.yaml
-sleep 1
-
-echo "run sync ..."
-nohup ./sync -f=../etc2/sync.yaml
-sleep 1
-
-echo "run bff ..."
-nohup ./bff -f=../etc2/bff.yaml
+# Add a longer delay for the "bff" service
 sleep 5
 
-echo "run session ..."
-nohup ./session -f=../etc2/session.yaml
-sleep 1
+run_service "session" "session.yaml"
 
-#echo "run gateway ..."
-#nohup ./gateway -f=../etc2/gateway.yaml >> ../logs/gateway.log  2>&1 &
-#sleep 1
+# Optional services - uncomment if needed
+# run_service "gateway" "gateway.yaml"
+# run_service "httpserver" "httpserver.yaml"
 
-echo "run gnetway ..."
-nohup ./gnetway -f=../etc/gnetway.yaml
-sleep 1
-
-#echo "run httpserver ..."
-#nohup ./httpserver -f=../etc/httpserver.yaml >> ../logs/httpserver.log  2>&1 &
-#sleep 1
+run_service "gnetway" "../etc/gnetway.yaml"
