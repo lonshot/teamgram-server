@@ -10,7 +10,6 @@ WORKDIR /go/src/
 RUN go get github.com/go-delve/delve/cmd/dlv
 
 FROM ubuntu:22.04
-
 # Set the working directory
 WORKDIR /app
 
@@ -18,7 +17,7 @@ WORKDIR /app
 RUN apt update -y && \
     apt install -y ffmpeg curl git \
 
-COPY --from=build-env /go/bin/dlv /
+COPY --from=build-env /go/bin/dlv /app
 
 # Expose ports for the application and Delve debugger
 EXPOSE 40000
