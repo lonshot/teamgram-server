@@ -1,9 +1,6 @@
 # Base image: Ubuntu 22.04
 FROM ubuntu:22.04
 
-# Set the working directory
-WORKDIR /app
-
 # Install necessary packages including curl, git, and dependencies for Go
 RUN apt update -y && \
     apt install -y ffmpeg curl git tar
