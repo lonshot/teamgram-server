@@ -90,7 +90,7 @@ stop:
 	@echo "Stopping main docker..."
 	docker compose down
 
-stop-deps:
+stopa:
 	@echo "Stopping all dockers..."
 	docker compose down
 	docker compose -f ./docker-compose-env.yaml down
