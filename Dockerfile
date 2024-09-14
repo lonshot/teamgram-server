@@ -23,7 +23,7 @@ RUN apt update -y && \
     apt install -y ffmpeg curl git
 
 # Copy the Delve binary from the build stage
-COPY --from=build-env /go/bin/dlv /usr/local/bin/dlv
+COPY --from=build-env /go/bin/dlv /app/dlv
 
 # Expose the Delve debugging port
 EXPOSE 40000
