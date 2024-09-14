@@ -33,6 +33,7 @@ pwm/bin/*
 !pwm/bin/config.json
 !pwm/bin/killall.sh
 !pwm/bin/runall2.sh
+!pwm/bin/runall.sh
 !pwm/bin/runall-docker.sh
 !pwm/bin/server_pkcs1.key
 
