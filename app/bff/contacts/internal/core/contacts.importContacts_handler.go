@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/teamgram/proto/mtproto"
 	userpb "pwm-server/app/service/biz/user/user"
+	"strings" // Import the strings package
 )
 
 // ContactsImportContacts imports a list of contacts for the user.
@@ -32,8 +33,11 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 			return nil, err
 		}
 
-		// Check if the contact phone is valid (non-empty)
-		if contact.Phone == "" {
+		// Remove all spaces from the phone number
+		cleanedPhone := strings.ReplaceAll(contact.Phone, " ", "")
+
+		// Check if the cleaned contact phone is valid (non-empty after removing spaces)
+		if cleanedPhone == "" {
 			err = mtproto.ErrContactIdInvalid
 			c.Logger.Errorf("ContactsImportContacts - error: contact phone is invalid")
 			return nil, err
@@ -42,11 +46,11 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		// Fetch the user by phone number using UserGetImmutableUserByPhone
 		contactUser, err := c.svcCtx.Dao.UserClient.UserGetImmutableUserByPhone(
 			c.ctx, &userpb.TLUserGetImmutableUserByPhone{
-				Phone: contact.Phone,
+				Phone: cleanedPhone,
 			},
 		)
 		if err != nil || contactUser == nil {
-			c.Logger.Errorf("ContactsImportContacts - error: user not found for phone: %v", contact.Phone)
+			c.Logger.Errorf("ContactsImportContacts - error: user not found for phone: %v", cleanedPhone)
 			continue // Skip this contact but do not fail the entire process
 		}
 
@@ -70,12 +74,11 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		// Add the contact to the user's contact list
 		changeMutual, err := c.svcCtx.Dao.UserClient.UserAddContact(
 			c.ctx, &userpb.TLUserAddContact{
-				UserId: c.MD.UserId,
-				// AddPhonePrivacyException: mtproto.ToBool(contact.AddPhonePrivacyException),
+				UserId:    c.MD.UserId,
 				Id:        contactUser.Id(),
 				FirstName: contact.FirstName,
 				LastName:  contact.LastName,
-				Phone:     contact.Phone,
+				Phone:     cleanedPhone, // Use the cleaned phone number
 			},
 		)
 		if err != nil {
@@ -88,11 +91,10 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 			imported, &mtproto.ImportedContact{
 				UserId:   contactUser.Id(),
 				ClientId: contact.ClientId, // Use client-provided ID if available
-				//Mutual:       mtproto.FromBool(changeMutual),
 			},
 		)
 
-		// Create a popular contact record (example of adding random logic)
+		// Create a popular contact record
 		popular = append(
 			popular, &mtproto.PopularContact{
 				ClientId:  contact.ClientId,
