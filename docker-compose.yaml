@@ -11,7 +11,7 @@ services:
     volumes:
       - ~/:/mnt  # Mount the host's home directory to /mnt in the container
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    command: bash -c "chmod +x /app/docker/entrypoint.sh && /app/dlv debug --headless --listen=:40000 --api-version=2 --log --accept-multiclient -- /app/docker/entrypoint.sh"
+    command: bash -c "chmod +x /app/docker/entrypoint.sh && dlv debug --headless --listen=:40000 --api-version=2 --log --accept-multiclient -- /app/docker/entrypoint.sh"
     networks:
       - pwm_net
 

@@ -6,9 +6,6 @@ ENV CGO_ENABLED 0
 # Install git for Go dependencies
 RUN apk add --no-cache git
 
-# Set the working directory
-WORKDIR /go/src/
-
 # Install Delve using 'go install' (the preferred method in Go 1.16+)
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
@@ -19,7 +16,7 @@ FROM ubuntu:22.04
 WORKDIR /app
 
 # Copy the Delve binary from the build stage
-COPY --from=build-env /go/bin/dlv /app/dlv
+COPY --from=build-env /go/bin/dlv /usr/local/bin/dlv
 
 # Install FFmpeg, curl, and other dependencies
 RUN apt update -y && \
