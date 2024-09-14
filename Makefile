@@ -13,7 +13,7 @@ gitTreeState=$(shell if git status|grep -q 'clean';then echo clean; else echo di
 
 ldflags="-s -w -X ${versionDir}.gitTag=${gitTag} -X ${versionDir}.buildDate=${buildDate} -X ${versionDir}.gitCommit=${gitCommit} -X ${versionDir}.gitTreeState=${gitTreeState} -X ${versionDir}.version=${VERSION} -X ${versionDir}.gitBranch=${gitBranch}"
 
-all: idgen status dfs media authsession biz msg sync bff session gateway gnetway
+build: idgen status dfs media authsession biz msg sync bff session gateway gnetway
 
 idgen:
 	@echo "build idgen..."
@@ -84,3 +84,22 @@ clean:
 
 clean-logs:
 	@rm -rf pwm/logs/* 
+
+stop:
+	@docker compose down
+	@docker compose -f ./docker-compose-env.yaml down
+
+reset:
+	@docker compose down
+	@docker compose -f ./docker-compose-env.yaml down
+	@rm -rf data
+	@mkdir data
+
+deps:
+	@docker compose -f ./docker-compose-env.yaml up -d
+
+run: 
+	@docker compose -f ./docker-compose-env.yaml up -d
+	@docker compose up -d 
+
+	@docker compose logs --tail 100 -f
