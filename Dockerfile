@@ -13,15 +13,17 @@ RUN apt update -y && \
 # The next step will check for the Go tarball in /mnt (host home directory)
 
 # Check if go1.21.13.linux-amd64.tar.gz exists in /mnt (mounted from host home)
-RUN if [ -f /mnt/go1.21.13.linux-amd64.tar.gz ]; then \
-        echo "Using existing Go archive from /mnt"; \
-        cp /mnt/go1.21.13.linux-amd64.tar.gz /tmp/go1.21.13.linux-amd64.tar.gz; \
+# Check if go1.21.13.linux-amd64.tar.gz exists in /mnt (mounted from host home) and install Go
+RUN rm -rf /usr/local/go && \
+    if [ -f /mnt/go1.21.13.linux-amd64.tar.gz ]; then \
+        echo "Using existing Go archive from /mnt" && \
+        tar -C /usr/local -xzf /mnt/go1.21.13.linux-amd64.tar.gz; \
     else \
-        echo "Downloading Go"; \
-        curl -o /tmp/go1.21.13.linux-amd64.tar.gz https://go.dev/dl/go1.21.13.linux-amd64.tar.gz; \
-    fi && \
-    tar -C /usr/local -xzf /tmp/go1.21.13.linux-amd64.tar.gz && \
-    rm /tmp/go1.21.13.linux-amd64.tar.gz
+        echo "Downloading Go" && \
+        curl -o /tmp/go1.21.13.linux-amd64.tar.gz https://go.dev/dl/go1.21.13.linux-amd64.tar.gz && \
+        tar -C /usr/local -xzf /tmp/go1.21.13.linux-amd64.tar.gz && \
+        rm /tmp/go1.21.13.linux-amd64.tar.gz; \
+    fi
 
 # Set up Go environment
 ENV PATH="/usr/local/go/bin:${PATH}"
