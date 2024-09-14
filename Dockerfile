@@ -21,11 +21,5 @@ ENV PATH=$PATH:/usr/local/go/bin
 # Install Delve debugger for Go
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-# Expose port 40000 for Delve debugger
+# Expose ports for application and debugging
 EXPOSE 40000
-
-# Set permissions for entrypoint script and make it executable
-RUN chmod +x /app/docker/entrypoint.sh
-
-# Entry point to run Delve for debugging
-ENTRYPOINT [ "dlv", "debug", "--headless", "--listen=:40000", "--api-version=2", "--log", "--accept-multiclient", "--", "/app/docker/entrypoint.sh" ]
