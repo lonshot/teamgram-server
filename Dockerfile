@@ -1,26 +1,34 @@
-# First stage: Build Delve using Golang Alpine 1.21
-FROM golang:1.21-alpine AS build-env
-
-ENV CGO_ENABLED 0
-
-# Install git for Go dependencies
-RUN apk add --no-cache git
-
-# Install Delve using 'go install' (the preferred method in Go 1.16+)
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
-
-# Second stage: Final container using Ubuntu 22.04
+# Base image: Ubuntu 22.04
 FROM ubuntu:22.04
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the Delve binary from the build stage
-COPY --from=build-env /go/bin/dlv /usr/local/bin/dlv
-
-# Install FFmpeg, curl, and other dependencies
+# Install necessary packages including curl, git, and dependencies for Go
 RUN apt update -y && \
-    apt install -y ffmpeg curl git
+    apt install -y ffmpeg curl git tar
+
+# Mount the host's home directory to /mnt inside the container
+# You will need to set this up when running the container using -v ~/:/mnt
+# The next step will check for the Go tarball in /mnt (host home directory)
+
+# Check if go1.21.13.linux-amd64.tar.gz exists in /mnt (mounted from host home)
+RUN if [ -f /mnt/go1.21.13.linux-amd64.tar.gz ]; then \
+        echo "Using existing Go archive from /mnt"; \
+        cp /mnt/go1.21.13.linux-amd64.tar.gz /tmp/go1.21.13.linux-amd64.tar.gz; \
+    else \
+        echo "Downloading Go"; \
+        curl -o /tmp/go1.21.13.linux-amd64.tar.gz https://go.dev/dl/go1.21.13.linux-amd64.tar.gz; \
+    fi && \
+    tar -C /usr/local -xzf /tmp/go1.21.13.linux-amd64.tar.gz && \
+    rm /tmp/go1.21.13.linux-amd64.tar.gz
+
+# Set up Go environment
+ENV PATH="/usr/local/go/bin:${PATH}"
+ENV CGO_ENABLED=0
+
+# Install Delve using 'go install'
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 # Expose the Delve debugging port
 EXPOSE 40000
