@@ -11,7 +11,7 @@ services:
     volumes:
       - .:/root  # Mount the host 'pwm' directory to '/app' in the container
     working_dir: /root  # Set the working directory to where your Go project is
-    command: bash -c "chmod +x /root/pwm/docker/entrypoint.sh && dlv debug --headless --listen=:40000 --api-version=2 --log --accept-multiclient -- /root/pwm/docker/entrypoint.sh"
+    command: bash -c "chmod +x /root/pwm/docker/entrypoint.sh && /root/pwm/docker/entrypoint.sh"
     networks:
       - pwm_net
 
