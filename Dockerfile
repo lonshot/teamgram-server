@@ -10,7 +10,7 @@ RUN apk add --no-cache git
 WORKDIR /go/src/
 
 # Get Delve debugger using Go Modules (Go 1.16+ uses 'go install' for binaries)
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go get github.com/go-delve/delve/cmd/dlv
 
 # Second stage: Final container using Ubuntu 22.04
 FROM ubuntu:22.04
@@ -18,12 +18,12 @@ FROM ubuntu:22.04
 # Set the working directory
 WORKDIR /app
 
+# Copy the Delve binary from the build stage
+COPY --from=build-env /go/bin/dlv /app/dlv
+
 # Install FFmpeg, curl, and other dependencies
 RUN apt update -y && \
     apt install -y ffmpeg curl git
-
-# Copy the Delve binary from the build stage
-COPY --from=build-env /go/bin/dlv /app/dlv
 
 # Expose the Delve debugging port
 EXPOSE 40000
