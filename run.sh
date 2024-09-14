@@ -3,10 +3,10 @@
 # Print the current date and time for log context
 echo "Script started at: $(date)"
 
-# Navigate to the teamgramd/bin directory and log the output
-cd ./teamgramd/bin
+# Navigate to the pwm/bin directory and log the output
+cd ./pwm/bin
 if [ $? -ne 0 ]; then
-  echo "Failed to change directory to ./teamgramd/bin"
+  echo "Failed to change directory to ./pwm/bin"
   exit 1
 fi
 
