@@ -87,6 +87,10 @@ clean-logs:
 	rm -rf pwm/logs/* 
 
 stop:
+	@echo "Stopping main docker..."
+	docker compose down
+
+stop-all:
 	@echo "Stopping all dockers..."
 	docker compose down
 	docker compose -f ./docker-compose-env.yaml down
