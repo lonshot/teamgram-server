@@ -1,39 +1,39 @@
 #!/usr/bin/env bash
 
 PWD=`pwd`
-TEAMGRAMAPP=${PWD}"/app"
+PWM_APP=${PWD}"/app"
 echo ${PWD}
 
-cd ${TEAMGRAMAPP}/messenger/msg/internal/dal/dalgen
+cd ${PWM_APP}/messenger/msg/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/messenger/sync/internal/dal/dalgen
+cd ${PWM_APP}/messenger/sync/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/bff/authorization/internal/dal/dalgen
+cd ${PWM_APP}/bff/authorization/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/chat/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/chat/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/message/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/message/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/user/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/user/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/updates/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/updates/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/dialog/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/dialog/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/biz/username/internal/dal/dalgen
+cd ${PWM_APP}/service/biz/username/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/authsession/internal/dal/dalgen
+cd ${PWM_APP}/service/authsession/internal/dal/dalgen
 ./dalgen_all.sh
 
-cd ${TEAMGRAMAPP}/service/media/internal/dal/dalgen
+cd ${PWM_APP}/service/media/internal/dal/dalgen
 ./dalgen_all.sh
 
