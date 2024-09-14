@@ -1,6 +1,6 @@
 services:
-  teamgram:
-    build: .
+  pwm:
+    image: ubuntu:22.04
     restart: always
     ports:
       - "10443:10443"
@@ -19,11 +19,14 @@ services:
       - "20670:20670"
       - "20420:20420"
       - "22650:22650"
+    volumes:
+      - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
+    command: bash -c "apt update -y && apt install -y ffmpeg && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
     networks:
-      - teamgram_net
+      - pwm_net
 
 networks:
-  teamgram_net:
+  pwm_net:
     driver: bridge
     ipam:
       config:

@@ -10,7 +10,7 @@ services:
     ports:
       - 127.0.0.1:2181:2181
     networks:
-      - teamgram_net
+      - pwm_net
 
   kafka:
     image: wurstmeister/kafka
@@ -27,7 +27,7 @@ services:
     volumes:
       - ./data/kafka/data:/data
     networks:
-      - teamgram_net
+      - pwm_net
     depends_on:
       - zookeeper
 
@@ -56,7 +56,7 @@ services:
     restart: always
     command: /usr/local/bin/etcd
     networks:
-      - teamgram_net
+      - pwm_net
 
   redis:
     image: redis
@@ -71,7 +71,7 @@ services:
     privileged: true
     command: redis-server --appendonly yes
     networks:
-      - teamgram_net
+      - pwm_net
 
   mysql:
     image: mysql:5.7
@@ -95,7 +95,7 @@ services:
     privileged: true
     restart: always
     networks:
-      - teamgram_net
+      - pwm_net
 
   minio:
     image: minio/minio
@@ -111,7 +111,7 @@ services:
     command: server /data --console-address ":9001"
     restart: always
     networks:
-      - teamgram_net
+      - pwm_net
 
   minio_mc:
     image: minio/mc:latest
@@ -120,7 +120,7 @@ services:
       - ./minio_init.sh:/minio_init.sh
     entrypoint: /minio_init.sh
     networks:
-      - teamgram_net
+      - pwm_net
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -134,10 +134,10 @@ services:
     depends_on:
       - mysql
     networks:
-      - teamgram_net
+      - pwm_net
 
 networks:
-  teamgram_net:
+  pwm_net:
     driver: bridge
     ipam:
       config:
