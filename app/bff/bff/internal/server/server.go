@@ -385,96 +385,57 @@ func (s *Server) Initialize() error {
 				),
 			)
 
+			pwmConfig := pwm_helper.Config{
+				RpcServerConf:     c.RpcServerConf,
+				Mysql:             c.Mysql,
+				Cache:             c.KV,
+				UserClient:        c.BizServiceClient,
+				ChatClient:        c.BizServiceClient,
+				MsgClient:         c.MsgClient,
+				DialogClient:      c.BizServiceClient,
+				SyncClient:        c.SyncClient,
+				MediaClient:       c.MediaClient,
+				AuthsessionClient: c.AuthSessionClient,
+				IdgenClient:       c.IdgenClient,
+				MessageClient:     c.BizServiceClient,
+			}
+
 			mtproto.RegisterRPCWallpapersServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCStickersServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCWebPageServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCEmojiServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCLangpackServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 
 			mtproto.RegisterRPCGifsServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCReactionsServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCFoldersServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 			mtproto.RegisterRPCThemesServer(
 				grpcServer,
-				pwm_helper.New(
-					pwm_helper.Config{
-						RpcServerConf: c.RpcServerConf,
-						Mysql:         c.Mysql,
-						MediaClient:   c.MediaClient,
-					},
-				),
+				pwm_helper.New(pwmConfig),
 			)
 		},
 	)
