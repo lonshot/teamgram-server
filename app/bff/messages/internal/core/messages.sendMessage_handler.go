@@ -27,11 +27,11 @@ func (c *MessagesCore) MessagesSendMessage(in *mtproto.TLMessagesSendMessage) (*
 		peer.PeerType = mtproto.PEER_USER
 	}
 
-	if in.Message == "" && len(in.Entities) == 0 {
-		err := mtproto.ErrMessageEmpty
-		c.Logger.Errorf("message empty: %v", err)
-		return nil, err
-	}
+	//if in.Message == "" && in.Media == nil {
+	//	err := mtproto.ErrMessageEmpty
+	//	c.Logger.Errorf("message empty: %v", err)
+	//	return nil, err
+	//}
 	// TODO(@benqi): calc utf16len(message)
 	//else if len(request.Message) > 4000 {
 	//	err = mtproto.ErrMessageTooLong

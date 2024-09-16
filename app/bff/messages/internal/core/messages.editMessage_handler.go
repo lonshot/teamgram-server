@@ -87,7 +87,7 @@ func (c *MessagesCore) MessagesEditMessage(in *mtproto.TLMessagesEditMessage) (*
 	}
 	// message
 	if in.Message != nil {
-		if in.Message.Value == "" && len(in.Entities) == 0 {
+		if in.Message.Value == "" && in.Media == nil {
 			err = mtproto.ErrMessageEmpty
 			c.Logger.Errorf("message empty: %v", err)
 			return nil, err
