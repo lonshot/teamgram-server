@@ -25,21 +25,23 @@ func (d *Dao) getBotData(ctx context.Context, botId int64) *mtproto.BotData {
 	botDO, _ := d.BotsDAO.Select(ctx, botId)
 	if botDO != nil {
 		// userData.Bot
-		botData = mtproto.MakeTLBotData(&mtproto.BotData{
-			Id:                   botDO.BotId,
-			BotType:              botDO.BotType,
-			Creator:              botDO.CreatorUserId,
-			Token:                botDO.Token,
-			Description:          botDO.Description,
-			BotChatHistory:       botDO.BotChatHistory,
-			BotNochats:           botDO.BotNochats,
-			BotInlineGeo:         botDO.BotInlineGeo,
-			BotInfoVersion:       botDO.BotInfoVersion,
-			BotInlinePlaceholder: mtproto.MakeFlagsString(botDO.BotInlinePlaceholder),
-			BotAttachMenu:        false,
-			AttachMenuEnabled:    false,
-			BotCanEdit:           false,
-		}).To_BotData()
+		botData = mtproto.MakeTLBotData(
+			&mtproto.BotData{
+				Id:                   botDO.BotId,
+				BotType:              botDO.BotType,
+				Creator:              botDO.CreatorUserId,
+				Token:                botDO.Token,
+				Description:          botDO.Description,
+				BotChatHistory:       botDO.BotChatHistory,
+				BotNochats:           botDO.BotNochats,
+				BotInlineGeo:         botDO.BotInlineGeo,
+				BotInfoVersion:       botDO.BotInfoVersion,
+				BotInlinePlaceholder: mtproto.MakeFlagsString(botDO.BotInlinePlaceholder),
+				BotAttachMenu:        false,
+				AttachMenuEnabled:    false,
+				BotCanEdit:           false,
+			},
+		).To_BotData()
 	}
 
 	return botData
@@ -50,7 +52,8 @@ func (d *Dao) CreateNewUserV2(
 	secretKeyId int64,
 	phone string,
 	countryCode string,
-	firstName string, lastName string) (*mtproto.ImmutableUser, error) {
+	firstName string, lastName string,
+) (*mtproto.ImmutableUser, error) {
 	var (
 		//err    error
 		userDO        *dataobject.UsersDO
@@ -71,6 +74,7 @@ func (d *Dao) CreateNewUserV2(
 		LastName:       lastName,
 		CountryCode:    countryCode,
 		AccountDaysTtl: 180,
+		Premium:        true,
 	}
 	if lastInsertId, _, err2 := d.UsersDAO.Insert(ctx, userDO); err2 != nil {
 		if sqlx.IsDuplicate(err2) {
@@ -86,18 +90,25 @@ func (d *Dao) CreateNewUserV2(
 	cacheUserData.UserData = d.MakeUserDataByDO(userDO)
 	cacheUserData.CachesPrivacyKeyRules = append(
 		cacheUserData.CachesPrivacyKeyRules,
-		mtproto.MakeTLPrivacyKeyRules(&mtproto.PrivacyKeyRules{
-			Key:   mtproto.STATUS_TIMESTAMP,
-			Rules: defaultRules,
-		}).To_PrivacyKeyRules(),
-		mtproto.MakeTLPrivacyKeyRules(&mtproto.PrivacyKeyRules{
-			Key:   mtproto.PHONE_NUMBER,
-			Rules: phoneNumberRules,
-		}).To_PrivacyKeyRules(),
-		mtproto.MakeTLPrivacyKeyRules(&mtproto.PrivacyKeyRules{
-			Key:   mtproto.PROFILE_PHOTO,
-			Rules: defaultRules,
-		}).To_PrivacyKeyRules())
+		mtproto.MakeTLPrivacyKeyRules(
+			&mtproto.PrivacyKeyRules{
+				Key:   mtproto.STATUS_TIMESTAMP,
+				Rules: defaultRules,
+			},
+		).To_PrivacyKeyRules(),
+		mtproto.MakeTLPrivacyKeyRules(
+			&mtproto.PrivacyKeyRules{
+				Key:   mtproto.PHONE_NUMBER,
+				Rules: phoneNumberRules,
+			},
+		).To_PrivacyKeyRules(),
+		mtproto.MakeTLPrivacyKeyRules(
+			&mtproto.PrivacyKeyRules{
+				Key:   mtproto.PROFILE_PHOTO,
+				Rules: defaultRules,
+			},
+		).To_PrivacyKeyRules(),
+	)
 
 	// 1. cacheUserData
 	d.CachedConn.SetCache(ctx, genCacheUserDataCacheKey(userDO.Id), cacheUserData)
@@ -105,22 +116,26 @@ func (d *Dao) CreateNewUserV2(
 	// 2. PutLastSeenAt
 	d.PutLastSeenAt(ctx, userDO.Id, now, 300)
 
-	return mtproto.MakeTLImmutableUser(&mtproto.ImmutableUser{
-		User:             cacheUserData.UserData,
-		LastSeenAt:       now,
-		Contacts:         nil,
-		KeysPrivacyRules: nil,
-	}).To_ImmutableUser(), nil
+	return mtproto.MakeTLImmutableUser(
+		&mtproto.ImmutableUser{
+			User:             cacheUserData.UserData,
+			LastSeenAt:       now,
+			Contacts:         nil,
+			KeysPrivacyRules: nil,
+		},
+	).To_ImmutableUser(), nil
 }
 
 func (d *Dao) UpdateUserFirstAndLastName(ctx context.Context, id int64, firstName, lastName string) bool {
 	_, _, err := d.CachedConn.Exec(
 		ctx,
 		func(ctx context.Context, conn *sqlx.DB) (int64, int64, error) {
-			rowsAffected, err := d.UsersDAO.UpdateUser(ctx, map[string]interface{}{
-				"first_name": firstName,
-				"last_name":  lastName,
-			}, id)
+			rowsAffected, err := d.UsersDAO.UpdateUser(
+				ctx, map[string]interface{}{
+					"first_name": firstName,
+					"last_name":  lastName,
+				}, id,
+			)
 
 			if err != nil {
 				return 0, 0, err
@@ -128,7 +143,8 @@ func (d *Dao) UpdateUserFirstAndLastName(ctx context.Context, id int64, firstNam
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateUserFirstAndLastName - error: %v", err)
 		return false
@@ -141,9 +157,11 @@ func (d *Dao) UpdateUserAbout(ctx context.Context, id int64, about string) bool 
 	_, _, err := d.CachedConn.Exec(
 		ctx,
 		func(ctx context.Context, conn *sqlx.DB) (int64, int64, error) {
-			rowsAffected, err := d.UsersDAO.UpdateUser(ctx, map[string]interface{}{
-				"about": about,
-			}, id)
+			rowsAffected, err := d.UsersDAO.UpdateUser(
+				ctx, map[string]interface{}{
+					"about": about,
+				}, id,
+			)
 
 			if err != nil {
 				return 0, 0, err
@@ -151,7 +169,8 @@ func (d *Dao) UpdateUserAbout(ctx context.Context, id int64, about string) bool 
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateUserAbout - error: %v", err)
 		return false
@@ -164,9 +183,11 @@ func (d *Dao) UpdateUserUsername(ctx context.Context, id int64, username string)
 	_, _, err := d.CachedConn.Exec(
 		ctx,
 		func(ctx context.Context, conn *sqlx.DB) (int64, int64, error) {
-			rowsAffected, err := d.UsersDAO.UpdateUser(ctx, map[string]interface{}{
-				"username": username,
-			}, id)
+			rowsAffected, err := d.UsersDAO.UpdateUser(
+				ctx, map[string]interface{}{
+					"username": username,
+				}, id,
+			)
 
 			if err != nil {
 				return 0, 0, err
@@ -174,7 +195,8 @@ func (d *Dao) UpdateUserUsername(ctx context.Context, id int64, username string)
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateUserUsername - error: %v", err)
 		return false
@@ -202,13 +224,15 @@ func (d *Dao) UpdateProfilePhoto(ctx context.Context, userId, photoId int64) int
 				mainPhotoId, _ = d.UsersDAO.SelectProfilePhoto(ctx, userId)
 				if mainPhotoId > 0 {
 					nextPhotoId, _ := d.UserProfilePhotosDAO.SelectNext(ctx, userId, []int64{mainPhotoId})
-					tR := sqlx.TxWrapper(ctx, d.DB, func(tx *sqlx.Tx, result *sqlx.StoreResult) {
-						_, result.Err = d.UserProfilePhotosDAO.DeleteTx(tx, userId, []int64{mainPhotoId})
-						if result.Err != nil {
-							return
-						}
-						_, result.Err = d.UsersDAO.UpdateProfilePhotoTx(tx, nextPhotoId, userId)
-					})
+					tR := sqlx.TxWrapper(
+						ctx, d.DB, func(tx *sqlx.Tx, result *sqlx.StoreResult) {
+							_, result.Err = d.UserProfilePhotosDAO.DeleteTx(tx, userId, []int64{mainPhotoId})
+							if result.Err != nil {
+								return
+							}
+							_, result.Err = d.UsersDAO.UpdateProfilePhotoTx(tx, nextPhotoId, userId)
+						},
+					)
 					mainPhotoId = nextPhotoId
 					err = tR.Err
 				} else {
@@ -216,23 +240,28 @@ func (d *Dao) UpdateProfilePhoto(ctx context.Context, userId, photoId int64) int
 					mainPhotoId = 0
 				}
 			} else {
-				tR := sqlx.TxWrapper(ctx, d.DB, func(tx *sqlx.Tx, result *sqlx.StoreResult) {
-					_, _, result.Err = d.UserProfilePhotosDAO.InsertOrUpdateTx(tx, &dataobject.UserProfilePhotosDO{
-						UserId:  userId,
-						PhotoId: mainPhotoId,
-						Date2:   time.Now().Unix(),
-					})
-					if result.Err != nil {
-						return
-					}
-					_, result.Err = d.UsersDAO.UpdateProfilePhotoTx(tx, mainPhotoId, userId)
-				})
+				tR := sqlx.TxWrapper(
+					ctx, d.DB, func(tx *sqlx.Tx, result *sqlx.StoreResult) {
+						_, _, result.Err = d.UserProfilePhotosDAO.InsertOrUpdateTx(
+							tx, &dataobject.UserProfilePhotosDO{
+								UserId:  userId,
+								PhotoId: mainPhotoId,
+								Date2:   time.Now().Unix(),
+							},
+						)
+						if result.Err != nil {
+							return
+						}
+						_, result.Err = d.UsersDAO.UpdateProfilePhotoTx(tx, mainPhotoId, userId)
+					},
+				)
 				err = tR.Err
 			}
 
 			return 0, 0, err
 		},
-		genCacheUserDataCacheKey(userId))
+		genCacheUserDataCacheKey(userId),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateProfilePhoto - error: %v", err)
 		return 0
@@ -241,7 +270,9 @@ func (d *Dao) UpdateProfilePhoto(ctx context.Context, userId, photoId int64) int
 	return mainPhotoId
 }
 
-func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, contacts ...int64) (*mtproto.ImmutableUser, error) {
+func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, contacts ...int64) (
+	*mtproto.ImmutableUser, error,
+) {
 	cacheUserData := d.GetCacheUserData(ctx, id)
 
 	// userDO, _ := c.svcCtx.Dao.UsersDAO.SelectById(c.ctx, in.Id)
@@ -251,12 +282,14 @@ func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, cont
 		return nil, err
 	}
 	userData := cacheUserData.UserData
-	immutableUser := mtproto.MakeTLImmutableUser(&mtproto.ImmutableUser{
-		User:             userData,
-		LastSeenAt:       0,
-		Contacts:         nil,
-		KeysPrivacyRules: nil,
-	}).To_ImmutableUser()
+	immutableUser := mtproto.MakeTLImmutableUser(
+		&mtproto.ImmutableUser{
+			User:             userData,
+			LastSeenAt:       0,
+			Contacts:         nil,
+			KeysPrivacyRules: nil,
+		},
+	).To_ImmutableUser()
 
 	if userData.Deleted {
 		return immutableUser, nil
@@ -296,7 +329,8 @@ func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, cont
 			}
 
 			immutableUser.Contacts = d.getContactListByIdList(ctx, id, idList2)
-		})
+		},
+	)
 	//func() {
 	//	if privacy {
 	//		immutableUser.KeysPrivacyRules = c.svcCtx.Dao.GetUserPrivacyRulesListByKeys(
@@ -314,7 +348,9 @@ func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, cont
 	return immutableUser, nil
 }
 
-func (d *Dao) UpdateUserEmojiStatus(ctx context.Context, id int64, emojiStatusDocumentId int64, emojiStatusUntil int32) bool {
+func (d *Dao) UpdateUserEmojiStatus(
+	ctx context.Context, id int64, emojiStatusDocumentId int64, emojiStatusUntil int32,
+) bool {
 	_, _, err := d.CachedConn.Exec(
 		ctx,
 		func(ctx context.Context, conn *sqlx.DB) (int64, int64, error) {
@@ -322,7 +358,8 @@ func (d *Dao) UpdateUserEmojiStatus(ctx context.Context, id int64, emojiStatusDo
 				ctx,
 				emojiStatusDocumentId,
 				emojiStatusUntil,
-				id)
+				id,
+			)
 
 			if err != nil {
 				return 0, 0, err
@@ -330,7 +367,8 @@ func (d *Dao) UpdateUserEmojiStatus(ctx context.Context, id int64, emojiStatusDo
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateUserEmojiStatus - error: %v", err)
 		return false
@@ -347,14 +385,16 @@ func (d *Dao) DeleteUser(ctx context.Context, id int64, reason string) bool {
 				ctx,
 				"-"+strconv.FormatInt(id, 10), // hack
 				reason,
-				id)
+				id,
+			)
 			if err != nil {
 				return 0, 0, err
 			}
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("DeleteUser - error: %v", err)
 		return false
@@ -363,7 +403,9 @@ func (d *Dao) DeleteUser(ctx context.Context, id int64, reason string) bool {
 	return true
 }
 
-func (d *Dao) GetCacheImmutableUserList(ctx context.Context, idList2 []int64, contacts []int64) []*mtproto.ImmutableUser {
+func (d *Dao) GetCacheImmutableUserList(
+	ctx context.Context, idList2 []int64, contacts []int64,
+) []*mtproto.ImmutableUser {
 	id := make([]int64, 0, len(idList2)+len(contacts))
 	for _, v := range idList2 {
 		if ok := container2.ContainsInt64(id, v); !ok {
@@ -421,7 +463,8 @@ func (d *Dao) GetCacheImmutableUserList(ctx context.Context, idList2 []int64, co
 					}
 				}
 			}
-		})
+		},
+	)
 
 	for i := 0; i < len(mUsers); {
 		if mUsers[i] != nil {
@@ -452,7 +495,8 @@ func (d *Dao) UpdateStoriesMaxId(ctx context.Context, id int64, maxId int32) boo
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateStoriesMaxId - error: %v", err)
 		return false
@@ -482,7 +526,8 @@ func (d *Dao) UpdateColor(ctx context.Context, id int64, forProfile bool, color 
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateColor - error: %v", err)
 		return false
@@ -508,7 +553,8 @@ func (d *Dao) UpdateBirthday(ctx context.Context, id int64, birthday *mtproto.Bi
 
 			return 0, rowsAffected, nil
 		},
-		genCacheUserDataCacheKey(id))
+		genCacheUserDataCacheKey(id),
+	)
 	if err != nil {
 		logx.WithContext(ctx).Errorf("updateBirthday - error: %v", err)
 		return false
@@ -517,7 +563,9 @@ func (d *Dao) UpdateBirthday(ctx context.Context, id int64, birthday *mtproto.Bi
 	return true
 }
 
-func (d *Dao) GetCacheImmutableUserListV2(ctx context.Context, idList2 []int64, contacts []int64) []*mtproto.ImmutableUser {
+func (d *Dao) GetCacheImmutableUserListV2(
+	ctx context.Context, idList2 []int64, contacts []int64,
+) []*mtproto.ImmutableUser {
 	logger := logx.WithContext(ctx)
 
 	logger.Infof("getCacheImmutableUserList - request: {id: %v, contacts: %v}", idList2, contacts)
@@ -563,12 +611,14 @@ func (d *Dao) GetCacheImmutableUserListV2(ctx context.Context, idList2 []int64, 
 	for _, cData := range cDataList {
 		id := cData.GetUserData().GetId()
 
-		cUser := mtproto.MakeTLImmutableUser(&mtproto.ImmutableUser{
-			User:             cData.GetUserData(),
-			LastSeenAt:       0,
-			Contacts:         nil,
-			KeysPrivacyRules: cData.CachesPrivacyKeyRules,
-		}).To_ImmutableUser()
+		cUser := mtproto.MakeTLImmutableUser(
+			&mtproto.ImmutableUser{
+				User:             cData.GetUserData(),
+				LastSeenAt:       0,
+				Contacts:         nil,
+				KeysPrivacyRules: cData.CachesPrivacyKeyRules,
+			},
+		).To_ImmutableUser()
 
 		cUserList = append(cUserList, cUser)
 		mUsers[id] = cUser
@@ -629,15 +679,19 @@ func (d *Dao) GetCacheImmutableUserListV2(ctx context.Context, idList2 []int64, 
 					}
 					noCaches[key] = contact
 					if cUser, ok := mUsers[contact.OwnerUserId]; ok {
-						cUser.Contacts = append(cUser.Contacts, mtproto.MakeTLContactData(&mtproto.ContactData{
-							UserId:        contact.OwnerUserId,
-							ContactUserId: contact.ContactUserId,
-							FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
-							LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
-							MutualContact: contact.Mutual,
-							Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
-							CloseFriend:   contact.CloseFriend,
-						}).To_ContactData())
+						cUser.Contacts = append(
+							cUser.Contacts, mtproto.MakeTLContactData(
+								&mtproto.ContactData{
+									UserId:        contact.OwnerUserId,
+									ContactUserId: contact.ContactUserId,
+									FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
+									LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
+									MutualContact: contact.Mutual,
+									Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
+									CloseFriend:   contact.CloseFriend,
+								},
+							).To_ContactData(),
+						)
 					}
 				}
 			}
@@ -672,28 +726,35 @@ func (d *Dao) GetCacheImmutableUserListV2(ctx context.Context, idList2 []int64, 
 				}
 
 				if cUser, ok := mUsers[contact.OwnerUserId]; ok {
-					cUser.Contacts = append(cUser.Contacts, mtproto.MakeTLContactData(&mtproto.ContactData{
-						UserId:        contact.OwnerUserId,
-						ContactUserId: contact.ContactUserId,
-						FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
-						LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
-						MutualContact: contact.Mutual,
-						Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
-						CloseFriend:   contact.CloseFriend,
-					}).To_ContactData())
+					cUser.Contacts = append(
+						cUser.Contacts, mtproto.MakeTLContactData(
+							&mtproto.ContactData{
+								UserId:        contact.OwnerUserId,
+								ContactUserId: contact.ContactUserId,
+								FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
+								LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
+								MutualContact: contact.Mutual,
+								Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
+								CloseFriend:   contact.CloseFriend,
+							},
+						).To_ContactData(),
+					)
 				}
 
 				return contact, nil
 			}
 		},
-		keyList...)
+		keyList...,
+	)
 
 	logger.Infof("getCacheImmutableUserList - cUserList: %d", len(cUserList))
 
 	return cUserList
 }
 
-func (d *Dao) GetImmutableUserV2(ctx context.Context, id int64, privacy bool, hasReverseContacts bool, reverseContacts []int64) (*mtproto.ImmutableUser, error) {
+func (d *Dao) GetImmutableUserV2(
+	ctx context.Context, id int64, privacy bool, hasReverseContacts bool, reverseContacts []int64,
+) (*mtproto.ImmutableUser, error) {
 	cacheUserData := d.GetCacheUserData(ctx, id)
 
 	if cacheUserData == nil {
@@ -702,13 +763,15 @@ func (d *Dao) GetImmutableUserV2(ctx context.Context, id int64, privacy bool, ha
 		return nil, err
 	}
 	userData := cacheUserData.UserData
-	immutableUser := mtproto.MakeTLImmutableUser(&mtproto.ImmutableUser{
-		User:             userData,
-		LastSeenAt:       0,
-		Contacts:         nil,
-		KeysPrivacyRules: nil,
-		ReverseContacts:  nil,
-	}).To_ImmutableUser()
+	immutableUser := mtproto.MakeTLImmutableUser(
+		&mtproto.ImmutableUser{
+			User:             userData,
+			LastSeenAt:       0,
+			Contacts:         nil,
+			KeysPrivacyRules: nil,
+			ReverseContacts:  nil,
+		},
+	).To_ImmutableUser()
 
 	if userData.Deleted {
 		return immutableUser, nil
@@ -751,7 +814,8 @@ func (d *Dao) GetImmutableUserV2(ctx context.Context, id int64, privacy bool, ha
 			fns,
 			func() {
 				immutableUser.ReverseContacts = d.getReverseContactListByIdList(ctx, id, rIdList)
-			})
+			},
+		)
 
 	}
 
@@ -768,7 +832,9 @@ func (d *Dao) GetImmutableUserV2(ctx context.Context, id int64, privacy bool, ha
 	return immutableUser, nil
 }
 
-func (d *Dao) GetMutableUsersV2(ctx context.Context, idList2 []int64, privacy bool, hasTo bool, to []int64) []*mtproto.ImmutableUser {
+func (d *Dao) GetMutableUsersV2(
+	ctx context.Context, idList2 []int64, privacy bool, hasTo bool, to []int64,
+) []*mtproto.ImmutableUser {
 	if len(idList2) == 0 {
 		return []*mtproto.ImmutableUser{}
 	}
@@ -796,13 +862,15 @@ func (d *Dao) GetMutableUsersV2(ctx context.Context, idList2 []int64, privacy bo
 	for _, cData := range cDataList {
 		id := cData.GetUserData().GetId()
 
-		cUser := mtproto.MakeTLImmutableUser(&mtproto.ImmutableUser{
-			User:             cData.GetUserData(),
-			LastSeenAt:       0,
-			Contacts:         nil,
-			ReverseContacts:  nil,
-			KeysPrivacyRules: nil,
-		}).To_ImmutableUser()
+		cUser := mtproto.MakeTLImmutableUser(
+			&mtproto.ImmutableUser{
+				User:             cData.GetUserData(),
+				LastSeenAt:       0,
+				Contacts:         nil,
+				ReverseContacts:  nil,
+				KeysPrivacyRules: nil,
+			},
+		).To_ImmutableUser()
 		if privacy {
 			cUser.KeysPrivacyRules = cData.CachesPrivacyKeyRules
 		}
@@ -862,15 +930,19 @@ func (d *Dao) GetMutableUsersV2(ctx context.Context, idList2 []int64, privacy bo
 					}
 					noCaches[key] = contact
 					if cUser, ok := mUsers[contact.ContactUserId]; ok {
-						cUser.ReverseContacts = append(cUser.ReverseContacts, mtproto.MakeTLContactData(&mtproto.ContactData{
-							UserId:        contact.OwnerUserId,
-							ContactUserId: contact.ContactUserId,
-							FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
-							LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
-							MutualContact: contact.Mutual,
-							Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
-							CloseFriend:   contact.CloseFriend,
-						}).To_ContactData())
+						cUser.ReverseContacts = append(
+							cUser.ReverseContacts, mtproto.MakeTLContactData(
+								&mtproto.ContactData{
+									UserId:        contact.OwnerUserId,
+									ContactUserId: contact.ContactUserId,
+									FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
+									LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
+									MutualContact: contact.Mutual,
+									Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
+									CloseFriend:   contact.CloseFriend,
+								},
+							).To_ContactData(),
+						)
 					}
 				}
 			}
@@ -904,21 +976,26 @@ func (d *Dao) GetMutableUsersV2(ctx context.Context, idList2 []int64, privacy bo
 				}
 
 				if cUser, ok := mUsers[contact.ContactUserId]; ok {
-					cUser.ReverseContacts = append(cUser.ReverseContacts, mtproto.MakeTLContactData(&mtproto.ContactData{
-						UserId:        contact.OwnerUserId,
-						ContactUserId: contact.ContactUserId,
-						FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
-						LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
-						MutualContact: contact.Mutual,
-						Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
-						CloseFriend:   contact.CloseFriend,
-					}).To_ContactData())
+					cUser.ReverseContacts = append(
+						cUser.ReverseContacts, mtproto.MakeTLContactData(
+							&mtproto.ContactData{
+								UserId:        contact.OwnerUserId,
+								ContactUserId: contact.ContactUserId,
+								FirstName:     mtproto.MakeFlagsString(contact.ContactFirstName),
+								LastName:      mtproto.MakeFlagsString(contact.ContactLastName),
+								MutualContact: contact.Mutual,
+								Phone:         mtproto.MakeFlagsString(contact.ContactPhone),
+								CloseFriend:   contact.CloseFriend,
+							},
+						).To_ContactData(),
+					)
 				}
 
 				return contact, nil
 			}
 		},
-		keyList...)
+		keyList...,
+	)
 
 	return cUserList
 }
