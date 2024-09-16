@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
+	"google.golang.org/grpc/status"
 	"pwm-server/app/bff/authorization/internal/logic"
 	"pwm-server/app/bff/authorization/internal/model"
 	"pwm-server/app/service/authsession/authsession"
 	userpb "pwm-server/app/service/biz/user/user"
-	statuspb "pwm-server/app/service/status/status"
-
-	"google.golang.org/grpc/status"
 )
 
 /*
@@ -327,31 +324,31 @@ func (c *AuthorizationCore) authSendCode(
 				needSendSms = true
 			)
 
-			if phoneRegistered {
-				if user.GetUser().GetUserType() == userpb.UserTypeTest {
-					needSendSms = false
-					codeData2.SentCodeType = model.SentCodeTypeApp
-					codeData2.PhoneCode = "12345"
-					codeData2.PhoneCodeExtraData = "12345"
-					c.Logger.Infof("is test server: %v", codeData2)
-				} else {
-					if status, _ := c.svcCtx.StatusClient.StatusGetUserOnlineSessions(
-						c.ctx, &statuspb.TLStatusGetUserOnlineSessions{
-							UserId: user.User.Id,
-						},
-					); len(status.GetUserSessions()) > 0 {
-						c.Logger.Infof("user online")
-						needSendSms = false
-						codeData2.SentCodeType = model.SentCodeTypeApp
-						codeData2.PhoneCodeExtraData = codeData2.PhoneCode
-					}
-				}
-				threading2.WrapperGoFunc(
-					c.ctx, nil, func(ctx context.Context) {
-						c.pushSignInMessage(ctx, user.Id(), codeData2.PhoneCode)
-					},
-				)
-			}
+			//if phoneRegistered {
+			//	if user.GetUser().GetUserType() == userpb.UserTypeTest {
+			//		needSendSms = false
+			//		codeData2.SentCodeType = model.SentCodeTypeApp
+			//		codeData2.PhoneCode = "12345"
+			//		codeData2.PhoneCodeExtraData = "12345"
+			//		c.Logger.Infof("is test server: %v", codeData2)
+			//	} else {
+			//		if status, _ := c.svcCtx.StatusClient.StatusGetUserOnlineSessions(
+			//			c.ctx, &statuspb.TLStatusGetUserOnlineSessions{
+			//				UserId: user.User.Id,
+			//			},
+			//		); len(status.GetUserSessions()) > 0 {
+			//			c.Logger.Infof("user online")
+			//			needSendSms = false
+			//			codeData2.SentCodeType = model.SentCodeTypeApp
+			//			codeData2.PhoneCodeExtraData = codeData2.PhoneCode
+			//		}
+			//	}
+			//	threading2.WrapperGoFunc(
+			//		c.ctx, nil, func(ctx context.Context) {
+			//			c.pushSignInMessage(ctx, user.Id(), codeData2.PhoneCode)
+			//		},
+			//	)
+			//}
 
 			if needSendSms {
 				c.Logger.Infof("send code by sms")

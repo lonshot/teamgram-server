@@ -7,6 +7,10 @@ type SmsVerifyCodeConfig struct {
 	Key           string
 	Secret        string
 	RegionId      string
+
+	GoogleClientId       string
+	FacebookClientId     string
+	FacebookClientSecret string
 }
 
 type WebrtcConfig struct {
