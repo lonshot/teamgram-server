@@ -25,19 +25,9 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	var peerType int32
 
 	// Handle different peer types from InputPeer
-	switch p := reaction.Peer; p.PredicateName {
-	case "TL_inputPeerUser":
-		peerId = p.UserId
-		peerType = mtproto.PEER_USER
-	case "TL_inputPeerChat":
-		peerId = p.ChatId
-		peerType = mtproto.PEER_CHAT
-	case "TL_inputPeerChannel":
-		peerId = p.ChannelId
-		peerType = mtproto.PEER_CHANNEL
-	default:
-		return nil, errors.New("unsupported peer type")
-	}
+	p := mtproto.FromInputPeer(reaction.Peer)
+	peerId = p.PeerId
+	peerType = p.PeerType
 
 	// Extract current user from the context (core)
 	c := core.New(ctx, s.svcCtx)
@@ -270,21 +260,10 @@ func (s Service) MessagesGetUnreadReactions(
 ) (*mtproto.Messages_Messages, error) {
 	// Extract peerId and construct Peer object
 	var peerId int64
-	var peer *mtproto.Peer
 
-	switch p := reactions.Peer; p.PredicateName {
-	case "TL_inputPeerUser":
-		peerId = p.UserId
-		peer = mtproto.MakePeerUser(peerId)
-	case "TL_inputPeerChat":
-		peerId = p.ChatId
-		peer = mtproto.MakePeerChat(peerId)
-	case "TL_inputPeerChannel":
-		peerId = p.ChannelId
-		peer = mtproto.MakePeerChannel(peerId)
-	default:
-		return nil, errors.New("unsupported peer type")
-	}
+	// Handle different peer types from InputPeer
+	peer := mtproto.FromInputPeer(reactions.Peer)
+	peerId = peer.PeerId
 
 	// Fetch unread reactions for the user using pagination parameters
 	unreadReactions, err := s.svcCtx.Dao.SelectUnreadReactionsByUserId(
@@ -299,7 +278,7 @@ func (s Service) MessagesGetUnreadReactions(
 	for i, reaction := range unreadReactions {
 		protoMessages[i] = &mtproto.Message{
 			Id:        int32(reaction.MessageId),
-			PeerId:    peer,
+			PeerId:    peer.ToPeer(),
 			Reactions: convertReactionsToMessageReactionsProto([]*dataobject.ReactionsDO{reaction}),
 		}
 	}
@@ -318,16 +297,9 @@ func (s Service) MessagesReadReactions(
 ) (*mtproto.Messages_AffectedHistory, error) {
 	// Extract peerId based on Peer type
 	var peerId int64
-	switch p := reactions.Peer; p.PredicateName {
-	case "TL_inputPeerUser":
-		peerId = p.UserId
-	case "TL_inputPeerChat":
-		peerId = p.ChatId
-	case "TL_inputPeerChannel":
-		peerId = p.ChannelId
-	default:
-		return nil, errors.New("unsupported peer type")
-	}
+
+	peer := mtproto.FromInputPeer(reactions.Peer)
+	peerId = peer.PeerId
 
 	// Convert TopMsgId to int32 if it exists
 	var topMsgId int32

@@ -188,10 +188,12 @@ func (c *ContactsCore) processImportedContacts(
 
 		// Prepare imported and popular contacts
 		importedContacts = append(
-			importedContacts, &mtproto.ImportedContact{
-				UserId:   contactUser.Id(),
-				ClientId: contact.ClientId,
-			},
+			importedContacts, mtproto.MakeTLImportedContact(
+				&mtproto.ImportedContact{
+					UserId:   contactUser.Id(),
+					ClientId: contact.ClientId,
+				},
+			).To_ImportedContact(),
 		)
 		popularContacts = append(
 			popularContacts, mtproto.MakeTLPopularContact(
