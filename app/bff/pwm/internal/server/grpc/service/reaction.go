@@ -16,12 +16,9 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	*mtproto.Updates, error,
 ) {
 	// Validate input
-	if reaction.Peer == nil || reaction.Reaction_FLAGSTRING == nil || reaction.MsgId == 0 {
+	if reaction.Peer == nil || len(reaction.Reaction_FLAGVECTORREACTION) == 0 || reaction.MsgId == 0 {
 		return nil, errors.New("invalid input")
 	}
-
-	// Extract the actual reaction from the StringValue wrapper
-	reactionValue := reaction.Reaction_FLAGSTRING.GetValue()
 
 	// Initialize PeerId and PeerType
 	var peerId int64
@@ -59,20 +56,26 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	// Extract recipientId (for peer-to-peer messaging)
 	recipientId := messageBox.SenderUserId
 
-	// Insert the reaction into the database
-	_, err = s.svcCtx.Dao.InsertReaction(
-		ctx, &dataobject.ReactionsDO{
-			UserId:    c.MD.UserId,
-			MessageId: int64(reaction.MsgId), // Convert int32 to int64
-			Reaction:  reactionValue,
-			PeerId:    peerId,
-			PeerType:  peerType,
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
-		},
-	)
-	if err != nil {
-		return nil, errors.New("failed to save reaction")
+	// Loop through all reactions in Reaction_FLAGVECTORREACTION
+	for _, reactionItem := range reaction.Reaction_FLAGVECTORREACTION {
+		// Extract the actual reaction value from the Reaction structure
+		reactionValue := reactionItem.Emoticon
+
+		// Insert the reaction into the database
+		_, err = s.svcCtx.Dao.InsertReaction(
+			ctx, &dataobject.ReactionsDO{
+				UserId:    c.MD.UserId,
+				MessageId: int64(reaction.MsgId), // Convert int32 to int64
+				Reaction:  reactionValue,
+				PeerId:    peerId,
+				PeerType:  peerType,
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
+		)
+		if err != nil {
+			return nil, errors.New("failed to save reaction")
+		}
 	}
 
 	// Retrieve the updated list of reactions for the message
