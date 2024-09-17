@@ -1429,6 +1429,33 @@ CREATE TABLE
     KEY `user_themes_theme_id_idx` (`theme_id`),
     CONSTRAINT `fk_user_themes_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+-- Creating the reactions table with indexes and foreign keys
+CREATE TABLE `reactions` (
+                             `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,    -- Primary key
+                             `user_id` BIGINT NOT NULL,                          -- User ID (foreign key to users table)
+                             `message_id` BIGINT NOT NULL,                       -- Message ID (foreign key to messages table)
+                             `reaction` VARCHAR(255) NOT NULL,                   -- The reaction (e.g., emoji)
+                             `peer_id` BIGINT NOT NULL,                          -- The peer ID (chat or user)
+                             `peer_type` INT NOT NULL,                           -- The peer type (e.g., user, group, etc.)
+                             `read` TINYINT(1) NOT NULL DEFAULT 0,               -- Whether the reaction has been read
+                             `reported` TINYINT(1) NOT NULL DEFAULT 0,           -- Whether the reaction has been reported
+                             `created_at` BIGINT NOT NULL,                       -- Unix timestamp when the reaction was added
+                             `updated_at` BIGINT NOT NULL                        -- Unix timestamp for updates
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Adding indexes for optimization
+CREATE INDEX `idx_user_id` ON `reactions` (`user_id`);
+CREATE INDEX `idx_message_id` ON `reactions` (`message_id`);
+CREATE INDEX `idx_peer_id_peer_type` ON `reactions` (`peer_id`, `peer_type`);
+CREATE INDEX `idx_read` ON `reactions` (`read`);
+
+-- Adding foreign key constraints for data integrity
+ALTER TABLE `reactions`
+    ADD CONSTRAINT `fk_reactions_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    ADD CONSTRAINT `fk_reactions_message_id` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE;
+
+
+
 
 INSERT INTO
   users (

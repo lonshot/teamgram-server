@@ -119,7 +119,8 @@ func (c *AuthorizationCore) authSendCode(
 	authKeyId, sessionId int64, request *mtproto.TLAuthSendCode,
 ) (reply *mtproto.Auth_SentCode, err error) {
 	// 1. check api_id and api_hash
-	if err = c.svcCtx.Dao.CheckApiIdAndHash(request.ApiId, request.ApiHash); err != nil {
+	email, _, err := c.svcCtx.Dao.CheckApiIdAndHash(request.ApiId, request.ApiHash)
+	if err != nil {
 		c.Logger.Errorf("invalid api: {api_id: %d, api_hash: %s}", request.ApiId, request.ApiHash)
 		return
 	}
@@ -357,14 +358,19 @@ func (c *AuthorizationCore) authSendCode(
 					phoneNumber,
 					codeData2.PhoneCode,
 					codeData2.PhoneCodeHash,
+					request.ApiHash,
 				)
-				if err2 != nil {
-					c.Logger.Errorf("send sms code error: %v", err2)
+				if err2 != nil || extraData == nil || !extraData.Valid {
+					c.Logger.Errorf("send verify code error: %v", err2)
 					return err2
 				} else {
 					// codeData2.SentCodeType = model.CodeTypeSms
 					codeData2.SentCodeType = model.SentCodeTypeSms
-					codeData2.PhoneCodeExtraData = extraData
+					if !extraData.Auto {
+						codeData2.PhoneCodeExtraData = extraData.ConfirmationId + "@@" + email
+					} else {
+						codeData2.PhoneCodeHash = codeData2.PhoneCodeHash + codeData2.PhoneCode
+					}
 				}
 			}
 

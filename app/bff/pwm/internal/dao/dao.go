@@ -8,7 +8,9 @@ import (
 	"github.com/teamgram/marmota/pkg/stores/sqlc"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
+	"github.com/zeromicro/go-zero/core/logx"
 	"pwm-server/app/bff/pwm/internal/config"
+	"pwm-server/app/bff/pwm/internal/dao/dataobject"
 	msg_client "pwm-server/app/messenger/msg/msg/client"
 	sync_client "pwm-server/app/messenger/sync/client"
 	authsession_client "pwm-server/app/service/authsession/client"
@@ -18,6 +20,7 @@ import (
 	user_client "pwm-server/app/service/biz/user/client"
 	idgen_client "pwm-server/app/service/idgen/client"
 	media_client "pwm-server/app/service/media/client"
+	"time"
 )
 
 type Dao struct {
@@ -289,4 +292,195 @@ func (d *Dao) GetThemeByEmoticon(ctx context.Context, emoticon string) (*mtproto
 		return nil, err
 	}
 	return &theme, nil
+}
+
+// InsertReaction adds a new reaction to a message.
+func (d *Dao) InsertReaction(ctx context.Context, reaction *dataobject.ReactionsDO) (int64, error) {
+	query := `
+		INSERT INTO reactions (user_id, message_id, reaction, peer_id, peer_type, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
+	`
+	// Use Unix timestamps for created_at and updated_at
+	result, err := d.db.Exec(
+		ctx, query, reaction.UserId, reaction.MessageId, reaction.Reaction, reaction.PeerId, reaction.PeerType,
+		reaction.CreatedAt, reaction.UpdatedAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+// SelectReactionsByMessageIds retrieves reactions for a list of message IDs.
+func (d *Dao) SelectReactionsByMessageIds(ctx context.Context, msgIds []int64) ([]*dataobject.ReactionsDO, error) {
+	query, args, err := sqlx.In("SELECT * FROM reactions WHERE message_id IN (?)", msgIds)
+	if err != nil {
+		return nil, err
+	}
+
+	var reactions []*dataobject.ReactionsDO
+	err = d.db.QueryRows(ctx, &reactions, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return reactions, nil
+}
+
+// SelectReactionsByMessageId retrieves reactions for a specific message ID.
+func (d *Dao) SelectReactionsByMessageId(ctx context.Context, msgId int64) ([]*dataobject.ReactionsDO, error) {
+	query := `
+		SELECT * FROM reactions WHERE message_id = ?
+	`
+	var reactions []*dataobject.ReactionsDO
+	err := d.db.QueryRows(ctx, &reactions, query, msgId)
+	if err != nil {
+		return nil, err
+	}
+	return reactions, nil
+}
+
+// MarkReactionsAsRead marks all reactions for a specific message as read.
+func (d *Dao) MarkReactionsAsRead(ctx context.Context, userId, msgId int64, updatedAt int64) error {
+	query := `
+		UPDATE reactions SET read = 1, updated_at = ? WHERE user_id = ? AND message_id = ?
+	`
+	_, err := d.db.Exec(ctx, query, updatedAt, userId, msgId)
+	return err
+}
+
+// ReportReaction flags a reaction for moderation or reporting.
+func (d *Dao) ReportReaction(ctx context.Context, msgId int64, reaction string) error {
+	// Prepare the SQL query to update the 'reported' status and update the 'updated_at' field.
+	query := `
+		UPDATE reactions 
+		SET reported = 1, updated_at = ? 
+		WHERE message_id = ? AND reaction = ?
+	`
+
+	// Use Unix timestamp for the updated_at field.
+	updatedAt := time.Now().Unix()
+
+	// Execute the query with context, passing the updated timestamp, message ID, and reaction.
+	_, err := d.db.Exec(ctx, query, updatedAt, msgId, reaction)
+	if err != nil {
+		// Log the error and return it if the query fails.
+		logx.WithContext(ctx).Errorf(
+			"Failed to report reaction for message_id: %d, reaction: %s, error: %v", msgId, reaction, err,
+		)
+		return err
+	}
+
+	return nil
+}
+
+// ClearRecentReactions clears recent reactions for a user.
+func (d *Dao) ClearRecentReactions(ctx context.Context, userId int64) error {
+	query := `
+		DELETE FROM reactions WHERE user_id = ?
+	`
+	_, err := d.db.Exec(ctx, query, userId)
+	return err
+}
+
+// UpdateAvailableReactions
+// update chats set available_reactions_type = :available_reactions_type, available_reactions = :available_reactions where id = :id
+func (dao *Dao) UpdateAvailableReactions(
+	ctx context.Context, availableReactionsType int32, availableReactions string, id int64,
+) (rowsAffected int64, err error) {
+	var (
+		query   = "update chats set available_reactions_type = ?, available_reactions = ? where id = ?"
+		rResult sql.Result
+	)
+
+	rResult, err = dao.db.Exec(ctx, query, availableReactionsType, availableReactions, id)
+
+	if err != nil {
+		logx.WithContext(ctx).Errorf("exec in UpdateAvailableReactions(_), error: %v", err)
+		return
+	}
+
+	rowsAffected, err = rResult.RowsAffected()
+	if err != nil {
+		logx.WithContext(ctx).Errorf("rowsAffected in UpdateAvailableReactions(_), error: %v", err)
+	}
+
+	return
+}
+
+// SelectAvailableReactions retrieves the available reactions for a chat.
+func (dao *Dao) SelectAvailableReactions(ctx context.Context, peerId int64) (*dataobject.ChatReactionsDO, error) {
+	var (
+		query   = "SELECT available_reactions_type, available_reactions FROM chats WHERE id = ?"
+		chatsDO dataobject.ChatReactionsDO
+	)
+
+	// Use QueryRow to execute the query and bind the result to the ChatsDO struct
+	err := dao.db.QueryRow(ctx, &chatsDO, query, peerId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			logx.WithContext(ctx).Infof("No available reactions found for peer_id: %d", peerId)
+			return nil, nil // Return nil without error for no results
+		}
+		logx.WithContext(ctx).Errorf("Error in SelectAvailableReactions: %v", err)
+		return nil, err
+	}
+
+	return &chatsDO, nil
+}
+
+// SelectUnreadReactionsByUserId retrieves unread reactions for a specific user/peer with pagination support.
+func (d *Dao) SelectUnreadReactionsByUserId(
+	ctx context.Context, peerId int64, offsetId, limit int32,
+) ([]*dataobject.ReactionsDO, error) {
+	query := `
+		SELECT * FROM reactions 
+		WHERE peer_id = ? AND read = 0
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`
+	var unreadReactions []*dataobject.ReactionsDO
+	err := d.db.QueryRows(ctx, &unreadReactions, query, peerId, limit, offsetId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return unreadReactions, nil
+}
+
+// SelectTopReactions fetches the top reactions from the database.
+func (d *Dao) SelectTopReactions(ctx context.Context) ([]*dataobject.ReactionCountDO, error) {
+	query := `
+		SELECT reaction, COUNT(reaction) AS count 
+		FROM reactions 
+		GROUP BY reaction 
+		ORDER BY count DESC 
+		LIMIT 10
+	`
+	var topReactions []*dataobject.ReactionCountDO
+	err := d.db.QueryRows(ctx, &topReactions, query)
+	if err != nil {
+		return nil, err
+	}
+	return topReactions, nil
+}
+
+// SelectRecentReactions retrieves the most recent reactions for a specific user, limited by the provided count.
+func (d *Dao) SelectRecentReactions(ctx context.Context, userId int64, limit int32) ([]*dataobject.ReactionsDO, error) {
+	query := `
+		SELECT * FROM reactions 
+		WHERE user_id = ? 
+		ORDER BY created_at DESC 
+		LIMIT ?
+	`
+	var recentReactions []*dataobject.ReactionsDO
+	err := d.db.QueryRows(ctx, &recentReactions, query, userId, limit)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No recent reactions found
+		}
+		return nil, err
+	}
+	return recentReactions, nil
 }

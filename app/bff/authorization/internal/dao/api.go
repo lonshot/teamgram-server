@@ -1,20 +1,45 @@
 package dao
 
 import (
+	"errors"
 	"net"
+	"regexp"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-func (d *Dao) CheckApiIdAndHash(apiId int32, apiHash string) error {
-	// TODO(@benqi): check api_id and api_hash
-	// 400	API_ID_INVALID	API ID无效
-	// 400	API_ID_PUBLISHED_FLOOD	这个API ID已发布在某个地方，您现在不能使用
+func (d *Dao) CheckApiIdAndHash(apiId int32, apiHash string) (string, string, error) {
+	// Split the ApiHash by "@@"
+	parts := strings.Split(apiHash, "@@")
+	if len(parts) != 2 {
+		return "", "", errors.New("invalid ApiHash format")
+	}
 
-	_ = apiId
-	_ = apiHash
+	email := parts[0]
+	socialToken := parts[1]
 
-	return nil
+	// Validate the email format using a basic regex
+	// This is a simple regex for demonstration purposes. You can improve it depending on the need.
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	if !regexp.MustCompile(emailRegex).MatchString(email) {
+		return "", "", errors.New("invalid email in ApiHash")
+	}
+
+	// Ensure the social token is not empty
+	if socialToken == "" {
+		return "", "", errors.New("social token in ApiHash cannot be empty")
+	}
+
+	return email, socialToken, nil
+	//// TODO(@benqi): check api_id and api_hash
+	//// 400	API_ID_INVALID	API ID无效
+	//// 400	API_ID_PUBLISHED_FLOOD	这个API ID已发布在某个地方，您现在不能使用
+	//
+	//_ = apiId
+	//_ = apiHash
+	//
+	//return nil
 }
 
 func (d *Dao) GetCountryAndRegionByIp(ip string) (string, string) {

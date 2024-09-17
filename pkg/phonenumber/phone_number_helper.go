@@ -22,9 +22,9 @@ func MakePhoneNumberHelper(number, region string) (*phoneNumberHelper, error) {
 		return nil, errors.New("empty phone number")
 	}
 
-	// Ensure the phone number starts with a "+" if no region is provided
-	if region == "" && number[:1] != "+" {
-		number = "+" + number
+	// If the number starts with "+", remove it
+	if number[:1] == "+" {
+		number = number[1:]
 	}
 
 	// Simulate parsing logic

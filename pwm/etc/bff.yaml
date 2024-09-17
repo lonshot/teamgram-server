@@ -13,11 +13,11 @@ KV:
   - Host: localhost:6379
 
 Code:
-  Name: "none"
-  SendCodeUrl: ""
-  VerifyCodeUrl: ""
-  Key: ""
-  Secret: ""
+  Name: "me"
+  SendCodeUrl: "http://wb.playwith-me.com/pwm/SendSecretVerifyCode"
+  VerifyCodeUrl: "http://wb.playwith-me.com/pwm/VerifySecretCode"
+  Key: "pwm-server"
+  Secret: "{F3BBF75F-E5F4-4B33-AAE8-4232F62D2037}"
   RegionId: ""
 
 BizServiceClient:

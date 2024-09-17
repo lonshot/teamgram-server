@@ -32,11 +32,13 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 	// If the input contacts are empty, syncing only means deleting existing contacts
 	if len(in.Contacts) == 0 {
 		c.Logger.Infof("ContactsImportContacts - no new contacts to import, synced deletions only")
-		return &mtproto.Contacts_ImportedContacts{
-			Imported:       []*mtproto.ImportedContact{},
-			PopularInvites: []*mtproto.PopularContact{},
-			Users:          []*mtproto.User{},
-		}, nil
+		return mtproto.MakeTLContactsImportedContacts(
+			&mtproto.Contacts_ImportedContacts{
+				Imported:       []*mtproto.ImportedContact{},
+				PopularInvites: []*mtproto.PopularContact{},
+				Users:          []*mtproto.User{},
+			},
+		).To_Contacts_ImportedContacts(), nil
 	}
 
 	// Process the imported contacts (Add/Update)
@@ -46,11 +48,13 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 	}
 
 	// Return the result, even if empty (syncing can result in an empty list)
-	return &mtproto.Contacts_ImportedContacts{
-		Imported:       importedContacts,
-		PopularInvites: popularContacts,
-		Users:          append([]*mtproto.User{me}, updatedUsers...),
-	}, nil
+	return mtproto.MakeTLContactsImportedContacts(
+		&mtproto.Contacts_ImportedContacts{
+			Imported:       importedContacts,
+			PopularInvites: popularContacts,
+			Users:          append([]*mtproto.User{me}, updatedUsers...),
+		},
+	).To_Contacts_ImportedContacts(), nil
 }
 
 // buildContactsMap creates a map of imported contacts by their cleaned phone numbers.
@@ -190,10 +194,12 @@ func (c *ContactsCore) processImportedContacts(
 			},
 		)
 		popularContacts = append(
-			popularContacts, &mtproto.PopularContact{
-				ClientId:  contact.ClientId,
-				Importers: 100, // Placeholder value
-			},
+			popularContacts, mtproto.MakeTLPopularContact(
+				&mtproto.PopularContact{
+					ClientId:  contact.ClientId,
+					Importers: 100, // Placeholder value
+				},
+			).To_PopularContact(),
 		)
 
 		// Update users list
