@@ -2,20 +2,15 @@ package code
 
 import (
 	"context"
+	"pwm-server/pkg/code/dataobject"
 	"pwm-server/pkg/code/me"
 
 	"pwm-server/pkg/code/conf"
 	"pwm-server/pkg/code/none"
 )
 
-type VerifyResponse struct {
-	Valid          bool   `json:"valid"`
-	Auto           bool   `json:"auto"`
-	ConfirmationId string `json:"confirmationId"`
-}
-
 type VerifyCodeInterface interface {
-	SendSmsVerifyCode(ctx context.Context, phoneNumber, code, codeHash, data string) (*VerifyResponse, error)
+	SendSmsVerifyCode(ctx context.Context, phoneNumber, code, codeHash, data string) (*dataobject.VerifyResponse, error)
 	VerifySmsCode(ctx context.Context, codeHash, code, extraData string) error
 }
 

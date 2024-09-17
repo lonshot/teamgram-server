@@ -7,15 +7,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"pwm-server/pkg/code"
+	"pwm-server/pkg/code/dataobject"
 
 	"pwm-server/pkg/code/conf"
 
 	"github.com/zeromicro/go-zero/core/logx"
-)
-
-var (
-	_smsURL = "http://127.0.0.1:8181/code?phone=%s&code=%s"
 )
 
 func New(c *conf.SmsVerifyCodeConfig) *meVerifyCode {
@@ -29,7 +25,7 @@ type meVerifyCode struct {
 }
 
 func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_, codeHash, data string) (
-	*code.VerifyResponse, error,
+	*dataobject.VerifyResponse, error,
 ) {
 	// Prepare the form data
 	form := url.Values{}
@@ -63,7 +59,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 	logx.Infof("response body: %s", string(body))
 
 	// Parse the JSON response
-	var verifyResp code.VerifyResponse
+	var verifyResp dataobject.VerifyResponse
 	err = jsonx.Unmarshal(body, &verifyResp)
 	if err != nil {
 		logx.Infof("error unmarshaling JSON response: %v", err)
@@ -113,7 +109,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	logx.Infof("response body: %s", string(body))
 
 	// Parse the JSON response
-	var verifyResp code.VerifyResponse
+	var verifyResp dataobject.VerifyResponse
 	err = jsonx.Unmarshal(body, &verifyResp)
 	if err != nil {
 		logx.Infof("error unmarshaling JSON response: %v", err)

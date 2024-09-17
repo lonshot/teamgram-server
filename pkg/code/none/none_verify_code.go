@@ -2,7 +2,7 @@ package none
 
 import (
 	"context"
-	"pwm-server/pkg/code"
+	"pwm-server/pkg/code/dataobject"
 
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/pkg/code/conf"
@@ -19,7 +19,7 @@ type noneVerifyCode struct {
 }
 
 func (m *noneVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code, codeHash, data string) (
-	*code.VerifyResponse, error,
+	*dataobject.VerifyResponse, error,
 ) {
 	return nil, nil
 }
