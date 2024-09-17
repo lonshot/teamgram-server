@@ -163,7 +163,7 @@ func (UnimplementedRPCSyncServer) SyncBroadcastUpdates(context.Context, *TLSyncB
 
 // UnsafeRPCSyncServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCSyncServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCSyncServer interface {
 	mustEmbedUnimplementedRPCSyncServer()
 }

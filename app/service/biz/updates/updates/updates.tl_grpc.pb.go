@@ -103,7 +103,7 @@ func (UnimplementedRPCUpdatesServer) UpdatesGetChannelDifferenceV2(context.Conte
 
 // UnsafeRPCUpdatesServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCUpdatesServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCUpdatesServer interface {
 	mustEmbedUnimplementedRPCUpdatesServer()
 }

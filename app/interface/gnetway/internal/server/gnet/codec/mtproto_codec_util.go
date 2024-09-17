@@ -42,7 +42,7 @@ const (
 )
 
 //var (
-//	errUnexpectedEOF = errors.New("there is no enough data")
+//	errUnexpectedEOF = error_types.New("there is no enough data")
 //)
 
 // innerBuffer

@@ -4,6 +4,8 @@ import (
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/authorization/internal/logic"
 	"pwm-server/app/bff/authorization/internal/model"
+	"pwm-server/pkg/error_types"
+	"strings"
 )
 
 /*
@@ -34,7 +36,23 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 		c.Logger.Errorf("auth.resendCode - error: %v", err)
 		return nil, err
 	}
+	// Split the ApiHash by "@@"
+	parts := strings.Split(in.PhoneCodeHash, "@@")
+	if len(parts) != 2 {
+		err := error_types.ErrPhoneCodeNotFound
+		c.Logger.Errorf("auth.resendCode - error: %v", err)
+		return nil, err
+	}
 
+	phoneCodeHash := parts[0]
+	apiHash := parts[1]
+
+	parts2 := strings.Split(apiHash, "@@")
+	if len(parts2) != 2 {
+		return nil, error_types.ErrPhoneApiHashInvalid
+	}
+
+	email := parts2[0]
 	// 3. check number
 	// client phone number format: "+86 111 1111 1111"
 	phoneNumber, err := checkPhoneNumberInvalid(in.PhoneNumber)
@@ -104,26 +122,35 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 	}
 
 	// codeLogic := logic.NewAuthSignLogic(s.AuthCore)
-	codeData, err2 := c.svcCtx.AuthLogic.DoAuthReSendCode(c.ctx,
+	codeData, err2 := c.svcCtx.AuthLogic.DoAuthReSendCode(
+		c.ctx,
 		c.MD.PermAuthKeyId,
 		phoneNumber,
-		in.PhoneCodeHash,
+		phoneCodeHash,
 		func(codeData2 *model.PhoneCodeTransaction) error {
 			//if codeData2.State == model.CodeStateSent {
 			//	return
 			//}
 
 			// 400	SMS_CODE_CREATE_FAILED	An error occurred while creating the SMS code
-			extraData, err2 := c.svcCtx.AuthLogic.VerifyCodeInterface.SendSmsVerifyCode(c.ctx, phoneNumber, codeData2.PhoneCode, codeData2.PhoneCodeHash)
-			if err2 != nil {
-				c.Logger.Errorf("sendSmsVerifyCode error: %v", err2)
-				return err2
-			}
+			extraData, err2 := c.svcCtx.AuthLogic.VerifyCodeInterface.SendSmsVerifyCode(
+				c.ctx, phoneNumber, codeData2.PhoneCode, phoneCodeHash, apiHash,
+			)
 
-			codeData2.SentCodeType = model.SentCodeTypeSms
+			if err2 != nil || extraData == nil || !extraData.Valid {
+				c.Logger.Errorf("send verify code error: %v", err2)
+				return err2
+			} else {
+				// codeData2.SentCodeType = model.CodeTypeSms
+				codeData2.SentCodeType = model.SentCodeTypeSms
+				if !extraData.Auto {
+					codeData2.PhoneCodeExtraData = extraData.ConfirmationId + "@@" + email
+				} else {
+					codeData2.PhoneCodeHash = codeData2.PhoneCodeHash + codeData2.PhoneCode
+				}
+			}
 			codeData2.NextCodeType = model.CodeTypeSms
 			codeData2.State = model.CodeStateSent
-			codeData2.PhoneCodeExtraData = extraData
 
 			return nil
 
@@ -136,7 +163,8 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 			//	codeData.State = model.CodeStateSent
 			//	m.AuthCore.UpdatePhoneCodeData(context.Background(), authKeyId, phoneNumber, codeData.PhoneCodeHash, codeData)
 			//}()
-		})
+		},
+	)
 	if err2 != nil {
 		c.Logger.Errorf("auth.resendCode - error: %v", err2)
 		err = err2
@@ -144,13 +172,15 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 	}
 
 	if c.svcCtx.Plugin != nil {
-		c.svcCtx.Plugin.OnAuthAction(c.ctx,
+		c.svcCtx.Plugin.OnAuthAction(
+			c.ctx,
 			c.MD.PermAuthKeyId,
 			c.MD.ClientMsgId,
 			c.MD.ClientAddr,
 			in.PhoneNumber,
 			logic.GetActionType(in),
-			"auth.resendCode")
+			"auth.resendCode",
+		)
 	}
 
 	return codeData.ToAuthSentCode(), nil

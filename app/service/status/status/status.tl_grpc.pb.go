@@ -208,7 +208,7 @@ func (UnimplementedRPCStatusServer) StatusSetChannelOffline(context.Context, *TL
 
 // UnsafeRPCStatusServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCStatusServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCStatusServer interface {
 	mustEmbedUnimplementedRPCStatusServer()
 }

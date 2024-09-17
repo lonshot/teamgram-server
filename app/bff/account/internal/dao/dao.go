@@ -61,7 +61,7 @@ func New(c config.Config) *Dao {
 //	// Handle the case where the key does not exist
 //	if storedCode == "" {
 //		logx.Errorf("Phone code not found for hash: %s", hash)
-//		return "", time.Time{}, errors.ErrPhoneCodeNotFound
+//		return "", time.Time{}, error_types.ErrPhoneCodeNotFound
 //	}
 //
 //	// Fetch the expiration time (TTL) of the phone code in seconds

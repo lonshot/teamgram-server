@@ -11,24 +11,30 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-func (c *session) onMsgsAck(ctx context.Context, gatewayId string, msgId int64, seqno int32, request *mtproto.TLMsgsAck) {
-	logx.WithContext(ctx).Infof("onMsgsAck - request data: {sess: %s, gatewayId: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgsAck(
+	ctx context.Context, gatewayId string, msgId int64, seqno int32, request *mtproto.TLMsgsAck,
+) {
+	logx.WithContext(ctx).Infof(
+		"onMsgsAck - request data: {sess: %s, gatewayId: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId,
 		seqno,
-		request)
+		request,
+	)
 
-	c.outQueue.OnMsgsAck(request.GetMsgIds(), func(inMsgId int64) {
-		// Notes: ignore notifyId
-		if inMsgId > math.MaxInt32 {
-			// 1. rpc
-			c.inQueue.ChangeAckReceived(inMsgId)
-		} else {
-			// 3. push
-			// TODO(@benqi): client received updates, will remove it from cache
-		}
-	})
+	c.outQueue.OnMsgsAck(
+		request.GetMsgIds(), func(inMsgId int64) {
+			// Notes: ignore notifyId
+			if inMsgId > math.MaxInt32 {
+				// 1. rpc
+				c.inQueue.ChangeAckReceived(inMsgId)
+			} else {
+				// 3. push
+				// TODO(@benqi): client received updates, will remove it from cache
+			}
+		},
+	)
 }
 
 //// Check Server Salt
@@ -66,17 +72,23 @@ func (c *session) checkBadServerSalt(ctx context.Context, gatewayId string, salt
 	}
 
 	if !valid {
-		badServerSalt := mtproto.MakeTLBadServerSalt(&mtproto.BadMsgNotification{
-			BadMsgId:      msg.MsgId,
-			ErrorCode:     kServerSaltIncorrect,
-			BadMsgSeqno:   msg.Seqno,
-			NewServerSalt: c.sessList.cacheSalt.GetSalt(),
-		}).To_BadMsgNotification()
-		logx.WithContext(ctx).Errorf("invalid salt: %d, send badServerSalt: {%v}, cacheSalt: %v", salt, badServerSalt, c.sessList.cacheLastSalt)
+		badServerSalt := mtproto.MakeTLBadServerSalt(
+			&mtproto.BadMsgNotification{
+				BadMsgId:      msg.MsgId,
+				ErrorCode:     kServerSaltIncorrect,
+				BadMsgSeqno:   msg.Seqno,
+				NewServerSalt: c.sessList.cacheSalt.GetSalt(),
+			},
+		).To_BadMsgNotification()
+		logx.WithContext(ctx).Errorf(
+			"invalid salt: %d, send badServerSalt: {%v}, cacheSalt: %v", salt, badServerSalt, c.sessList.cacheLastSalt,
+		)
 
-		c.sendDirectToGateway(ctx, gatewayId, false, badServerSalt, func(sentRaw *mtproto.TLMessageRawData) {
-			// nothing do
-		})
+		c.sendDirectToGateway(
+			ctx, gatewayId, false, badServerSalt, func(sentRaw *mtproto.TLMessageRawData) {
+				// nothing do
+			},
+		)
 		return false
 	}
 
@@ -154,7 +166,9 @@ func (c *session) checkBadServerSalt(ctx context.Context, gatewayId string, salt
 */
 
 // func checkConfirm()
-func (c *session) checkBadMsgNotification(ctx context.Context, gatewayId string, excludeMsgIdToo bool, msg *mtproto.TLMessage2) bool {
+func (c *session) checkBadMsgNotification(
+	ctx context.Context, gatewayId string, excludeMsgIdToo bool, msg *mtproto.TLMessage2,
+) bool {
 	// Notice of Ignored Error Message
 	//
 	// In certain cases, a server may notify a client that its incoming message was ignored for whatever reason.
@@ -187,7 +201,7 @@ func (c *session) checkBadMsgNotification(ctx context.Context, gatewayId string,
 	//  64: invalid container.
 	//
 	// The intention is that error_code values are grouped (error_code >> 4):
-	// for example, the codes 0x40 - 0x4f correspond to errors in container decomposition.
+	// for example, the codes 0x40 - 0x4f correspond to error_types in container decomposition.
 	//
 	// Notifications of an ignored message do not require acknowledgment (i.e., are irrelevant).
 	//
@@ -258,13 +272,17 @@ func (c *session) checkBadMsgNotification(ctx context.Context, gatewayId string,
 			*/
 			if clientTime+60 < serverTime {
 				errorCode = kMsgIdTooLow
-				logx.WithContext(ctx).Errorf("bad server time - {msg_id: %d, clientTime: %d, serverTime: %d}", msg.MsgId, clientTime, serverTime)
+				logx.WithContext(ctx).Errorf(
+					"bad server time - {msg_id: %d, clientTime: %d, serverTime: %d}", msg.MsgId, clientTime, serverTime,
+				)
 
 				break
 			}
 			if clientTime > serverTime+300 {
 				errorCode = kMsgIdTooHigh
-				logx.WithContext(ctx).Errorf("bad server time - {msg_id: %d, clientTime: %d, serverTime: %d}", msg.MsgId, clientTime, serverTime)
+				logx.WithContext(ctx).Errorf(
+					"bad server time - {msg_id: %d, clientTime: %d, serverTime: %d}", msg.MsgId, clientTime, serverTime,
+				)
 				break
 			}
 		}
@@ -342,15 +360,19 @@ func (c *session) checkBadMsgNotification(ctx context.Context, gatewayId string,
 	}
 
 	if errorCode != 0 {
-		badMsgNotification := mtproto.MakeTLBadMsgNotification(&mtproto.BadMsgNotification{
-			BadMsgId:    msg.MsgId,
-			BadMsgSeqno: msg.Seqno,
-			ErrorCode:   errorCode,
-		}).To_BadMsgNotification()
+		badMsgNotification := mtproto.MakeTLBadMsgNotification(
+			&mtproto.BadMsgNotification{
+				BadMsgId:    msg.MsgId,
+				BadMsgSeqno: msg.Seqno,
+				ErrorCode:   errorCode,
+			},
+		).To_BadMsgNotification()
 		logx.WithContext(ctx).Error("errorCode - ", errorCode, ", msg: ", reflect.TypeOf(msg.Object))
-		c.sendDirectToGateway(ctx, gatewayId, false, badMsgNotification, func(sentRaw *mtproto.TLMessageRawData) {
-			// nothing do
-		})
+		c.sendDirectToGateway(
+			ctx, gatewayId, false, badMsgNotification, func(sentRaw *mtproto.TLMessageRawData) {
+				// nothing do
+			},
+		)
 		return false
 	}
 	return true
@@ -411,13 +433,17 @@ func (c *session) checkBadMsgNotification(ctx context.Context, gatewayId string,
 			emit sendMsgsStateInfoAsync(msgId, info);
 		} return HandleResult::Success;
 */
-func (c *session) onMsgsStateReq(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsStateReq) {
-	logx.WithContext(ctx).Debugf("onMsgsStateReq - request data: {sess: %s, gatewayId: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgsStateReq(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsStateReq,
+) {
+	logx.WithContext(ctx).Debugf(
+		"onMsgsStateReq - request data: {sess: %s, gatewayId: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// Request for Message Status Information
 	//
@@ -475,10 +501,12 @@ func (c *session) onMsgsStateReq(ctx context.Context, gatewayId string, msgId *i
 		info[i] = iMsgId.state
 	}
 
-	msgsStateInfo := mtproto.MakeTLMsgsStateInfo(&mtproto.MsgsStateInfo{
-		ReqMsgId: msgId.msgId,
-		Info:     string(info),
-	}).To_MsgsStateInfo()
+	msgsStateInfo := mtproto.MakeTLMsgsStateInfo(
+		&mtproto.MsgsStateInfo{
+			ReqMsgId: msgId.msgId,
+			Info:     string(info),
+		},
+	).To_MsgsStateInfo()
 
 	c.sendRawToQueue(ctx, gatewayId, msgId.msgId, false, msgsStateInfo)
 	msgId.state = RECEIVED | NEED_NO_ACK
@@ -536,13 +564,17 @@ func (c *session) onMsgsStateReq(ctx context.Context, gatewayId string, msgId *i
 		}
 	}
 */
-func (c *session) onMsgsStateInfo(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsStateInfo) {
-	logx.WithContext(ctx).Infof("onMsgsStateInfo - request data: {sess: %s, gatewayId: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgsStateInfo(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsStateInfo,
+) {
+	logx.WithContext(ctx).Infof(
+		"onMsgsStateInfo - request data: {sess: %s, gatewayId: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// 1. handle other
 	// 1) hand request.
@@ -590,13 +622,15 @@ func (c *session) onMsgsStateInfo(ctx context.Context, gatewayId string, msgId *
 			ackIds = append(ackIds, msgIds[i])
 		}
 	}
-	c.outQueue.OnMsgsAck(ackIds, func(inMsgId int64) {
-		// Notes: ignore notifyId
-		if inMsgId <= math.MaxInt32 {
-			// 3. push
-			// TODO(@benqi): client received updates, will remove it from cache
-		}
-	})
+	c.outQueue.OnMsgsAck(
+		ackIds, func(inMsgId int64) {
+			// Notes: ignore notifyId
+			if inMsgId <= math.MaxInt32 {
+				// 3. push
+				// TODO(@benqi): client received updates, will remove it from cache
+			}
+		},
+	)
 
 	// TODO(@benqi): resend
 	if len(resendIds) > 0 {
@@ -607,13 +641,17 @@ func (c *session) onMsgsStateInfo(ctx context.Context, gatewayId string, msgId *
 	msgId.state = RECEIVED | NEED_NO_ACK
 }
 
-func (c *session) onMsgsAllInfo(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsAllInfo) {
-	logx.WithContext(ctx).Infof("onMsgsAllInfo - request data: {sess: %s, conn_id: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgsAllInfo(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgsAllInfo,
+) {
+	logx.WithContext(ctx).Infof(
+		"onMsgsAllInfo - request data: {sess: %s, conn_id: %s, md: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// Voluntary Communication of Status of Messages
 	//
@@ -647,13 +685,15 @@ func (c *session) onMsgsAllInfo(ctx context.Context, gatewayId string, msgId *in
 			ackIds = append(ackIds, msgIds[i])
 		}
 	}
-	c.outQueue.OnMsgsAck(ackIds, func(inMsgId int64) {
-		// Notes: ignore notifyId
-		if inMsgId <= math.MaxInt32 {
-			// 3. push
-			// TODO(@benqi): client received updates, will remove it from cache
-		}
-	})
+	c.outQueue.OnMsgsAck(
+		ackIds, func(inMsgId int64) {
+			// Notes: ignore notifyId
+			if inMsgId <= math.MaxInt32 {
+				// 3. push
+				// TODO(@benqi): client received updates, will remove it from cache
+			}
+		},
+	)
 
 	// TODO(@benqi): resend
 	if len(resendIds) > 0 {
@@ -664,13 +704,17 @@ func (c *session) onMsgsAllInfo(ctx context.Context, gatewayId string, msgId *in
 	msgId.state = RECEIVED | NEED_NO_ACK
 }
 
-func (c *session) onMsgResendReq(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgResendReq) {
-	logx.WithContext(ctx).Errorf("onMsgResendReq - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgResendReq(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgResendReq,
+) {
+	logx.WithContext(ctx).Errorf(
+		"onMsgResendReq - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// Explicit Request to Re-Send Messages
 	//
@@ -728,10 +772,12 @@ func (c *session) onMsgResendReq(ctx context.Context, gatewayId string, msgId *i
 			info[i] = iMsgId.state
 		}
 
-		msgsStateInfo := mtproto.MakeTLMsgsStateInfo(&mtproto.MsgsStateInfo{
-			ReqMsgId: msgId.msgId,
-			Info:     string(info),
-		}).To_MsgsStateInfo()
+		msgsStateInfo := mtproto.MakeTLMsgsStateInfo(
+			&mtproto.MsgsStateInfo{
+				ReqMsgId: msgId.msgId,
+				Info:     string(info),
+			},
+		).To_MsgsStateInfo()
 
 		c.sendRawToQueue(ctx, gatewayId, msgId.msgId, false, msgsStateInfo)
 		msgId.state = RECEIVED | NEED_NO_ACK
@@ -742,24 +788,32 @@ func (c *session) onMsgResendReq(ctx context.Context, gatewayId string, msgId *i
 	}
 }
 
-func (c *session) onMsgDetailInfo(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgDetailedInfo) {
-	logx.WithContext(ctx).Errorf("onMsgDetailInfo - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgDetailInfo(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgDetailedInfo,
+) {
+	logx.WithContext(ctx).Errorf(
+		"onMsgDetailInfo - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// NOTE(@benqi): not received by server
 }
 
-func (c *session) onMsgNewDetailInfo(ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgDetailedInfo) {
-	logx.WithContext(ctx).Errorf("onMsgNewDetailInfo - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
+func (c *session) onMsgNewDetailInfo(
+	ctx context.Context, gatewayId string, msgId *inboxMsg, request *mtproto.TLMsgDetailedInfo,
+) {
+	logx.WithContext(ctx).Errorf(
+		"onMsgNewDetailInfo - request data: {sess: %s, conn_id: %s, msg_id: %d, seq_no: %d, request: {%s}}",
 		c,
 		gatewayId,
 		msgId.msgId,
 		msgId.seqNo,
-		request)
+		request,
+	)
 
 	// NOTE(@benqi): not received by server
 }
@@ -767,13 +821,17 @@ func (c *session) onMsgNewDetailInfo(ctx context.Context, gatewayId string, msgI
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 func (c *session) notifyMsgsStateInfo(ctx context.Context, gatewayId string, inMsg *inboxMsg) {
 	// TODO(@benqi): if aced and < resendSize, send rsp.
-	msgsStateInfo := mtproto.MakeTLMsgsStateInfo(&mtproto.MsgsStateInfo{
-		ReqMsgId: inMsg.msgId,
-		Info:     string([]byte{inMsg.state}),
-	})
-	c.sendDirectToGateway(ctx, gatewayId, false, msgsStateInfo, func(sentRaw *mtproto.TLMessageRawData) {
-		// nothing do
-	})
+	msgsStateInfo := mtproto.MakeTLMsgsStateInfo(
+		&mtproto.MsgsStateInfo{
+			ReqMsgId: inMsg.msgId,
+			Info:     string([]byte{inMsg.state}),
+		},
+	)
+	c.sendDirectToGateway(
+		ctx, gatewayId, false, msgsStateInfo, func(sentRaw *mtproto.TLMessageRawData) {
+			// nothing do
+		},
+	)
 }
 
 func (c *session) notifyMsgsStateReq() {

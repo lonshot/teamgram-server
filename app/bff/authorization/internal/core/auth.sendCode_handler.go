@@ -72,7 +72,7 @@ import (
 //
 
 /*
-## Possible errors
+## Possible error_types
 
 |Code |	Type |	Description|
 |:-:|:-:|:-:|
@@ -231,7 +231,7 @@ func (c *AuthorizationCore) authSendCode(
 			c.Logger.Errorf("checkPhoneNumberExist error: %v", err)
 			return
 		}
-		//st, ok := errors.Cause(err).(*status.Error)
+		//st, ok := error_types.Cause(err).(*status.Error)
 		//if !ok {
 		//	c.Logger.Errorf("checkPhoneNumberExist error: %v, type: %s", st, reflect.TypeOf(err))
 		//	return
@@ -243,7 +243,7 @@ func (c *AuthorizationCore) authSendCode(
 		//}
 		//
 		//*ecode.Status
-		//switch nErr := errors.Cause(err).(type) {
+		//switch nErr := error_types.Cause(err).(type) {
 		//case ecode.Codes:
 		//	phoneRegistered = true
 		//default:

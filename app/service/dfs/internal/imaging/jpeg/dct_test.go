@@ -48,7 +48,7 @@ func TestDCT(t *testing.T) {
 	}
 
 	// Check that the FDCT and IDCT functions are inverses, after a scale and
-	// level shift. Scaling reduces the rounding errors in the conversion from
+	// level shift. Scaling reduces the rounding error_types in the conversion from
 	// floats to ints.
 	for i, b := range blocks {
 		got, want := b, b
@@ -93,7 +93,7 @@ func TestDCT(t *testing.T) {
 // differ reports whether any pair-wise elements in b0 and b1 differ by 2 or
 // more. That tolerance is because there isn't a single definitive decoding of
 // a given JPEG image, even before the YCbCr to RGB conversion; implementations
-// can have different IDCT rounding errors.
+// can have different IDCT rounding error_types.
 func differ(b0, b1 *block) bool {
 	for i := range b0 {
 		delta := b0[i] - b1[i]

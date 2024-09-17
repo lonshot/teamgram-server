@@ -643,7 +643,7 @@ func (UnimplementedRPCDialogServer) DialogUpdateUnreadCount(context.Context, *TL
 
 // UnsafeRPCDialogServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCDialogServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCDialogServer interface {
 	mustEmbedUnimplementedRPCDialogServer()
 }

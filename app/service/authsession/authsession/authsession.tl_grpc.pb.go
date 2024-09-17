@@ -358,7 +358,7 @@ func (UnimplementedRPCAuthsessionServer) AuthsessionSetInitConnection(context.Co
 
 // UnsafeRPCAuthsessionServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCAuthsessionServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCAuthsessionServer interface {
 	mustEmbedUnimplementedRPCAuthsessionServer()
 }

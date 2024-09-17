@@ -25,7 +25,7 @@ enum HandshakeType {
 	binding a new temporary key overwrites the previous one.
 
 
-## Possible errors
+## Possible error_types
 | Code | Type | Description |
 | ---- | ---- | ----------- |
 | 400 | ENCRYPTED_MESSAGE_INVALID | Encrypted message is incorrect |
@@ -86,7 +86,9 @@ AuthsessionBindTempAuthKey
 ```
 */
 // authsession.bindTempAuthKey perm_auth_key_id:long nonce:long expires_at:int encrypted_message:bytes = Bool;
-func (c *AuthsessionCore) AuthsessionBindTempAuthKey(in *authsession.TLAuthsessionBindTempAuthKey) (*mtproto.Bool, error) {
+func (c *AuthsessionCore) AuthsessionBindTempAuthKey(in *authsession.TLAuthsessionBindTempAuthKey) (
+	*mtproto.Bool, error,
+) {
 	// 400	ENCRYPTED_MESSAGE_INVALID	Encrypted message is incorrect
 	// 400	INPUT_REQUEST_TOO_LONG	The request is too big
 	// 400	TEMP_AUTH_KEY_ALREADY_BOUND	The passed temporary key is already bound to another perm_auth_key_id
@@ -134,17 +136,21 @@ func (c *AuthsessionCore) AuthsessionBindTempAuthKey(in *authsession.TLAuthsessi
 
 		// TODO: tx wrapper
 		// bindTemp
-		c.svcCtx.Dao.UnsafeBindKeyIdV2(c.ctx,
+		c.svcCtx.Dao.UnsafeBindKeyIdV2(
+			c.ctx,
 			bindAuthKeyInner.GetPermAuthKeyId(),
 			tempKeyData.AuthKeyType,
-			bindAuthKeyInner.GetTempAuthKeyId())
+			bindAuthKeyInner.GetTempAuthKeyId(),
+		)
 
 		// TODO: expiredIn int32
 		// bindPerm
-		c.svcCtx.Dao.UnsafeBindKeyIdV2(c.ctx,
+		c.svcCtx.Dao.UnsafeBindKeyIdV2(
+			c.ctx,
 			bindAuthKeyInner.GetTempAuthKeyId(),
 			mtproto.AuthKeyTypePerm,
-			bindAuthKeyInner.GetPermAuthKeyId())
+			bindAuthKeyInner.GetPermAuthKeyId(),
+		)
 	}
 
 	return mtproto.BoolTrue, nil

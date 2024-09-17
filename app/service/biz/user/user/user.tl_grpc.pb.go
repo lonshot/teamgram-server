@@ -1138,7 +1138,7 @@ func (UnimplementedRPCUserServer) UserSetStoriesHidden(context.Context, *TLUserS
 
 // UnsafeRPCUserServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCUserServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCUserServer interface {
 	mustEmbedUnimplementedRPCUserServer()
 }

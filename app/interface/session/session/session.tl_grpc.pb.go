@@ -193,7 +193,7 @@ func (UnimplementedRPCSessionServer) SessionPushRpcResultData(context.Context, *
 
 // UnsafeRPCSessionServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCSessionServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCSessionServer interface {
 	mustEmbedUnimplementedRPCSessionServer()
 }

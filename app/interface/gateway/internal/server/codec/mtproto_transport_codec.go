@@ -174,7 +174,7 @@ func (c *TransportCodec) peekMTProtoCodec() error {
 	// check intermediate version
 	if firstInt == INTERMEDIATE_FLAG {
 		//log.Warn("MTProtoProxyCodec - mtproto intermediate version, impl in the future!!")
-		//return nil, errors.New("mtproto intermediate version not impl!!")
+		//return nil, error_types.New("mtproto intermediate version not impl!!")
 		log.Infof("mtproto intermediate version.")
 		c.codec = NewMTProtoIntermediateCodec(c.conn)
 		peek.Discard(4)
@@ -184,7 +184,7 @@ func (c *TransportCodec) peekMTProtoCodec() error {
 	// check intermediate version
 	if firstInt == PADDED_INTERMEDIATE_FLAG {
 		//log.Warn("MTProtoProxyCodec - mtproto intermediate version, impl in the future!!")
-		//return nil, errors.New("mtproto intermediate version not impl!!")
+		//return nil, error_types.New("mtproto intermediate version not impl!!")
 		log.Infof("mtproto padded intermediate version.")
 		c.codec = NewMTProtoPaddedIntermediateCodec(c.conn)
 		peek.Discard(4)
@@ -249,8 +249,10 @@ func (c *TransportCodec) peekMTProtoCodec() error {
 	if protocolType != ABRIDGED_INT32_FLAG &&
 		protocolType != INTERMEDIATE_FLAG &&
 		protocolType != PADDED_INTERMEDIATE_FLAG {
-		log.Errorf("transportCodec - invalid obfuscated protocol type - %s",
-			hex.EncodeToString(obfuscatedBuf))
+		log.Errorf(
+			"transportCodec - invalid obfuscated protocol type - %s",
+			hex.EncodeToString(obfuscatedBuf),
+		)
 		return errors.New("mtproto buf[56:60]'s byte != 0xef")
 	}
 
@@ -309,8 +311,10 @@ func (c *TransportCodec) peekNTProtoCodec() error {
 	if protocolType != ABRIDGED_INT32_FLAG &&
 		protocolType != INTERMEDIATE_FLAG &&
 		protocolType != PADDED_INTERMEDIATE_FLAG {
-		log.Errorf("transportCodec - invalid obfuscated protocol type - %s, buf[8:12] = %s",
-			hex.EncodeToString(obfuscatedBuf), hex.EncodeToString(obfuscatedBuf[8:12]))
+		log.Errorf(
+			"transportCodec - invalid obfuscated protocol type - %s, buf[8:12] = %s",
+			hex.EncodeToString(obfuscatedBuf), hex.EncodeToString(obfuscatedBuf[8:12]),
+		)
 
 		return errors.New("mtproto buf[8:12]'s byte != 0xfefefefe")
 	}

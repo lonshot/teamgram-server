@@ -283,7 +283,7 @@ func (UnimplementedRPCInboxServer) InboxReadMediaUnreadToInboxV2(context.Context
 
 // UnsafeRPCInboxServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RPCInboxServer will
-// result in compilation errors.
+// result in compilation error_types.
 type UnsafeRPCInboxServer interface {
 	mustEmbedUnimplementedRPCInboxServer()
 }
