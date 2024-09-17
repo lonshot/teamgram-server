@@ -77,6 +77,9 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 }
 
 func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extraData string) error {
+	if extraData == "__auto__" || len(m.code.DummyCode) == 5 && code_ == m.code.DummyCode {
+		return nil
+	}
 	// Prepare the form data for the POST request
 	form := url.Values{}
 	form.Add("phoneNumber", codeHash)

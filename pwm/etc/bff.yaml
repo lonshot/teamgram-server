@@ -19,6 +19,7 @@ Code:
   Key: "pwm-server"
   Secret: "{F3BBF75F-E5F4-4B33-AAE8-4232F62D2037}"
   RegionId: ""
+  DummyCode: "12345"
 
 BizServiceClient:
   Etcd:

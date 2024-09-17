@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/teamgram/proto/mtproto"
@@ -362,6 +363,7 @@ func (c *AuthorizationCore) authSendCode(
 				)
 				if err2 != nil || extraData == nil || !extraData.Valid {
 					c.Logger.Errorf("send verify code error: %v", err2)
+					err2 = errors.New("send verify code error")
 					return err2
 				} else {
 					// codeData2.SentCodeType = model.CodeTypeSms
@@ -369,7 +371,7 @@ func (c *AuthorizationCore) authSendCode(
 					if !extraData.Auto {
 						codeData2.PhoneCodeExtraData = extraData.ConfirmationId + "@@" + email
 					} else {
-						codeData2.PhoneCodeHash = codeData2.PhoneCodeHash + codeData2.PhoneCode
+						codeData2.PhoneCodeExtraData = "__auto__"
 					}
 				}
 			}

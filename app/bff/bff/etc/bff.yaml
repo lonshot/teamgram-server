@@ -17,6 +17,7 @@ Code:
   Key: ""
   Secret: ""
   RegionId: ""
+  DummyCode: ""
 
 BizServiceClient:
   Etcd:

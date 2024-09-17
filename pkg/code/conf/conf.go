@@ -7,6 +7,7 @@ type SmsVerifyCodeConfig struct {
 	Key           string
 	Secret        string
 	RegionId      string
+	DummyCode     string
 }
 
 type WebrtcConfig struct {
