@@ -41,18 +41,18 @@ func (c *ContactsCore) ContactsImportContacts(in *mtproto.TLContactsImportContac
 		).To_Contacts_ImportedContacts(), nil
 	}
 
-	// Process the imported contacts (Add/Update)
-	importedContacts, popularContacts, updatedUsers, me, err := c.processImportedContacts(in)
-	if err != nil {
-		return nil, err
-	}
-
+	importedContacts, err := c.svcCtx.Dao.UserClient.UserImportContacts(
+		c.ctx, &userpb.TLUserImportContacts{
+			UserId:   c.MD.UserId,
+			Contacts: in.Contacts,
+		},
+	)
 	// Return the result, even if empty (syncing can result in an empty list)
 	return mtproto.MakeTLContactsImportedContacts(
 		&mtproto.Contacts_ImportedContacts{
-			Imported:       importedContacts,
-			PopularInvites: popularContacts,
-			Users:          append([]*mtproto.User{me}, updatedUsers...),
+			Imported:       importedContacts.Imported,
+			PopularInvites: importedContacts.PopularInvites,
+			Users:          importedContacts.Users,
 		},
 	).To_Contacts_ImportedContacts(), nil
 }

@@ -33,7 +33,7 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	c := core.New(ctx, s.svcCtx)
 
 	// Get the message details using the MessageClient
-	messageBox, err := s.svcCtx.MessageClient.MessageGetUserMessage(
+	box, err := s.svcCtx.MessageClient.MessageGetUserMessage(
 		ctx, &message.TLMessageGetUserMessage{
 			UserId: c.MD.UserId,
 			Id:     reaction.MsgId, // The ID of the message to which a reaction will be added
@@ -42,9 +42,6 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	if err != nil {
 		return nil, errors.New("message not found")
 	}
-
-	// Extract recipientId (for peer-to-peer messaging)
-	recipientId := messageBox.SenderUserId
 
 	// Loop through all reactions in Reaction_FLAGVECTORREACTION
 	for _, reactionItem := range reaction.Reaction_FLAGVECTORREACTION {
@@ -77,27 +74,23 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	// Convert the reactions to proto format
 	reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
 
-	// Prepare the UpdateMessageReactions object with the new reactions
-	updateMessageReactions := mtproto.MakeTLUpdateMessageReactions(
-		&mtproto.Update{
-			Peer_PEER:                  mtproto.MakePeer(peerType, peerId), // Peer of the message
-			MaxId:                      messageBox.MessageId,               // Message ID
-			Pts_INT32:                  messageBox.Pts,                     // Points for updates synchronization
-			PtsCount:                   1,                                  // Count of points for this update
-			Reactions_MESSAGEREACTIONS: reactionProto,                      // Include the updated reactions
-		},
-	).To_Update()
-
-	// Prepare and return the Updates object to the current user
-	updates := mtproto.MakeUpdatesByUpdates(updateMessageReactions)
-
-	// Send the updated reactions to the recipient
-	_, err = s.svcCtx.SyncClient.SyncUpdatesNotMe(
+	updates := mtproto.MakeUpdatesByUpdates(
+		mtproto.MakeTLUpdateMessageReactions(
+			&mtproto.Update{
+				UserId:                     c.MD.UserId,
+				Pts_INT32:                  box.Pts,
+				PtsCount:                   box.PtsCount,
+				RandomId:                   box.RandomId,
+				Message_MESSAGE:            box.Message,
+				Reactions_MESSAGEREACTIONS: reactionProto,
+			},
+		).To_Update(),
+	)
+	_, err = s.svcCtx.Dao.SyncClient.SyncPushUpdates(
 		ctx,
-		&sync.TLSyncUpdatesNotMe{
-			UserId:        recipientId,        // The recipient user to notify
-			PermAuthKeyId: c.MD.PermAuthKeyId, // AuthKeyId of the user performing the action
-			Updates:       updates,
+		&sync.TLSyncPushUpdates{
+			UserId:  peerId,
+			Updates: updates,
 		},
 	)
 	if err != nil {
@@ -117,38 +110,75 @@ func (s Service) MessagesGetMessagesReactions(
 	}
 
 	// Convert the list of int32 message IDs to int64
-	msgIds := make([]int64, len(reactions.Id))
+	msgIds := make([]int32, len(reactions.Id))
 	for i, id := range reactions.Id {
-		msgIds[i] = int64(id)
+		msgIds[i] = int32(id)
 	}
 
-	// Retrieve reactions for the specified message IDs
-	reactionsList, err := s.svcCtx.Dao.SelectReactionsByMessageIds(ctx, msgIds)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert reactions into proto format
-	messageReactions := convertReactionsToMessageReactionsProto(reactionsList)
-
-	// Prepare the Updates object to return
-	updates := mtproto.MakeUpdatesByUpdates(
-		mtproto.MakeTLUpdateMessageReactions(
-			&mtproto.Update{
-				Peer_PEER:                  mtproto.MakePeerUser(reactions.Peer.UserId),
-				Reactions_MESSAGEREACTIONS: messageReactions,
-			},
-		).To_Update(),
+	// Extract current user from the context (core)
+	c := core.New(ctx, s.svcCtx)
+	// Get the message list details using the MessageClient
+	messageBoxes, err := s.svcCtx.MessageClient.MessageGetUserMessageList(
+		ctx, &message.TLMessageGetUserMessageList{
+			UserId: c.MD.UserId,
+			IdList: msgIds, // The ID of the message to which a reaction will be added
+		},
 	)
+	if err != nil {
+		return nil, errors.New("message not found")
+	}
 
-	return updates, nil
+	var messageUpdates []*mtproto.Update
+	for _, box := range messageBoxes.GetDatas() {
+		// Retrieve the updated list of reactions for the message
+		reactionsList, err2 := s.svcCtx.Dao.SelectReactionsByMessageId(ctx, int64(box.MessageId))
+		if err2 != nil {
+			return nil, errors.New("failed to retrieve message reactions")
+		}
+
+		// Convert the reactions to proto format
+		reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
+
+		messageUpdates = append(
+			messageUpdates, mtproto.MakeTLUpdateMessageReactions(
+				&mtproto.Update{
+					UserId:                     c.MD.UserId,
+					Pts_INT32:                  box.Pts,
+					PtsCount:                   box.PtsCount,
+					RandomId:                   box.RandomId,
+					Message_MESSAGE:            box.Message,
+					Reactions_MESSAGEREACTIONS: reactionProto,
+				},
+			).To_Update(),
+		)
+	}
+
+	return mtproto.MakeTLUpdates(
+		&mtproto.Updates{
+			Updates: messageUpdates,
+			Users:   []*mtproto.User{},
+			Chats:   []*mtproto.Chat{},
+			Date:    int32(time.Now().Unix()),
+			Seq:     0,
+		},
+	).To_Updates(), nil
 }
 
 // convertReactionsToMessageReactionsProto converts the list of ReactionsDO into proto format (MessageReactions).
 func convertReactionsToMessageReactionsProto(reactions []*dataobject.ReactionsDO) *mtproto.MessageReactions {
 	var protoReactions []*mtproto.MessagePeerReaction
+	reactionCountMap := make(map[string]int32) // Map to store the count of each reaction type
+	uniqueReactionSet := make(map[string]bool) // Set to track if a reaction type has been added to protoReactions
 
 	for _, reaction := range reactions {
+		// Count the reactions for each type
+		reactionCountMap[reaction.Reaction]++
+
+		// Skip adding to protoReactions if the reaction has already been added
+		if uniqueReactionSet[reaction.Reaction] {
+			continue
+		}
+
 		// Create each proto reaction object
 		protoReaction := mtproto.MakeTLMessagePeerReaction(
 			&mtproto.MessagePeerReaction{
@@ -161,13 +191,29 @@ func convertReactionsToMessageReactionsProto(reactions []*dataobject.ReactionsDO
 
 		// Append to the list of proto reactions
 		protoReactions = append(protoReactions, protoReaction)
+
+		// Mark the reaction type as already added
+		uniqueReactionSet[reaction.Reaction] = true
 	}
 
-	// Return the MessageReactions object with the proto reactions list
+	// Create the Results list of ReactionCount from the reactionCountMap
+	var reactionCounts []*mtproto.ReactionCount
+	for reaction, count := range reactionCountMap {
+		reactionCounts = append(
+			reactionCounts, mtproto.MakeTLReactionCount(
+				&mtproto.ReactionCount{
+					Reaction: reaction,
+					Count:    count,
+				},
+			).To_ReactionCount(),
+		)
+	}
+
+	// Return the MessageReactions object with both the proto reactions list and the reaction counts
 	return mtproto.MakeTLMessageReactions(
 		&mtproto.MessageReactions{
-			Results:         nil,            // Can be populated if needed
-			RecentReactions: protoReactions, // The reactions we just converted
+			Results:         reactionCounts, // Populated with aggregated reaction counts
+			RecentReactions: protoReactions, // The individual reactions we just converted
 			CanSeeList:      true,           // Can customize this depending on the use case
 		},
 	).To_MessageReactions()
@@ -188,23 +234,31 @@ func (s *Service) MessagesGetMessageReactionsList(
 		return nil, err
 	}
 
-	// Convert reactions to proto format
+	// Convert reactions to proto format and aggregate reaction counts
 	var protoReactions []*mtproto.MessagePeerReaction
+	uniqueReactionSet := make(map[string]bool) // Set to track if a reaction type has been added to protoReactions
+
 	for _, reaction := range reactions {
-		if list.Reaction_FLAGSTRING != nil && reaction.Reaction != list.Reaction_FLAGSTRING.GetValue() {
+		// Skip adding to protoReactions if the reaction has already been added
+		if uniqueReactionSet[reaction.Reaction] {
 			continue
 		}
-		protoReactions = append(
-			protoReactions, mtproto.MakeTLMessagePeerReaction(
-				&mtproto.MessagePeerReaction{
-					Reaction: reaction.Reaction, // The reaction string (emoji, etc.)
-					PeerId: mtproto.MakePeer(
-						mtproto.PEER_USER, reaction.PeerId,
-					), // MakePeer is used to build the Peer object
-					Date: int32(reaction.UpdatedAt), // Convert timestamp to Unix time in int32 format
-				},
-			).To_MessagePeerReaction(),
-		)
+
+		// Create each proto reaction object
+		protoReaction := mtproto.MakeTLMessagePeerReaction(
+			&mtproto.MessagePeerReaction{
+				Reaction: reaction.Reaction,                     // The reaction (e.g., emoji)
+				PeerId:   mtproto.MakePeerUser(reaction.UserId), // User who made the reaction
+				Date:     int32(reaction.CreatedAt),             // The date of the reaction (convert timestamp to int32)
+				Unread:   !reaction.Read,                        // Whether the reaction is unread
+			},
+		).To_MessagePeerReaction()
+
+		// Append to the list of proto reactions
+		protoReactions = append(protoReactions, protoReaction)
+
+		// Mark the reaction type as already added
+		uniqueReactionSet[reaction.Reaction] = true
 	}
 
 	// Limit the number of reactions returned
@@ -212,11 +266,11 @@ func (s *Service) MessagesGetMessageReactionsList(
 		protoReactions = protoReactions[:list.Limit]
 	}
 
-	// Build the response with reactions
+	// Build the response with both individual reactions and reaction counts
 	reactionsList := mtproto.MakeTLMessagesMessageReactionsList(
 		&mtproto.Messages_MessageReactionsList{
-			Reactions: protoReactions,             // Populate with converted reactions
-			Count:     int32(len(protoReactions)), // Number of reactions
+			Reactions: protoReactions,             // Individual reactions in proto format
+			Count:     int32(len(protoReactions)), // Number of individual reactions returned
 		},
 	).To_Messages_MessageReactionsList()
 

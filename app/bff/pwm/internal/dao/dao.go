@@ -312,7 +312,7 @@ func (d *Dao) InsertReaction(ctx context.Context, reaction *dataobject.Reactions
 }
 
 // SelectReactionsByMessageIds retrieves reactions for a list of message IDs.
-func (d *Dao) SelectReactionsByMessageIds(ctx context.Context, msgIds []int64) ([]*dataobject.ReactionsDO, error) {
+func (d *Dao) SelectReactionsByMessageIds(ctx context.Context, msgIds []int32) ([]*dataobject.ReactionsDO, error) {
 	query, args, err := sqlx.In("SELECT * FROM reactions WHERE message_id IN (?)", msgIds)
 	if err != nil {
 		return nil, err
