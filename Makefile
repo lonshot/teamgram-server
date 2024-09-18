@@ -116,6 +116,7 @@ prune:
 	docker system prune -a
 
 run:
+	docker compose down
 	docker compose up -d 
 	docker compose logs --tail 100 -f
 

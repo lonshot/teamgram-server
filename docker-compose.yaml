@@ -1,6 +1,6 @@
 services:
   pwm:
-    image: debian:bullseye-slim  # Use Debian slim image
+    image: debian:bookworm-slim # Use Debian slim image
     restart: always
     ports:
       - "10443:10443"
