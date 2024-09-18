@@ -1,6 +1,6 @@
 services:
   pwm:
-    image: busybox  # Use BusyBox image (lightweight)
+    image: debian:bullseye-slim  # Use Debian slim image
     restart: always
     ports:
       - "10443:10443"
