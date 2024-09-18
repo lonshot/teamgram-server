@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   pwm:
-    image: alpine:latest  # Use lightweight Alpine image
+    image: busybox  # Use BusyBox image (lightweight)
     restart: always
     ports:
       - "10443:10443"
@@ -12,7 +10,7 @@ services:
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
     working_dir: /  # Root directory
-    entrypoint: ["/bin/sh", "-c", "/app/docker/entrypoint.sh"]  # Define entrypoint to run the script
+    command: sh -c "ls /app/docker/ && pwd && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
     networks:
       - pwm_net
 
