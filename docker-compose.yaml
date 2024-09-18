@@ -1,17 +1,16 @@
 services:
   pwm:
-    build: .  # Build the image from the Dockerfile
+    image: alpine:latest  # Use lightweight Alpine image
     restart: always
     ports:
       - "10443:10443"
       - "11443:11443"
       - "5222:5222"
       - "8801:8801"
-      - "40000:40000"  # Delve debugging port
     volumes:
       - .:/root  # Mount the host 'pwm' directory to '/app' in the container
     working_dir: /root  # Set the working directory to where your Go project is
-    command: bash -c "chmod +x /root/pwm/docker/entrypoint.sh && /root/pwm/docker/entrypoint.sh"
+    command: sh -c "apk add --no-cache ffmpeg curl git tar && chmod +x /root/pwm/docker/entrypoint.sh && /root/pwm/docker/entrypoint.sh"
     networks:
       - pwm_net
 
