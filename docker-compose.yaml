@@ -8,8 +8,9 @@ services:
       - "5222:5222"
       - "8801:8801"
     volumes:
-      - /root/pwm-server/pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    command: sh -c "ls /app/docker/entrypoint.sh && apk add --no-cache ffmpeg curl git tar && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
+      - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
+    working_dir: /
+    command: sh -c "chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
     networks:
       - pwm_net
 
