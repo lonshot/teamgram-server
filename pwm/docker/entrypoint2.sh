@@ -6,7 +6,7 @@
 
 export PWM_HOST=${PWM_HOST:-"0.0.0.0"}
 export ETCD_URL=${ETCD_URL:-"etcd:2379"}
-export REDIS_HOST=${REDIS_HOST:-"redis:6379"}
+export REDIS_HOST=${REDIS_HOST:-"redis:6479"}
 export KAFKA_HOST=${KAFKA_HOST:-"kafka:9092"}
 export MYSQL_URI=${MYSQL_URI:-"teamgram:teamgram@tcp(mysql:3306)/pwm?charset=utf8mb4"}
 export MINIO_URI=${MINIO_URI:-"minio:9000"}
@@ -23,8 +23,8 @@ createConfigs() {
     cat $CONFIG_TEMPLATES_DIR/$file \
       | sed 's#ListenOn: 127.0.0.1#ListenOn: '"$PWM_HOST"'#g' \
       | sed "s#127.0.0.1:2379#$ETCD_URL#g" \
-      | sed "s#127.0.0.1:6379#$REDIS_HOST#g" \
-      | sed "s#localhost:6379#$REDIS_HOST#g" \
+      | sed "s#127.0.0.1:6479#$REDIS_HOST#g" \
+      | sed "s#localhost:6479#$REDIS_HOST#g" \
       | sed "s#root:@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4#$MYSQL_URI#g" \
       | sed 's#AccessKeyID: minio#AccessKeyID: '"$MINIO_KEY"'#g' \
       | sed 's#SecretAccessKey: pwm1234aa#SecretAccessKey: '"$MINIO_SECRET"'#g' \

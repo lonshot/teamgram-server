@@ -75,7 +75,7 @@ image: redis:6.2.7
 container_name: redis
 restart: always
 ports:
-- 6379:6379
+- 6479:6479
 networks:
 - teamgram-net
 volumes:
@@ -215,9 +215,9 @@ mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "$CHANGE_AUTHENTICATION $CHANGE_PAS
 127.0.0.1:2379
 =>etcd:2379
 
-127.0.0.1:6379
-localhost:6379
-=>redis:6379
+127.0.0.1:6479
+localhost:6479
+=>redis:6479
 
 127.0.0.1:9092
 =>kafka:9092
@@ -249,9 +249,9 @@ QueryTimeout: 5s
 ExecTimeout: 5s
 TranTimeout: 5s
 Cache:
-- Host: redis:6379
+- Host: redis:6479
   KV:
-- Host: redis:6379
+- Host: redis:6479
 ```
 
 ## 5、teamgram在主机部署

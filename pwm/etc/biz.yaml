@@ -9,9 +9,9 @@ Log:
   Path: ../logs/biz
   Level: debug
 Cache:
-  - Host: localhost:6379
+  - Host: localhost:6479
 KV:
-  - Host: localhost:6379
+  - Host: localhost:6479
 Mysql:
   DSN: root:@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4&parseTime=true
   Active: 64

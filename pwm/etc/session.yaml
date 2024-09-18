@@ -9,7 +9,7 @@ Log:
   Path: ../logs/session
   Level: debug
 Cache:
-  - Host: 127.0.0.1:6379
+  - Host: 127.0.0.1:6479
 AuthSession:
   Etcd:
     Hosts:
