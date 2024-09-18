@@ -8,9 +8,8 @@ services:
       - "5222:5222"
       - "8801:8801"
     volumes:
-      - .:/root  # Mount the host 'pwm' directory to '/app' in the container
-    working_dir: /root  # Set the working directory to where your Go project is
-    command: sh -c "apk add --no-cache ffmpeg curl git tar && chmod +x /root/pwm/docker/entrypoint.sh && /root/pwm/docker/entrypoint.sh"
+      - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
+    command: sh -c "apk add --no-cache ffmpeg curl git tar && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
     networks:
       - pwm_net
 

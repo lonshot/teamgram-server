@@ -17,8 +17,8 @@ export MINIO_SSL=${MINIO_SSL:-"false"}
 
 # create configs from config templates.
 createConfigs() {
-  CONFIG_TARGET_DIR=/root/pwm/etc2
-  CONFIG_TEMPLATES_DIR=/root/pwm/etc
+  CONFIG_TARGET_DIR=/app/etc2
+  CONFIG_TEMPLATES_DIR=/app/etc
   for file in `ls $CONFIG_TEMPLATES_DIR`; do
     cat $CONFIG_TEMPLATES_DIR/$file \
       | sed 's#ListenOn: 127.0.0.1#ListenOn: '"$PWM_HOST"'#g' \
