@@ -10,7 +10,7 @@ Log:
   Path: ../logs/bff
   Level: debug
 KV:
-  - Host: localhost:6479
+  - Host: localhost:6379
 
 Code:
   Name: "me"

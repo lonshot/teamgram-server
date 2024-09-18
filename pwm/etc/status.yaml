@@ -9,5 +9,5 @@ Log:
   Path: ../logs/status
   Level: debug
 Status:
-  - Host: 127.0.0.1:6479
+  - Host: 127.0.0.1:6379
 StatusExpire: 90

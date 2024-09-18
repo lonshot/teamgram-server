@@ -14,4 +14,4 @@ Mysql:
   ExecTimeout: "5s"
   TranTimeout: "5s"
 Cache:
-  - Host: 127.0.0.1:6479
+  - Host: 127.0.0.1:6379
