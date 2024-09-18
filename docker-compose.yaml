@@ -1,6 +1,6 @@
 services:
   pwm:
-    image: ubuntu:22.04  # Use the official Ubuntu base image directly
+    image: debian:bookworm-slim # ubuntu:22.04  # Use the official Ubuntu base image directly
     restart: always
     ports:
       - "10443:10443"
@@ -9,7 +9,7 @@ services:
       - "8801:8801"
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    command: bash -c "chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
+    entrypoint: ["/bin/sh", "-c", "/app/docker/entrypoint.sh"]
     networks:
       - pwm_net
 
