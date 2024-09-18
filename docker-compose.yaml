@@ -12,7 +12,7 @@ services:
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
     working_dir: /  # Root directory
-    command: sh -c "ls /app/docker/ && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
+    entrypoint: ["/bin/sh", "-c", "/app/docker/entrypoint.sh"]  # Define entrypoint to run the script
     networks:
       - pwm_net
 
