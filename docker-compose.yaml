@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   pwm:
     image: alpine:latest  # Use lightweight Alpine image
@@ -9,8 +11,8 @@ services:
       - "8801:8801"
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    working_dir: /
-    command: sh -c "chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
+    working_dir: /  # Root directory
+    command: sh -c "ls /app/docker/ && chmod +x /app/docker/entrypoint.sh && /app/docker/entrypoint.sh"
     networks:
       - pwm_net
 
