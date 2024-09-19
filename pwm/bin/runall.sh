@@ -47,6 +47,6 @@ run_service "session" "session.yaml"
 
 # Optional services - uncomment if needed
 # run_service "gateway" "gateway.yaml"
-# run_service "httpserver" "httpserver.yaml"
+run_service "httpserver" "httpserver.yaml"
 
 run_service "gnetway" "../etc/gnetway.yaml"

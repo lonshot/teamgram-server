@@ -29,12 +29,18 @@ func (s Service) MessagesGetDialogFiltersEFD48C89(
 	}
 
 	// Convert filters.Datas (of type []*DialogFilterExt) to Filters (of type []*DialogFilter)
-	dialogFilters := &mtproto.Messages_DialogFilters{
-		Filters: make([]*mtproto.DialogFilter, len(filters.Datas)), // Initialize the slice with the appropriate length
-	}
+	dialogFilters := mtproto.MakeTLMessagesDialogFilters(
+		&mtproto.Messages_DialogFilters{
+			Filters: make(
+				[]*mtproto.DialogFilter, len(filters.Datas),
+			), // Initialize the slice with the appropriate length
+		},
+	).To_Messages_DialogFilters()
 
 	for i, filterExt := range filters.Datas {
-		dialogFilters.Filters[i] = filterExt.DialogFilter
+		dialogFilters.Filters[i] = mtproto.MakeTLDialogFilter(
+			filterExt.DialogFilter,
+		).To_DialogFilter()
 	}
 
 	return dialogFilters, nil
@@ -63,7 +69,9 @@ func (s Service) MessagesGetSuggestedDialogFilters(
 			suggestedFilters = append(
 				suggestedFilters, mtproto.MakeTLDialogFilterSuggested(
 					&mtproto.DialogFilterSuggested{
-						Filter: filterExt.DialogFilter, // Use the actual dialog filter
+						Filter: mtproto.MakeTLDialogFilter(
+							filterExt.DialogFilter,
+						).To_DialogFilter(), // Use the actual dialog filter
 					},
 				).To_DialogFilterSuggested(),
 			)
@@ -175,10 +183,12 @@ func convertDialogPinnedExtToChat(pinned *dialog.DialogPinnedExt) *mtproto.Chat 
 	}
 
 	// Map fields from DialogPinnedExt to mtproto.Chat
-	return &mtproto.Chat{
-		Id: pinned.PeerId, // Assuming DialogPinnedExt has a PeerId field
-		// Add other field mappings here
-	}
+	return mtproto.MakeTLChat(
+		&mtproto.Chat{
+			Id: pinned.PeerId, // Assuming DialogPinnedExt has a PeerId field
+			// Add other field mappings here
+		},
+	).To_Chat()
 }
 
 func (s Service) ChatlistsExportChatlistInvite(

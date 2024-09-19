@@ -5,6 +5,7 @@ import (
 	"github.com/teamgram/proto/mtproto"
 )
 
+// fetchStickersForEmoji
 func (s Service) MessagesGetStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesGetStickers,
 ) (*mtproto.Messages_Stickers, error) {
@@ -12,6 +13,7 @@ func (s Service) MessagesGetStickers(
 	panic("implement me")
 }
 
+// fetchStickerSets
 func (s Service) MessagesGetAllStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesGetAllStickers,
 ) (*mtproto.Messages_AllStickers, error) {
@@ -19,6 +21,7 @@ func (s Service) MessagesGetAllStickers(
 	panic("implement me")
 }
 
+// fetchStickers
 func (s Service) MessagesGetStickerSet(
 	ctx context.Context, set *mtproto.TLMessagesGetStickerSet,
 ) (*mtproto.Messages_StickerSet, error) {
@@ -26,6 +29,7 @@ func (s Service) MessagesGetStickerSet(
 	panic("implement me")
 }
 
+// installStickerSet
 func (s Service) MessagesInstallStickerSet(
 	ctx context.Context, set *mtproto.TLMessagesInstallStickerSet,
 ) (*mtproto.Messages_StickerSetInstallResult, error) {
@@ -33,6 +37,7 @@ func (s Service) MessagesInstallStickerSet(
 	panic("implement me")
 }
 
+// uninstallStickerSet
 func (s Service) MessagesUninstallStickerSet(
 	ctx context.Context, set *mtproto.TLMessagesUninstallStickerSet,
 ) (*mtproto.Bool, error) {
@@ -47,6 +52,7 @@ func (s Service) MessagesReorderStickerSets(
 	panic("implement me")
 }
 
+// fetchFeaturedStickers
 func (s Service) MessagesGetFeaturedStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesGetFeaturedStickers,
 ) (*mtproto.Messages_FeaturedStickers, error) {
@@ -61,6 +67,7 @@ func (s Service) MessagesReadFeaturedStickers(
 	panic("implement me")
 }
 
+// fetchRecentStickers
 func (s Service) MessagesGetRecentStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesGetRecentStickers,
 ) (*mtproto.Messages_RecentStickers, error) {
@@ -68,6 +75,7 @@ func (s Service) MessagesGetRecentStickers(
 	panic("implement me")
 }
 
+// removeRecentSticker
 func (s Service) MessagesSaveRecentSticker(
 	ctx context.Context, sticker *mtproto.TLMessagesSaveRecentSticker,
 ) (*mtproto.Bool, error) {
@@ -75,6 +83,7 @@ func (s Service) MessagesSaveRecentSticker(
 	panic("implement me")
 }
 
+// clearRecentStickers
 func (s Service) MessagesClearRecentStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesClearRecentStickers,
 ) (*mtproto.Bool, error) {
@@ -103,6 +112,7 @@ func (s Service) MessagesGetAttachedStickers(
 	panic("implement me")
 }
 
+// fetchFavoriteStickers
 func (s Service) MessagesGetFavedStickers(
 	ctx context.Context, stickers *mtproto.TLMessagesGetFavedStickers,
 ) (*mtproto.Messages_FavedStickers, error) {
@@ -110,6 +120,7 @@ func (s Service) MessagesGetFavedStickers(
 	panic("implement me")
 }
 
+// faveSticker
 func (s Service) MessagesFaveSticker(ctx context.Context, sticker *mtproto.TLMessagesFaveSticker) (
 	*mtproto.Bool, error,
 ) {
@@ -117,6 +128,7 @@ func (s Service) MessagesFaveSticker(ctx context.Context, sticker *mtproto.TLMes
 	panic("implement me")
 }
 
+// searchStickers
 func (s Service) MessagesSearchStickerSets(
 	ctx context.Context, sets *mtproto.TLMessagesSearchStickerSets,
 ) (*mtproto.Messages_FoundStickerSets, error) {

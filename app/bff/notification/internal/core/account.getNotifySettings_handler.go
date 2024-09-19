@@ -7,7 +7,9 @@ import (
 
 // AccountGetNotifySettings
 // account.getNotifySettings#12b3ad31 peer:InputNotifyPeer = PeerNotifySettings;
-func (c *NotificationCore) AccountGetNotifySettings(in *mtproto.TLAccountGetNotifySettings) (*mtproto.PeerNotifySettings, error) {
+func (c *NotificationCore) AccountGetNotifySettings(in *mtproto.TLAccountGetNotifySettings) (
+	*mtproto.PeerNotifySettings, error,
+) {
 	var (
 		err      error
 		settings *mtproto.PeerNotifySettings
@@ -16,7 +18,16 @@ func (c *NotificationCore) AccountGetNotifySettings(in *mtproto.TLAccountGetNoti
 	peer := mtproto.FromInputNotifyPeer(c.MD.UserId, in.Peer)
 	switch peer.PeerType {
 	case mtproto.PEER_USER:
-		// TODO(@benqi): check peerUser Exists
+		// Validate if the user exists by calling UserGetImmutableUser
+		_, err = c.svcCtx.Dao.UserClient.UserGetImmutableUser(
+			c.ctx, &userpb.TLUserGetImmutableUser{
+				Id: peer.PeerId,
+			},
+		)
+		if err != nil {
+			c.Logger.Errorf("account.getNotifySettings - user not found: %v", err)
+			return nil, mtproto.ErrMemberNotFound
+		}
 	case mtproto.PEER_CHAT:
 		// TODO(@benqi): check peerChat exists
 	case mtproto.PEER_CHANNEL:
@@ -30,11 +41,13 @@ func (c *NotificationCore) AccountGetNotifySettings(in *mtproto.TLAccountGetNoti
 		return nil, err
 	}
 
-	settings, err = c.svcCtx.Dao.UserClient.UserGetNotifySettings(c.ctx, &userpb.TLUserGetNotifySettings{
-		UserId:   c.MD.UserId,
-		PeerType: peer.PeerType,
-		PeerId:   peer.PeerId,
-	})
+	settings, err = c.svcCtx.Dao.UserClient.UserGetNotifySettings(
+		c.ctx, &userpb.TLUserGetNotifySettings{
+			UserId:   c.MD.UserId,
+			PeerType: peer.PeerType,
+			PeerId:   peer.PeerId,
+		},
+	)
 	if err != nil {
 		c.Logger.Errorf("getNotifySettings error - %v", err)
 		return nil, err

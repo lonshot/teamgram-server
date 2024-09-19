@@ -86,11 +86,11 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 			},
 		).To_Update(),
 	)
-	_, err = s.svcCtx.Dao.SyncClient.SyncPushUpdates(
-		ctx,
-		&sync.TLSyncPushUpdates{
-			UserId:  peerId,
-			Updates: updates,
+	_, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
+		ctx, &sync.TLSyncUpdatesNotMe{
+			UserId:        peerId,
+			PermAuthKeyId: c.MD.PermAuthKeyId,
+			Updates:       updates,
 		},
 	)
 	if err != nil {
