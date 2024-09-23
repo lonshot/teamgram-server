@@ -87,7 +87,7 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 	}
 
 	// Extract metadata
-	var title, description, image, siteName string
+	var title, description, siteName string
 	var extractMeta func(*html.Node)
 
 	// Function to traverse the HTML tree and extract meta tags
@@ -114,8 +114,8 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 					switch nameAttr {
 					case "description", "og:description":
 						description = contentAttr
-					case "og:image":
-						image = contentAttr
+					//case "og:image":
+					//	image = contentAttr
 					case "og:site_name":
 						siteName = contentAttr
 					}
@@ -141,13 +141,13 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 	displayUrl := d.getDisplayUrl(url)
 
 	// Convert image to photo if available
-	var photo *mtproto.Photo
-	if image != "" {
-		photo, err = d.convertImageToPhoto(ctx, image)
-		if err != nil {
-			logx.Errorf("fetchWebPage - error converting image to photo: %v", err)
-		}
-	}
+	//var photo *mtproto.Photo
+	//if image != "" {
+	//	photo, err = d.convertImageToPhoto(ctx, image)
+	//	if err != nil {
+	//		logx.Errorf("fetchWebPage - error converting image to photo: %v", err)
+	//	}
+	//}
 
 	// Create and return a WebPage object with extracted metadata
 	return mtproto.MakeTLWebPage(
@@ -157,9 +157,9 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 			Hash:        contentHash,
 			Title:       wrapperspb.String(title),
 			Description: wrapperspb.String(description),
-			Photo:       photo,
-			SiteName:    wrapperspb.String(siteName),
-			Type:        wrapperspb.String("article"),
+			//Photo:       photo,
+			SiteName: wrapperspb.String(siteName),
+			Type:     wrapperspb.String("article"),
 		},
 	).To_WebPage(), nil
 }
