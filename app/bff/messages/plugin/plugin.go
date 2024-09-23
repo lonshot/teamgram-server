@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"crypto/tls"
 	"fmt"
+	"github.com/disintegration/imaging"
 	"golang.org/x/net/html"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-	"image"
 	"io/ioutil"
 	"net/http"
 	"pwm-server/app/service/media/media"
@@ -243,7 +243,6 @@ func (d defaultMessagesPlugin) convertImageToPhoto(ctx context.Context, imageUrl
 	).To_Photo(), nil
 }
 
-// Function to fetch image metadata (width, height, size, and MIME type) from the URL
 func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	int32, int32, int32, string, error,
 ) {
@@ -259,67 +258,37 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 
 	req, err := http.NewRequest("GET", imageUrl, nil)
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to create request: %v", err)
+		return 0, 0, 0, "", fmt.Errorf("failed to create request for %s: %v", imageUrl, err)
 	}
 	req.Header.Set(
 		"User-Agent",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
 	)
 
-	// Fetch the image data
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to fetch image: %v", err)
+		return 0, 0, 0, "", fmt.Errorf("failed to fetch image from %s: %v", imageUrl, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, 0, 0, "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
+		return 0, 0, 0, "", fmt.Errorf("failed to fetch image from %s, status code: %d", imageUrl, resp.StatusCode)
 	}
 	fmt.Printf("Received response with status code: %d\n", resp.StatusCode)
 
-	// Read the response body to check its content
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	// Read and decode the image directly
+	img, err := imaging.Decode(resp.Body) // Stream directly from the response
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to read response body: %v", err)
-	}
-	fmt.Printf("Read %d bytes from response body\n", len(bodyBytes))
-
-	// Log the first few bytes for debugging
-	if len(bodyBytes) > 20 {
-		fmt.Printf("First few bytes: %x\n", bodyBytes[:20])
-	} else {
-		fmt.Printf("Response body is too short to display bytes\n")
+		return 0, 0, 0, "", fmt.Errorf("failed to decode image from %s: %v", imageUrl, err)
 	}
 
-	// Attempt to decode the image to get its dimensions
-	img, format, err := image.DecodeConfig(bytes.NewReader(bodyBytes))
-	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v; bytes: %x", err, bodyBytes[:20])
-	}
-	fmt.Printf("Decoded image format: %s\n", format)
+	width := int32(img.Bounds().Max.X)
+	height := int32(img.Bounds().Max.Y)
+	size := int32(resp.ContentLength) // Use Content-Length if available
+	mimeType := resp.Header.Get("Content-Type")
 
-	size := int32(len(bodyBytes))
-	if size <= 0 {
-		return 0, 0, 0, "", fmt.Errorf("unable to get image size")
-	}
-	fmt.Printf("Image dimensions: %d x %d, Size: %d bytes\n", img.Width, img.Height, size)
-
-	// Guess MIME type based on the decoded format
-	var mimeType string
-	switch format {
-	case "jpeg":
-		mimeType = "image/jpeg"
-	case "png":
-		mimeType = "image/png"
-	case "gif":
-		mimeType = "image/gif"
-	case "webp":
-		mimeType = "image/webp"
-	default:
-		mimeType = "application/octet-stream" // Fallback for unknown formats
-	}
+	fmt.Printf("Image dimensions: %d x %d, Size: %d bytes\n", width, height, size)
 	fmt.Printf("Guessed MIME type: %s\n", mimeType)
 
-	return int32(img.Width), int32(img.Height), size, mimeType, nil
+	return width, height, size, mimeType, nil
 }
