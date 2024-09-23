@@ -248,22 +248,25 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	int32, int32, int32, string, error,
 ) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // Consider using secure verification in production
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // Use secure verification in production
 	}
 	client := &http.Client{
 		Transport: tr,
 		Timeout:   10 * time.Second,
 	}
 
+	fmt.Printf("Fetching image metadata from URL: %s\n", imageUrl)
+
 	req, err := http.NewRequest("GET", imageUrl, nil)
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to fetch image: %v", err)
+		return 0, 0, 0, "", fmt.Errorf("failed to create request: %v", err)
 	}
 	// Set User-Agent to mimic Chrome
 	req.Header.Set(
 		"User-Agent",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
 	)
+
 	// Fetch the image data
 	resp, err := client.Do(req)
 	if err != nil {
@@ -275,24 +278,34 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	if resp.StatusCode != http.StatusOK {
 		return 0, 0, 0, "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
 	}
+	fmt.Printf("Received response with status code: %d\n", resp.StatusCode)
 
 	// Get the MIME type from the Content-Type header
 	mimeType := resp.Header.Get("Content-Type")
 	if mimeType == "" {
 		return 0, 0, 0, "", fmt.Errorf("unable to get MIME type")
 	}
+	fmt.Printf("MIME type: %s\n", mimeType)
+
+	// Read the response body to check its content
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, 0, 0, "", fmt.Errorf("failed to read response body: %v", err)
+	}
+	fmt.Printf("Read %d bytes from response body\n", len(bodyBytes))
+
+	// Decode the image to get its dimensions
+	img, _, err := image.DecodeConfig(bytes.NewReader(bodyBytes))
+	if err != nil {
+		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v; MIME type: %s", err, mimeType)
+	}
 
 	// Get content length from headers for size
-	size := resp.ContentLength
+	size := int32(len(bodyBytes))
 	if size <= 0 {
 		return 0, 0, 0, "", fmt.Errorf("unable to get image size")
 	}
+	fmt.Printf("Image dimensions: %d x %d, Size: %d bytes\n", img.Width, img.Height, size)
 
-	// Decode the image to get its dimensions
-	img, _, err := image.DecodeConfig(resp.Body)
-	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v", err)
-	}
-
-	return int32(img.Width), int32(img.Height), int32(size), mimeType, nil
+	return int32(img.Width), int32(img.Height), size, mimeType, nil
 }
