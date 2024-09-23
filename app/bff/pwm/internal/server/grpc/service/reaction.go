@@ -6,7 +6,6 @@ import (
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/pwm/internal/core"
 	"pwm-server/app/bff/pwm/internal/dao/dataobject"
-	"pwm-server/app/messenger/sync/sync"
 	"pwm-server/app/service/biz/message/message"
 	"time"
 )
@@ -73,26 +72,34 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 
 	// Convert the reactions to proto format
 	reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
-
+	box.Message.Reactions = reactionProto
 	updates := mtproto.MakeUpdatesByUpdates(
-		mtproto.MakeTLUpdateMessageReactions(
+		mtproto.MakeTLUpdateEditMessage(
 			&mtproto.Update{
-				UserId:                     c.MD.UserId,
-				Pts_INT32:                  box.Pts,
-				PtsCount:                   box.PtsCount,
-				RandomId:                   box.RandomId,
-				Message_MESSAGE:            box.Message,
-				Reactions_MESSAGEREACTIONS: reactionProto,
+				Pts_INT32:       box.Pts,
+				PtsCount:        box.PtsCount,
+				Message_MESSAGE: box.Message,
 			},
 		).To_Update(),
+		//mtproto.MakeTLUpdateMessageReactions(
+		//	&mtproto.Update{
+		//		UserId:          c.MD.UserId,
+		//		Pts_INT32:       box.Pts,
+		//		PtsCount:        box.PtsCount,
+		//		RandomId:        box.RandomId,
+		//		Message_MESSAGE: box.Message,
+		//
+		//		Reactions_MESSAGEREACTIONS: reactionProto,
+		//	},
+		//).To_Update(),
 	)
-	_, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
-		ctx, &sync.TLSyncUpdatesNotMe{
-			UserId:        peerId,
-			PermAuthKeyId: c.MD.PermAuthKeyId,
-			Updates:       updates,
-		},
-	)
+	//_, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
+	//	ctx, &sync.TLSyncUpdatesNotMe{
+	//		UserId:        peerId,
+	//		PermAuthKeyId: c.MD.PermAuthKeyId,
+	//		Updates:       updates,
+	//	},
+	//)
 	if err != nil {
 		return nil, errors.New("failed to push update to peer")
 	}
