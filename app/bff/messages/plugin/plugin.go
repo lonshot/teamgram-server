@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/tls"
 	"fmt"
 	"golang.org/x/net/html"
+	"time"
 
 	"github.com/teamgram/marmota/pkg/net/rpcx"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -40,8 +42,25 @@ func NewMessagesPlugin(mediaClientConfig zrpc.RpcClientConf) MessagesPlugin {
 }
 
 func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string) (*mtproto.WebPage, error) {
-	// Fetch the web page content
-	resp, err := http.Get(url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // Consider using secure verification in production
+	}
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   10 * time.Second,
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+	// Set User-Agent to mimic Chrome
+	req.Header.Set(
+		"User-Agent",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+	)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch web page: %v", err)
 	}
@@ -59,7 +78,7 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 
 	// Calculate the hash of the content
 	hash := md5.Sum(bodyBytes)
-	contentHash := int32(hash[0]) // A simple hash to int32 conversion (adjust if necessary)
+	contentHash := int32(hash[0]) // Adjust hash calculation if needed
 
 	// Parse the HTML content using net/html
 	doc, err := html.Parse(bytes.NewReader(bodyBytes))
@@ -80,23 +99,26 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 					title = n.FirstChild.Data
 				}
 			case "meta":
-				// Look for description and other meta tags
 				var nameAttr, contentAttr string
 				for _, attr := range n.Attr {
 					if attr.Key == "name" || attr.Key == "property" {
 						nameAttr = attr.Val
-					} else if attr.Key == "content" {
+					}
+					if attr.Key == "content" {
 						contentAttr = attr.Val
 					}
 				}
 
-				switch nameAttr {
-				case "description", "og:description":
-					description = contentAttr
-				case "og:image":
-					image = contentAttr
-				case "og:site_name":
-					siteName = contentAttr
+				// Only assign if nameAttr and contentAttr are not empty
+				if nameAttr != "" && contentAttr != "" {
+					switch nameAttr {
+					case "description", "og:description":
+						description = contentAttr
+					case "og:image":
+						image = contentAttr
+					case "og:site_name":
+						siteName = contentAttr
+					}
 				}
 			}
 		}
@@ -110,12 +132,12 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 	// Start parsing the HTML tree
 	extractMeta(doc)
 
-	// If site name is empty, use the title as a fallback
+	// Use title as a fallback for site name
 	if siteName == "" {
 		siteName = title
 	}
 
-	// Display URL (simplify for display purposes)
+	// Simplify the URL for display purposes
 	displayUrl := d.getDisplayUrl(url)
 
 	// Convert image to photo if available
@@ -135,13 +157,13 @@ func (d defaultMessagesPlugin) GetWebpagePreview(ctx context.Context, url string
 			Hash:        contentHash,
 			Title:       wrapperspb.String(title),
 			Description: wrapperspb.String(description),
-			Photo:       photo, // The photo extracted from the image URL
+			Photo:       photo,
 			SiteName:    wrapperspb.String(siteName),
 			Type:        wrapperspb.String("article"),
-			// Add additional fields if needed, such as EmbedUrl or VideoUrl
 		},
 	).To_WebPage(), nil
 }
+
 func (d defaultMessagesPlugin) GetMessageMedia(
 	ctx context.Context, userId, ownerId int64, media *mtproto.InputMedia,
 ) (*mtproto.MessageMedia, error) {
@@ -222,13 +244,37 @@ func (d defaultMessagesPlugin) convertImageToPhoto(ctx context.Context, imageUrl
 }
 
 // Function to fetch image metadata (width, height, size, and MIME type) from the URL
-func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (int32, int32, int32, string, error) {
-	// Fetch the image data
-	resp, err := http.Get(imageUrl)
+func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
+	int32, int32, int32, string, error,
+) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // Consider using secure verification in production
+	}
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   10 * time.Second,
+	}
+
+	req, err := http.NewRequest("GET", imageUrl, nil)
 	if err != nil {
-		return 0, 0, 0, "", err
+		return 0, 0, 0, "", fmt.Errorf("failed to fetch image: %v", err)
+	}
+	// Set User-Agent to mimic Chrome
+	req.Header.Set(
+		"User-Agent",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+	)
+	// Fetch the image data
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, 0, 0, "", fmt.Errorf("failed to fetch image: %v", err)
 	}
 	defer resp.Body.Close()
+
+	// Check for a successful response
+	if resp.StatusCode != http.StatusOK {
+		return 0, 0, 0, "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
+	}
 
 	// Get the MIME type from the Content-Type header
 	mimeType := resp.Header.Get("Content-Type")
@@ -236,16 +282,16 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (int32, int32
 		return 0, 0, 0, "", fmt.Errorf("unable to get MIME type")
 	}
 
-	// Decode the image to get its dimensions
-	img, _, err := image.DecodeConfig(resp.Body)
-	if err != nil {
-		return 0, 0, 0, "", err
-	}
-
 	// Get content length from headers for size
 	size := resp.ContentLength
 	if size <= 0 {
 		return 0, 0, 0, "", fmt.Errorf("unable to get image size")
+	}
+
+	// Decode the image to get its dimensions
+	img, _, err := image.DecodeConfig(resp.Body)
+	if err != nil {
+		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v", err)
 	}
 
 	return int32(img.Width), int32(img.Height), int32(size), mimeType, nil
