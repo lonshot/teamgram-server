@@ -280,13 +280,6 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	}
 	fmt.Printf("Received response with status code: %d\n", resp.StatusCode)
 
-	// Get the MIME type from the Content-Type header
-	mimeType := resp.Header.Get("Content-Type")
-	if mimeType == "" {
-		return 0, 0, 0, "", fmt.Errorf("unable to get MIME type")
-	}
-	fmt.Printf("MIME type: %s\n", mimeType)
-
 	// Read the response body to check its content
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -294,11 +287,12 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	}
 	fmt.Printf("Read %d bytes from response body\n", len(bodyBytes))
 
-	// Decode the image to get its dimensions
-	img, _, err := image.DecodeConfig(bytes.NewReader(bodyBytes))
+	// Attempt to decode the image to get its dimensions
+	img, format, err := image.DecodeConfig(bytes.NewReader(bodyBytes))
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v; MIME type: %s", err, mimeType)
+		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v", err)
 	}
+	fmt.Printf("Decoded image format: %s\n", format)
 
 	// Get content length from headers for size
 	size := int32(len(bodyBytes))
@@ -306,6 +300,22 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 		return 0, 0, 0, "", fmt.Errorf("unable to get image size")
 	}
 	fmt.Printf("Image dimensions: %d x %d, Size: %d bytes\n", img.Width, img.Height, size)
+
+	// Guess MIME type based on the decoded format
+	var mimeType string
+	switch format {
+	case "jpeg":
+		mimeType = "image/jpeg"
+	case "png":
+		mimeType = "image/png"
+	case "gif":
+		mimeType = "image/gif"
+	case "webp":
+		mimeType = "image/webp"
+	default:
+		mimeType = "application/octet-stream" // Fallback for unknown formats
+	}
+	fmt.Printf("Guessed MIME type: %s\n", mimeType)
 
 	return int32(img.Width), int32(img.Height), size, mimeType, nil
 }
