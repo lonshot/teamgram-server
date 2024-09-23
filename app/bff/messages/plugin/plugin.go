@@ -261,7 +261,6 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	if err != nil {
 		return 0, 0, 0, "", fmt.Errorf("failed to create request: %v", err)
 	}
-	// Set User-Agent to mimic Chrome
 	req.Header.Set(
 		"User-Agent",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
@@ -274,7 +273,6 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	}
 	defer resp.Body.Close()
 
-	// Check for a successful response
 	if resp.StatusCode != http.StatusOK {
 		return 0, 0, 0, "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
 	}
@@ -287,14 +285,20 @@ func (d defaultMessagesPlugin) fetchImageMetadata(imageUrl string) (
 	}
 	fmt.Printf("Read %d bytes from response body\n", len(bodyBytes))
 
+	// Log the first few bytes for debugging
+	if len(bodyBytes) > 20 {
+		fmt.Printf("First few bytes: %x\n", bodyBytes[:20])
+	} else {
+		fmt.Printf("Response body is too short to display bytes\n")
+	}
+
 	// Attempt to decode the image to get its dimensions
 	img, format, err := image.DecodeConfig(bytes.NewReader(bodyBytes))
 	if err != nil {
-		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v", err)
+		return 0, 0, 0, "", fmt.Errorf("failed to decode image: %v; bytes: %x", err, bodyBytes[:20])
 	}
 	fmt.Printf("Decoded image format: %s\n", format)
 
-	// Get content length from headers for size
 	size := int32(len(bodyBytes))
 	if size <= 0 {
 		return 0, 0, 0, "", fmt.Errorf("unable to get image size")
