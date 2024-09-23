@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/pwm/internal/core"
 	"pwm-server/app/bff/pwm/internal/dao/dataobject"
@@ -14,8 +15,17 @@ import (
 func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TLMessagesSendReaction) (
 	*mtproto.Updates, error,
 ) {
+	fmt.Printf(
+		"MessagesSendReaction called with: Peer: %+v, MsgId: %d, Reactions: %+v\n", reaction.Peer, reaction.MsgId,
+		reaction.Reaction_FLAGVECTORREACTION,
+	)
+
 	// Validate input
 	if reaction.Peer == nil || len(reaction.Reaction_FLAGVECTORREACTION) == 0 || reaction.MsgId == 0 {
+		fmt.Printf(
+			"Invalid input: Peer: %+v, MsgId: %d, Reactions: %+v\n", reaction.Peer, reaction.MsgId,
+			reaction.Reaction_FLAGVECTORREACTION,
+		)
 		return nil, errors.New("invalid input")
 	}
 
@@ -27,11 +37,14 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 	p := mtproto.FromInputPeer(reaction.Peer)
 	peerId = p.PeerId
 	peerType = p.PeerType
+	fmt.Printf("Resolved PeerId: %d, PeerType: %d\n", peerId, peerType)
 
 	// Extract current user from the context (core)
 	c := core.New(ctx, s.svcCtx)
+	fmt.Printf("Current UserId: %d\n", c.MD.UserId)
 
 	// Get the message details using the MessageClient
+	fmt.Printf("Fetching message with MsgId: %d for UserId: %d\n", reaction.MsgId, c.MD.UserId)
 	box, err := s.svcCtx.MessageClient.MessageGetUserMessage(
 		ctx, &message.TLMessageGetUserMessage{
 			UserId: c.MD.UserId,
@@ -39,13 +52,16 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 		},
 	)
 	if err != nil {
+		fmt.Printf("Error: Message not found for MsgId: %d, UserId: %d\n", reaction.MsgId, c.MD.UserId)
 		return nil, errors.New("message not found")
 	}
+	fmt.Printf("Message fetched: %+v\n", box)
 
 	// Loop through all reactions in Reaction_FLAGVECTORREACTION
 	for _, reactionItem := range reaction.Reaction_FLAGVECTORREACTION {
 		// Extract the actual reaction value from the Reaction structure
 		reactionValue := reactionItem.Emoticon
+		fmt.Printf("Processing reaction: %s for MsgId: %d\n", reactionValue, reaction.MsgId)
 
 		// Insert the reaction into the database
 		_, err = s.svcCtx.Dao.InsertReaction(
@@ -60,15 +76,20 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 			},
 		)
 		if err != nil {
+			fmt.Printf("Error: Failed to save reaction: %s for MsgId: %d\n", reactionValue, reaction.MsgId)
 			return nil, errors.New("failed to save reaction")
 		}
+		fmt.Printf("Reaction %s saved successfully for MsgId: %d\n", reactionValue, reaction.MsgId)
 	}
 
 	// Retrieve the updated list of reactions for the message
+	fmt.Printf("Retrieving updated reactions for MsgId: %d\n", reaction.MsgId)
 	reactionsList, err := s.svcCtx.Dao.SelectReactionsByMessageId(ctx, int64(reaction.MsgId))
 	if err != nil {
+		fmt.Printf("Error: Failed to retrieve updated reactions for MsgId: %d\n", reaction.MsgId)
 		return nil, errors.New("failed to retrieve updated reactions")
 	}
+	fmt.Printf("Updated reactions list: %+v\n", reactionsList)
 
 	// Convert the reactions to proto format
 	reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
@@ -81,29 +102,22 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 				Message_MESSAGE: box.Message,
 			},
 		).To_Update(),
-		//mtproto.MakeTLUpdateMessageReactions(
-		//	&mtproto.Update{
-		//		UserId:          c.MD.UserId,
-		//		Pts_INT32:       box.Pts,
-		//		PtsCount:        box.PtsCount,
-		//		RandomId:        box.RandomId,
-		//		Message_MESSAGE: box.Message,
-		//
-		//		Reactions_MESSAGEREACTIONS: reactionProto,
-		//	},
-		//).To_Update(),
 	)
-	//_, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
+	fmt.Printf("Updates created: %+v\n", updates)
+
+	// _, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
 	//	ctx, &sync.TLSyncUpdatesNotMe{
 	//		UserId:        peerId,
 	//		PermAuthKeyId: c.MD.PermAuthKeyId,
 	//		Updates:       updates,
 	//	},
-	//)
-	if err != nil {
-		return nil, errors.New("failed to push update to peer")
-	}
+	// )
+	// if err != nil {
+	// 	fmt.Printf("Error: Failed to push update to peer\n")
+	// 	return nil, errors.New("failed to push update to peer")
+	// }
 
+	fmt.Printf("Updates successfully generated for MsgId: %d\n", reaction.MsgId)
 	return updates, nil
 }
 
