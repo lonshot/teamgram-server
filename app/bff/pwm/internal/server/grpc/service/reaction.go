@@ -103,6 +103,10 @@ func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TL
 			},
 		).To_Update(),
 	)
+	if err != nil {
+		c.Logger.Errorf("inbox.editMessageToInboxV2 - error: %v", err)
+		return nil, err
+	}
 	fmt.Printf("Updates created: %+v\n", updates)
 
 	// _, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
