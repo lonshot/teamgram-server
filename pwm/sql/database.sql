@@ -5358,3 +5358,90 @@ ON UPDATE CASCADE
 ON DELETE CASCADE
 ;
 
+-- Table: pwm.identify_role
+CREATE TABLE pwm.identify_role (
+    Id VARCHAR(128) NOT NULL,
+    Name VARCHAR(256) NULL,
+    NormalizedName VARCHAR(256) NULL,
+    ConcurrencyStamp TEXT NULL,
+    PRIMARY KEY (Id)
+);
+
+-- Table: pwm.identify_role_claims
+CREATE TABLE pwm.identify_role_claims (
+    Id INT AUTO_INCREMENT NOT NULL,
+    RoleId VARCHAR(128) NOT NULL,
+    ClaimType TEXT NULL,
+    ClaimValue TEXT NULL,
+    PRIMARY KEY (Id),
+    CONSTRAINT FK_RoleClaims_Role FOREIGN KEY (RoleId)
+    REFERENCES pwm.identify_role (Id) ON DELETE CASCADE
+);
+
+-- Table: pwm.identify_user
+CREATE TABLE pwm.identify_user (
+    Id VARCHAR(128) NOT NULL,
+    UserName VARCHAR(256) NULL,
+    NormalizedUserName VARCHAR(256) NULL,
+    Email VARCHAR(256) NULL,
+    NormalizedEmail VARCHAR(256) NULL,
+    EmailConfirmed BOOLEAN NOT NULL DEFAULT 0,
+    PasswordHash TEXT NULL,
+    SecurityStamp TEXT NULL,
+    ConcurrencyStamp TEXT NULL,
+    PhoneNumber TEXT NULL,
+    PhoneNumberConfirmed BOOLEAN NOT NULL DEFAULT 0,
+    TwoFactorEnabled BOOLEAN NOT NULL DEFAULT 0,
+    LockoutEnd DATETIME NULL,
+    LockoutEnabled BOOLEAN NOT NULL DEFAULT 0,
+    AccessFailedCount INT NOT NULL DEFAULT 0,
+    FirstName TEXT NULL,
+    LastName TEXT NULL,
+    ProfilePicture LONGBLOB NULL,
+    UsernameChangeLimit INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (Id)
+);
+
+-- Table: pwm.identify_user_claims
+CREATE TABLE pwm.identify_user_claims (
+    Id INT AUTO_INCREMENT NOT NULL,
+    UserId VARCHAR(128) NOT NULL,
+    ClaimType TEXT NULL,
+    ClaimValue TEXT NULL,
+    PRIMARY KEY (Id),
+    CONSTRAINT FK_UserClaims_User FOREIGN KEY (UserId)
+    REFERENCES pwm.identify_user (Id) ON DELETE CASCADE
+);
+
+-- Table: pwm.identify_user_logins
+CREATE TABLE pwm.identify_user_logins (
+    LoginProvider VARCHAR(128) NOT NULL,
+    ProviderKey VARCHAR(128) NOT NULL,
+    ProviderDisplayName TEXT NULL,
+    UserId VARCHAR(128) NOT NULL,
+    PRIMARY KEY (LoginProvider, ProviderKey),
+    CONSTRAINT FK_UserLogins_User FOREIGN KEY (UserId)
+    REFERENCES pwm.identify_user (Id) ON DELETE CASCADE
+);
+
+-- Table: pwm.identify_user_roles
+CREATE TABLE pwm.identify_user_roles (
+    UserId VARCHAR(128) NOT NULL,
+    RoleId VARCHAR(128) NOT NULL,
+    PRIMARY KEY (UserId, RoleId),
+    CONSTRAINT FK_UserRoles_Role FOREIGN KEY (RoleId)
+    REFERENCES pwm.identify_role (Id) ON DELETE CASCADE,
+    CONSTRAINT FK_UserRoles_User FOREIGN KEY (UserId)
+    REFERENCES pwm.identify_user (Id) ON DELETE CASCADE
+);
+
+-- Table: pwm.identify_user_tokens
+CREATE TABLE pwm.identify_user_tokens (
+    UserId VARCHAR(128) NOT NULL,
+    LoginProvider VARCHAR(128) NOT NULL,
+    Name VARCHAR(128) NOT NULL,
+    Value TEXT NULL,
+    PRIMARY KEY (UserId, LoginProvider, Name),
+    CONSTRAINT FK_UserTokens_User FOREIGN KEY (UserId)
+    REFERENCES pwm.identify_user (Id) ON DELETE CASCADE
+); 
