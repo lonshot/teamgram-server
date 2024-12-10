@@ -14,8 +14,8 @@ KV:
 
 Code:
   Name: "me"
-  SendCodeUrl: "http://wb.playwith-me.com/pwm/SendSecretVerifyCode"
-  VerifyCodeUrl: "http://wb.playwith-me.com/pwm/VerifySecretCode"
+  SendCodeUrl: "https://127.0.0.1/api/v1/send_secret_code"
+  VerifyCodeUrl: "https://127.0.0.1/api/v1/verify_secret_code"
   Key: "pwm-server"
   Secret: "{F3BBF75F-E5F4-4B33-AAE8-4232F62D2037}"
   RegionId: ""
