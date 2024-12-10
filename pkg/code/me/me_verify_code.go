@@ -3,11 +3,13 @@ package me
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/jsonx"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"pwm-server/pkg/code/dataobject"
+	"strings"
+
+	"github.com/zeromicro/go-zero/core/jsonx"
 
 	"pwm-server/pkg/code/conf"
 
@@ -33,15 +35,27 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 	form.Add("code", code_)
 	form.Add("codeHash", codeHash)
 	form.Add("key", m.code.Key)
-	form.Add("secret", m.code.Secret)
 	form.Add("regionId", m.code.RegionId)
 	form.Add("data", data)
 
-	// Send the POST request
+	// Prepare the request URL
 	urlV := m.code.SendCodeUrl
 	logx.Infof("sending SMS verification request to: %s", urlV)
 
-	resp, err := http.PostForm(urlV, form)
+	// Create a new HTTP request
+	req, err := http.NewRequest("POST", urlV, strings.NewReader(form.Encode()))
+	if err != nil {
+		logx.Infof("error creating HTTP request: %v", err)
+		return nil, err
+	}
+
+	// Set the headers
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
+
+	// Send the request using the HTTP client
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		logx.Infof("error sending SMS verification request: %v", err)
 		return nil, err
@@ -49,7 +63,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body) // Use io.ReadAll instead of ioutil.ReadAll
 	if err != nil {
 		logx.Infof("error reading response body: %v", err)
 		return nil, err
@@ -68,8 +82,8 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 
 	// Log the response details
 	logx.Infof(
-		"Verification response - Valid: %v, Auto: %v, ConfirmationId: %s", verifyResp.Valid, verifyResp.Auto,
-		verifyResp.ConfirmationId,
+		"Verification response - Valid: %v, Auto: %v, ConfirmationId: %s",
+		verifyResp.Valid, verifyResp.Auto, verifyResp.ConfirmationId,
 	)
 
 	// Return the confirmation ID
@@ -80,21 +94,33 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	if extraData == "__auto__" || len(m.code.DummyCode) == 5 && code_ == m.code.DummyCode {
 		return nil
 	}
+
 	// Prepare the form data for the POST request
 	form := url.Values{}
 	form.Add("phoneNumber", codeHash)
 	form.Add("code", code_)
 	form.Add("codeHash", extraData)
 	form.Add("key", m.code.Key)
-	form.Add("secret", m.code.Secret)
 	form.Add("regionId", m.code.RegionId)
-	//form.Add("data", extraData) // This is the additional data field
 
-	// Send the POST request
+	// Prepare the request URL
 	urlV := m.code.VerifyCodeUrl
 	logx.Infof("sending verification request to: %s", urlV)
 
-	resp, err := http.PostForm(urlV, form)
+	// Create a new HTTP request
+	req, err := http.NewRequest("POST", urlV, strings.NewReader(form.Encode()))
+	if err != nil {
+		logx.Infof("error creating HTTP request: %v", err)
+		return err
+	}
+
+	// Set the headers
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
+
+	// Send the request using the HTTP client
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		logx.Infof("error sending verification request: %v", err)
 		return err
@@ -102,7 +128,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body) // Use io.ReadAll instead of ioutil.ReadAll
 	if err != nil {
 		logx.Infof("error reading response body: %v", err)
 		return err
@@ -125,6 +151,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	if !verifyResp.Valid {
 		return errors.New("verification code invalid")
 	}
+
 	// Return the verification response object
 	return nil
 }
