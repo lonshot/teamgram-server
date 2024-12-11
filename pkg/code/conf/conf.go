@@ -1,13 +1,14 @@
 package conf
 
 type SmsVerifyCodeConfig struct {
-	Name          string
-	SendCodeUrl   string
-	VerifyCodeUrl string
-	Key           string
-	Secret        string
-	RegionId      string
-	DummyCode     string
+	Name           string
+	SendCodeUrl    string
+	VerifyCodeUrl  string
+	PushMessageUrl string
+	Key            string
+	Secret         string
+	RegionId       string
+	DummyCode      string
 }
 
 type WebrtcConfig struct {
