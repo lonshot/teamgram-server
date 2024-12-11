@@ -2,14 +2,12 @@ package me
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"pwm-server/pkg/code/dataobject"
 	"strings"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 
@@ -56,19 +54,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
 
 	// Send the request using the HTTP client
-
-	// Create a custom HTTP client with InsecureSkipVerify set to true
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-
-	client := &http.Client{
-		Timeout:   10 * time.Second, // Set timeout as needed
-		Transport: transport,
-	}
-
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		logx.Infof("error sending SMS verification request: %v", err)
@@ -133,17 +119,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
 
 	// Send the request using the HTTP client
-	// Create a custom HTTP client with InsecureSkipVerify set to true
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-
-	client := &http.Client{
-		Timeout:   10 * time.Second, // Set timeout as needed
-		Transport: transport,
-	}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		logx.Infof("error sending verification request: %v", err)
