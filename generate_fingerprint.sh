@@ -1,52 +1,37 @@
 #!/bin/bash
 
-# Ensure a private key file is provided
+# Check if a private key file is provided
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <path-to-private-key-file>"
+    echo "Usage: $0 <private_key_file>"
     exit 1
 fi
 
-PRIVATE_KEY_FILE="$1"
+PRIVATE_KEY_FILE=$1
 
 # Step 1: Extract the public key from the private key
-echo "Step 1: Extracting public key from private key file..."
-PUBLIC_KEY=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout)
+echo "Step 1: Extracting public key from private key..."
+PUBLIC_KEY=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -outform PEM)
 
 if [ $? -ne 0 ]; then
-    echo "Error: Failed to extract public key from private key."
+    echo "Error extracting public key"
     exit 1
 fi
+
+echo "Public Key Extracted Successfully:"
+echo "$PUBLIC_KEY"
 
 # Step 2: Generate the SHA-1 hash of the public key
 echo "Step 2: Generating SHA-1 hash of the public key..."
-SHA1_HASH=$(echo -n "$PUBLIC_KEY" | sha1sum | awk '{print $1}')
+SHA1_HASH=$(echo "$PUBLIC_KEY" | openssl dgst -sha1 | awk '{print $2}')
 
 echo "SHA-1 Hash: $SHA1_HASH"
-echo "----------------------------------------"
 
-# Step 3: Extract the first 8 bytes (16 hex digits) of the SHA-1 hash
-FIRST_8_BYTES=${SHA1_HASH:0:16}
+# Step 3: Extract the 64 lower-order bits of the SHA-1 hash
+# Convert the SHA-1 hash from hex to decimal and then extract the lower 64 bits
+echo "Step 3: Converting SHA-1 hash to decimal and extracting the lower 64 bits..."
+FINGERPRINT=$(echo "ibase=16; ${SHA1_HASH^^}" | bc)
 
-# Step 4: Convert the first 8 bytes (16 hex characters) from hexadecimal to decimal
-FINGERPRINT_DECIMAL=$(echo "ibase=16; $FIRST_8_BYTES" | bc)
+# Take only the lower 64 bits
+FINGERPRINT=$((FINGERPRINT & 0xFFFFFFFFFFFFFFFF))
 
-# Check if bc returned an error
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to convert hexadecimal hash to decimal."
-    exit 1
-fi
-
-echo "Fingerprint (Decimal): $FINGERPRINT_DECIMAL"
-echo "----------------------------------------"
-
-# Step 5: Extract the modulus (n) from the public key (using openssl to extract it)
-MODULUS=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -text | grep 'Modulus' | awk '{print $2}')
-
-# Step 6: Output the JavaScript configuration
-echo "export const SERVER_KEYS = ["
-echo "    {"
-echo "        fingerprint: $FINGERPRINT_DECIMAL,"
-echo "        n: bigInt('$MODULUS'),"
-echo "        e: 65537,"
-echo "    },"
-echo "]"
+echo "Fingerprint (Decimal): $FINGERPRINT"
