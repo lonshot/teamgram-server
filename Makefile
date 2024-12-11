@@ -150,14 +150,13 @@ pull:
 restart: stop-main pull start-main
 
 # Show logs for all services
-logs-all:
+log-deps:
 	@echo "Showing logs for all services..."
-	docker compose logs --tail 100 -f
+	docker compose -f ./docker-compose-env.yaml logs --tail 100 -f
 
-# Show logs for a specific service (use: make logs-service service=<service-name>)
-logs-service:
-	@echo "Showing logs for $(service)..."
-	docker compose logs --tail 100 -f $(service)
+log-main:
+	@echo "Showing logs for main..."
+	docker compose logs --tail 100 -f
 
 # Additional target to tail docker logs in a different format
 docker-logs:

@@ -642,7 +642,7 @@ CREATE TABLE `identify_role` (
   `NormalizedName` varchar(256) DEFAULT NULL,
   `ConcurrencyStamp` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -670,7 +670,7 @@ CREATE TABLE `identify_role_claims` (
   PRIMARY KEY (`Id`),
   KEY `FK_RoleClaims_Role` (`RoleId`),
   CONSTRAINT `FK_RoleClaims_Role` FOREIGN KEY (`RoleId`) REFERENCES `identify_role` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -710,7 +710,7 @@ CREATE TABLE `identify_user` (
   `ProfilePicture` longblob,
   `UsernameChangeLimit` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -738,7 +738,7 @@ CREATE TABLE `identify_user_claims` (
   PRIMARY KEY (`Id`),
   KEY `FK_UserClaims_User` (`UserId`),
   CONSTRAINT `FK_UserClaims_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -765,7 +765,7 @@ CREATE TABLE `identify_user_logins` (
   PRIMARY KEY (`LoginProvider`,`ProviderKey`),
   KEY `FK_UserLogins_User` (`UserId`),
   CONSTRAINT `FK_UserLogins_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -791,7 +791,7 @@ CREATE TABLE `identify_user_roles` (
   KEY `FK_UserRoles_Role` (`RoleId`),
   CONSTRAINT `FK_UserRoles_Role` FOREIGN KEY (`RoleId`) REFERENCES `identify_role` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `FK_UserRoles_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -818,7 +818,7 @@ CREATE TABLE `identify_user_tokens` (
   `Value` text,
   PRIMARY KEY (`UserId`,`LoginProvider`,`Name`),
   CONSTRAINT `FK_UserTokens_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -934,7 +934,7 @@ CREATE TABLE `net_areas` (
   `Latitude` decimal(9,6) DEFAULT NULL,
   `Longitude` decimal(9,6) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -958,7 +958,7 @@ CREATE TABLE `net_brands` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `BrandName` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -987,7 +987,7 @@ CREATE TABLE `net_broadcastmessage` (
   `HtmlContent` longtext NOT NULL,
   `Title` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`BroadcastMessageId`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1018,7 +1018,7 @@ CREATE TABLE `net_broadcastmessageuser` (
   KEY `FK_BroadcastMessageUser_User` (`UserId`),
   CONSTRAINT `FK_BroadcastMessageUser_BroadcastMessage` FOREIGN KEY (`BroadcastMessageId`) REFERENCES `net_broadcastmessage` (`BroadcastMessageId`),
   CONSTRAINT `FK_BroadcastMessageUser_User` FOREIGN KEY (`UserId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1045,7 +1045,7 @@ CREATE TABLE `net_chain` (
   PRIMARY KEY (`Id`),
   KEY `FK_Chain_Task` (`ChainId`),
   CONSTRAINT `FK_Chain_Task` FOREIGN KEY (`ChainId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1076,7 +1076,7 @@ CREATE TABLE `net_completedchain` (
   CONSTRAINT `FK_CompletedChain_CompletedTask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_CompletedChain_Tasks` FOREIGN KEY (`ChainId`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_CompletedChain_Tasks1` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1110,7 +1110,7 @@ CREATE TABLE `net_completedtask` (
   CONSTRAINT `FK_CompletedTask_GameConfig` FOREIGN KEY (`GameConfigId`) REFERENCES `net_gameconfig` (`Id`),
   CONSTRAINT `FK_CompletedTask_PairGame` FOREIGN KEY (`PairGameId`) REFERENCES `net_pairgame` (`PairGameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_CompletedTask_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1133,7 +1133,7 @@ CREATE TABLE `net_configurabletext` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1159,7 +1159,7 @@ CREATE TABLE `net_country` (
   `ShortName` varchar(20) DEFAULT NULL,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1189,7 +1189,7 @@ CREATE TABLE `net_filltext` (
   KEY `FK_FillText_Task` (`TaskId`),
   CONSTRAINT `FK_FillText_Language` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`),
   CONSTRAINT `FK_FillText_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2619 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2619 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1220,7 +1220,7 @@ CREATE TABLE `net_game` (
   PRIMARY KEY (`GameId`),
   KEY `FK_Game_GameType` (`Type`),
   CONSTRAINT `FK_Game_GameType` FOREIGN KEY (`Type`) REFERENCES `net_gametype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1252,7 +1252,7 @@ CREATE TABLE `net_gameconfig` (
   CONSTRAINT `FK_GameConfig_Game` FOREIGN KEY (`GameId`) REFERENCES `net_game` (`GameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_GameConfig_TaskF` FOREIGN KEY (`TaskForF`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_GameConfig_TaskM` FOREIGN KEY (`TaskForM`) REFERENCES `net_tasks` (`TaskId`)
-) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1275,7 +1275,7 @@ CREATE TABLE `net_gametype` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1299,7 +1299,7 @@ CREATE TABLE `net_gender` (
   `Id` int NOT NULL,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1325,7 +1325,7 @@ CREATE TABLE `net_generatorparameters` (
   `Factor` double DEFAULT NULL,
   `BaseValue` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1351,7 +1351,7 @@ CREATE TABLE `net_geographicalarea` (
   `TitleHeb` varchar(100) DEFAULT NULL,
   `MatchKey` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1375,7 +1375,7 @@ CREATE TABLE `net_keywords` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Keyword` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1399,7 +1399,7 @@ CREATE TABLE `net_language` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1430,7 +1430,7 @@ CREATE TABLE `net_loginsession` (
   `DeviceToken` varchar(250) DEFAULT NULL,
   `DeviceType` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1457,7 +1457,7 @@ CREATE TABLE `net_mediacomment` (
   `Comment` text,
   `Created` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1489,7 +1489,7 @@ CREATE TABLE `net_newgamerules` (
   `MinScore` int DEFAULT NULL,
   `MaxScore` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1518,7 +1518,7 @@ CREATE TABLE `net_news` (
   `Created` datetime NOT NULL,
   `Modified` datetime NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1545,7 +1545,7 @@ CREATE TABLE `net_newscomment` (
   `Comment` text,
   `Created` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1569,7 +1569,7 @@ CREATE TABLE `net_offensivereport` (
   `PlayerId` bigint DEFAULT NULL,
   `OffensivePlayerId` bigint DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1605,7 +1605,7 @@ CREATE TABLE `net_pairgame` (
   KEY `FK_PairGame_PlayerPair_idx` (`PlayerPairId`),
   CONSTRAINT `FK_PairGame_Game` FOREIGN KEY (`GameId`) REFERENCES `net_game` (`GameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_PairGame_PlayerPair` FOREIGN KEY (`PlayerPairId`) REFERENCES `net_playerpair` (`PlayerPairId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1628,7 +1628,7 @@ CREATE TABLE `net_pairstatus` (
   `Id` int NOT NULL,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1653,7 +1653,7 @@ CREATE TABLE `net_passion` (
   `TitleEn` varchar(100) DEFAULT NULL,
   `TitleHeb` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`PassionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1696,7 +1696,7 @@ CREATE TABLE `net_playerpair` (
   CONSTRAINT `FK_PlayerPair_PairStatus` FOREIGN KEY (`Status`) REFERENCES `net_pairstatus` (`Id`),
   CONSTRAINT `FK_PlayerPair_UserFemale` FOREIGN KEY (`Player2`) REFERENCES `users` (`id`),
   CONSTRAINT `FK_PlayerPair_UserMale` FOREIGN KEY (`Player1`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1732,7 +1732,7 @@ CREATE TABLE `net_q234` (
   KEY `FK_Q234_Task` (`TaskId`),
   CONSTRAINT `FK_Q234_Language` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`),
   CONSTRAINT `FK_Q234_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1758,7 +1758,7 @@ CREATE TABLE `net_resourcestring` (
   `En` longtext,
   `He` longtext,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1782,7 +1782,7 @@ CREATE TABLE `net_role` (
   `Name` varchar(50) DEFAULT NULL,
   `Description` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1807,7 +1807,7 @@ CREATE TABLE `net_sexualorientation` (
   `TitleEn` varchar(100) DEFAULT NULL,
   `TitleHeb` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`SexualOrientationId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1848,7 +1848,7 @@ CREATE TABLE `net_sysparam` (
   `PlayNowMessageKey` varchar(100) DEFAULT NULL,
   `DefaultRegisterUserState` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1881,7 +1881,7 @@ CREATE TABLE `net_taskanswer` (
   PRIMARY KEY (`Id`),
   KEY `fk_taskanswer_completedtask_idx` (`CompletedTaskId`),
   CONSTRAINT `fk_taskanswer_completedtask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1915,7 +1915,7 @@ CREATE TABLE `net_taskanswerfeedback` (
   CONSTRAINT `FK_TaskAnswerComment_TaskAnswer` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskAnswerFeedback_TaskLike` FOREIGN KEY (`LikeTypeId`) REFERENCES `net_tasklike` (`Id`),
   CONSTRAINT `FK_TaskAnswerFeedback_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1938,7 +1938,7 @@ CREATE TABLE `net_taskauthor` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `AuthorName` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1963,7 +1963,7 @@ CREATE TABLE `net_taskkeyword` (
   `TaskId` varchar(50) DEFAULT NULL,
   `KeywordId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1989,7 +1989,7 @@ CREATE TABLE `net_tasklike` (
   `ImagePath` varchar(512) DEFAULT NULL,
   `IsActive` tinyint DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2022,7 +2022,7 @@ CREATE TABLE `net_taskmaxstep` (
   CONSTRAINT `FK_TaskMaxStep_PlayerPair` FOREIGN KEY (`PlayerPairId`) REFERENCES `net_playerpair` (`PlayerPairId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskMaxStep_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_TaskMaxStep_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2054,7 +2054,7 @@ CREATE TABLE `net_tasknotification` (
   CONSTRAINT `FK_TaskNotification_CompletedTask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`),
   CONSTRAINT `FK_TaskNotification_User` FOREIGN KEY (`PlayerToId`) REFERENCES `users` (`id`),
   CONSTRAINT `FK_TaskNotification_UserFrom` FOREIGN KEY (`PlayerFromId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2109,7 +2109,7 @@ CREATE TABLE `net_tasks` (
   CONSTRAINT `FK_Tasks_TaskAuthor` FOREIGN KEY (`Author`) REFERENCES `net_taskauthor` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Tasks_TaskStatus` FOREIGN KEY (`Status`) REFERENCES `net_taskstatus` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Tasks_TaskTypes` FOREIGN KEY (`Type`) REFERENCES `net_tasktype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1730 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1730 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2133,7 +2133,7 @@ CREATE TABLE `net_taskstatus` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2160,7 +2160,7 @@ CREATE TABLE `net_tasksubsubtype` (
   PRIMARY KEY (`Id`),
   KEY `FK_TaskSubSubType_TaskSubType` (`SubType`),
   CONSTRAINT `FK_TaskSubSubType_TaskSubType` FOREIGN KEY (`SubType`) REFERENCES `net_tasksubtype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2185,7 +2185,7 @@ CREATE TABLE `net_tasksubtype` (
   `TypeId` int NOT NULL,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2218,7 +2218,7 @@ CREATE TABLE `net_tasktext` (
   KEY `FK_TaskText_Task` (`TaskId`),
   CONSTRAINT `FK_TaskText_Languages` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskText_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2242,7 +2242,7 @@ CREATE TABLE `net_tasktype` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2268,7 +2268,7 @@ CREATE TABLE `net_textinmultilanguages` (
   `text` longtext,
   `LanguageId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1037 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1037 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2296,7 +2296,7 @@ CREATE TABLE `net_timesfortask` (
   PRIMARY KEY (`Id`),
   KEY `FK_TimesForTask_Task` (`TaskId`),
   CONSTRAINT `FK_TimesForTask_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2322,7 +2322,7 @@ CREATE TABLE `net_userblock` (
   `BlockByUser` int NOT NULL,
   `CreateOn` datetime NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2348,7 +2348,7 @@ CREATE TABLE `net_userdislike` (
   `Timestamp` datetime DEFAULT NULL,
   `MessageId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2374,7 +2374,7 @@ CREATE TABLE `net_userreport` (
   `CreateOn` datetime NOT NULL,
   `ReportType` int NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2406,7 +2406,7 @@ CREATE TABLE `net_usertracking` (
   `TimeZone` varchar(50) DEFAULT NULL,
   `IP` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`UserId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2634,7 +2634,7 @@ CREATE TABLE `saved_dialogs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`peer_type`,`peer_id`),
   KEY `user_id_2` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3340,7 +3340,7 @@ CREATE TABLE `wallpapers` (
   PRIMARY KEY (`id`),
   KEY `fk_wallpapers_document_id` (`document_id`),
   CONSTRAINT `fk_wallpapers_document_id` FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
