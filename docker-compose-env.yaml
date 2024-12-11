@@ -2,7 +2,7 @@ services:
   # zookeeper是kafka的依赖 - Zookeeper is the dependencies of Kafka
   zookeeper:
     image: wurstmeister/zookeeper
-    container_name: zookeeper_pwm
+    container_name: pwm_zookeeper
     volumes:
       - ./data/zookeeper/data:/data
       - /etc/localtime:/etc/localtime
@@ -14,7 +14,7 @@ services:
 
   kafka:
     image: wurstmeister/kafka
-    container_name: kafka_pwm
+    container_name: pwm_kafka
     ports:
       - 127.0.0.1:9092:9092
     environment:
@@ -36,7 +36,7 @@ services:
     ports:
       - 127.0.0.1:2379:2379
       - 127.0.0.1:2380:2380
-    container_name: etcd_pwm
+    container_name: pwm_etcd
     volumes:
       - ./data/etcd/data:/data
       - /etc/timezone:/etc/timezone
@@ -60,7 +60,7 @@ services:
 
   redis:
     image: redis
-    container_name: redis_pwm
+    container_name: pwm_redis
     ports:
       - 127.0.0.1:6379:6379
     volumes:
@@ -75,7 +75,7 @@ services:
 
   mysql:
     image: mysql:5.7
-    container_name: mysql_pwm
+    container_name: pwm_mysql
     environment:
       MYSQL_ROOT_PASSWORD: pass123456a
       MYSQL_DATABASE: pwm
@@ -99,7 +99,7 @@ services:
 
   minio:
     image: minio/minio
-    container_name: minio_pwm
+    container_name: pwm_minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -115,7 +115,7 @@ services:
 
   minio_mc:
     image: minio/mc:latest
-    container_name: minio_mc_pwm
+    container_name: pwm_minio_mc
     volumes:
       - ./minio_init.sh:/minio_init.sh
     entrypoint: /minio_init.sh
@@ -124,7 +124,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_pwm
+    container_name: pwm_phpmyadmin
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
