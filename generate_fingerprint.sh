@@ -17,7 +17,7 @@ if [ $? -ne 0 ]; then
   echo "Failed to extract public key from private key."
   exit 1
 fi
-
+ 
 # Calculate the SHA-1 hash of the public key
 PUBLIC_KEY_HASH=$(echo "$PUBLIC_KEY" | openssl sha1 -binary)
 
