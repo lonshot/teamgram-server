@@ -1,60 +1,70 @@
 #!/bin/bash
 
-# Check if a private key file is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <private_key_file>"
-    exit 1
+# Enable debugging for step-by-step output
+set -euo pipefail
+
+echo "Starting RSA Fingerprint Generation"
+
+# File path to the RSA private key
+PRIVATE_KEY_PATH="private_key.pem"
+echo "Private key path: $PRIVATE_KEY_PATH"
+
+# Check if the private key exists
+if [[ ! -f "$PRIVATE_KEY_PATH" ]]; then
+  echo "Error: Private key file not found at $PRIVATE_KEY_PATH"
+  exit 1
 fi
 
-PRIVATE_KEY_FILE=$1
+# Step 1: Extract modulus (n) from the private key
+echo "Step 1: Extracting modulus (n)"
+modulus=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -modulus | sed 's/Modulus=//')
+echo "Modulus (hex): $modulus"
 
-# Step 1: Extract the public key from the private key
-echo "Step 1: Extracting public key from private key..."
-PUBLIC_KEY=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -outform PEM)
+# Step 2: Extract public exponent (e) from the private key
+echo "Step 2: Extracting public exponent (e)"
+exponent=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -text | grep publicExponent | awk '{print $2}')
+echo "Exponent: $exponent"
 
-if [ $? -ne 0 ]; then
-    echo "Error extracting public key"
-    exit 1
-fi
+# Step 3: Convert modulus to binary
+echo "Step 3: Converting modulus to binary"
+modulus_bin=$(echo "$modulus" | xxd -r -p)
+modulus_bin_size=$(echo -n "$modulus_bin" | wc -c)
+echo "Modulus (binary size): $modulus_bin_size bytes"
 
-echo "Public Key Extracted Successfully"
+# Step 4: Convert exponent to binary
+echo "Step 4: Converting exponent to binary"
+exponent_bin=$(printf '%08x' "$exponent" | xxd -r -p)
+exponent_bin_size=$(echo -n "$exponent_bin" | wc -c)
+echo "Exponent (binary size): $exponent_bin_size bytes"
 
-# Step 2: Extract the modulus (n) and public exponent (e) in binary format
-echo "Step 2: Extracting n (modulus) and e (public exponent) in binary format..."
+# Step 5: Serialize the TL structure
+echo "Step 5: Serializing TL structure"
+tmp_file=$(mktemp)
+echo -n -e "\x00" > "$tmp_file"  # Placeholder for type (optional in TL)
+echo -n -e "$modulus_bin" >> "$tmp_file"
+echo -n -e "$exponent_bin" >> "$tmp_file"
+serialized_size=$(wc -c < "$tmp_file")
+echo "Serialized data size: $serialized_size bytes"
+echo "Serialized data (hex): $(xxd -p "$tmp_file")"
 
-# Extract modulus and convert to binary
-MODULUS_HEX=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -text -noout | grep "modulus:" -A 20 | tail -n +2 | tr -d ' \n:')
-MODULUS_BIN=$(echo "$MODULUS_HEX" | xxd -r -p)
+# Step 6: Compute SHA1 hash
+echo "Step 6: Computing SHA1 hash"
+key_sha1=$(sha1sum "$tmp_file" | awk '{print $1}')
+echo "SHA1 hash: $key_sha1"
 
-# Extract public exponent and convert to binary
-PUBLIC_EXPONENT_HEX=$(openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -text -noout | grep "publicExponent" | awk '{print $2}')
-PUBLIC_EXPONENT_BIN=$(printf "%x" $PUBLIC_EXPONENT_HEX | xxd -r -p)
+# Step 7: Extract the last 8 bytes for fingerprint
+echo "Step 7: Extracting last 8 bytes of SHA1 hash"
+fingerprint_last_8=${key_sha1:32}
+echo "Last 8 bytes (hex): $fingerprint_last_8"
 
-# Step 3: Serialize the public key (n, e) as a binary structure
-echo "Step 3: Serializing the public key structure..."
-PUBLIC_KEY_BIN=$(printf '\x00\x00\x00\x00%s%s' "$(echo -n "$MODULUS_BIN" | xxd -ps -c 256 | wc -c | awk '{print int(($1 + 3) / 4)}')" "$MODULUS_BIN")
-PUBLIC_KEY_BIN+=$(printf '\x00\x00\x00\x00%s%s' "$(echo -n "$PUBLIC_EXPONENT_BIN" | xxd -ps -c 256 | wc -c | awk '{print int(($1 + 3) / 4)}')" "$PUBLIC_EXPONENT_BIN")
+# Step 8: Convert to int64
+echo "Step 8: Converting to int64 fingerprint"
+fingerprint_int64=$((0x$fingerprint_last_8))
+echo "Fingerprint (int64): $fingerprint_int64"
 
-# Step 4: Compute SHA-1 of the serialized binary structure
-echo "Step 4: Computing SHA-1 hash of the serialized public key..."
-SHA1_HASH=$(echo -n "$PUBLIC_KEY_BIN" | sha1sum | awk '{print $1}')
+# Step 9: Cleanup temporary file
+echo "Step 9: Cleaning up"
+rm "$tmp_file"
+echo "Temporary file removed."
 
-# Step 5: Extract the lower 64 bits from SHA-1 as the fingerprint
-echo "Step 5: Extracting fingerprint from the SHA-1 hash..."
-FINGERPRINT=$(printf '%s' "$SHA1_HASH" | xxd -r -p | tail -c 8 | xxd -p | tr -d '\n')
-
-echo "Fingerprint (Decimal): $FINGERPRINT"
-
-# Step 6: Output the JavaScript code for SERVER_KEYS
-echo "Step 6: Generating JavaScript output..."
-MODULUS_DECIMAL=$(echo "ibase=16; $MODULUS_HEX" | bc)
-
-cat <<EOF
-export const SERVER_KEYS = [
-    {
-        fingerprint: bigInt('$FINGERPRINT'),
-        n: bigInt('$MODULUS_DECIMAL'),
-        e: $PUBLIC_EXPONENT_HEX,
-    },
-]
-EOF
+echo "RSA Fingerprint Generation Completed Successfully."
