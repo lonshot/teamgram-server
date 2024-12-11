@@ -29,8 +29,15 @@ echo "SHA-1 Hash Generated:"
 echo "$SHA1_HASH"
 echo "----------------------------------------"
 
-# Step 3: Convert the SHA-1 hash to a decimal value
+# Step 3: Convert the SHA-1 hash to decimal
 echo "Step 3: Converting SHA-1 hash to decimal..."
-DECIMAL_FINGERPRINT=$(echo "ibase=16; $SHA1_HASH" | bc)
+
+# Strip leading zeros if any, and convert the hex string to decimal
+DECIMAL_FINGERPRINT=$(echo "ibase=16; ${SHA1_HASH^^}" | bc)
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to convert SHA-1 hash to decimal."
+    exit 1
+fi
 
 echo "Fingerprint (Decimal): $DECIMAL_FINGERPRINT"
