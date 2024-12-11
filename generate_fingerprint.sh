@@ -1,67 +1,61 @@
 #!/bin/bash
 
-# Provide the private key file path as input
-PRIVATE_KEY_PATH="$1"
+# Enable debugging for step-by-step output
+set -euo pipefail
 
-# Log the starting process
 echo "Starting RSA Fingerprint Generation"
+
+# Check if PRIVATE_KEY_PATH is provided as a parameter
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <path-to-private-key>"
+  exit 1
+fi
+
+PRIVATE_KEY_PATH="$1"
 echo "Private key path provided: $PRIVATE_KEY_PATH"
 
-# Step 1: Extract the modulus (n) and exponent (e) using openssl
+# Check if the private key exists
+if [[ ! -f "$PRIVATE_KEY_PATH" ]]; then
+  echo "Error: Private key file not found at $PRIVATE_KEY_PATH"
+  exit 1
+fi
+
+# Step 1: Extract modulus (n) from the private key
 echo "Step 1: Extracting modulus (n)"
-modulus=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -modulus | sed 's/Modulus=//')
+modulus_hex=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -modulus | sed 's/Modulus=//')
+modulus_decimal=$(echo "ibase=16; $modulus_hex" | bc)
+echo "Modulus (decimal): $modulus_decimal"
 
-# Log modulus
-echo "Modulus (hex): $modulus"
-
-# Step 2: Extract the public exponent (e), which is commonly 65537 for most keys
+# Step 2: Extract exponent (e) from the private key
 echo "Step 2: Extracting public exponent (e)"
-exponent=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -text | grep "publicExponent" | sed 's/.*=//')
-
-# Log exponent
+exponent=$(openssl rsa -in "$PRIVATE_KEY_PATH" -text -noout | grep "publicExponent" | awk '{print $2}' | tr -d '()')
 echo "Public Exponent: $exponent"
 
 # Step 3: Convert modulus and exponent to binary
 echo "Step 3: Converting modulus and exponent to binary"
-modulus_bin=$(echo "$modulus" | xxd -r -p | base64)
-exponent_bin=$(echo "$exponent" | xxd -r -p | base64)
+modulus_bin=$(echo "$modulus_hex" | xxd -r -p)
+exponent_bin=$(printf "%x" "$exponent" | xxd -r -p)
 
-# Log conversion to binary
-echo "Modulus (binary): $modulus_bin"
-echo "Exponent (binary): $exponent_bin"
-
-# Step 4: Construct the TL-serialized public key
-# For this, we can use openssl or a script to serialize the public key in the required format
+# Step 4: Construct TL-serialized public key
 echo "Step 4: Constructing TL-serialized public key"
-# Assuming a function or openssl command can help with TL serialization, you may need to serialize manually here
+public_key_bin=$(echo -n -e "\x00${modulus_bin}${exponent_bin}")
 
-# For simplicity, assume serialized public key (in base64)
-public_key_serialized="your_serialized_public_key_here"
-
-# Step 5: Calculate the SHA1 hash of the public key
+# Step 5: Calculate SHA1 hash of the public key
 echo "Step 5: Calculating SHA1 hash of the public key"
-sha1_hash=$(echo -n "$public_key_serialized" | sha1sum | awk '{print $1}')
+fingerprint_sha1=$(echo -n "$public_key_bin" | sha1sum | awk '{print $1}')
+echo "SHA1 Hash: $fingerprint_sha1"
 
-# Log the SHA1 hash
-echo "SHA1 Hash: $sha1_hash"
-
-# Step 6: Extract fingerprint (last 64 bits of the SHA1 hash)
+# Step 6: Extract fingerprint (last 8 bytes of the SHA1 hash, interpreted as signed 64-bit integer)
 echo "Step 6: Extracting fingerprint"
-fingerprint_hex=${sha1_hash:12:16} # Last 64 bits as hexadecimal (from position 12 to 16)
-fingerprint_decimal=$(echo "ibase=16; $fingerprint_hex" | bc)
+fingerprint=$(printf "%d" $((0x${fingerprint_sha1: -16})))
+echo "Fingerprint: $fingerprint"
 
-# Log fingerprint
-echo "Fingerprint: $fingerprint_decimal"
-
-# Optional: Convert fingerprint to a positive number if needed
-if [[ "$fingerprint_decimal" -lt 0 ]]; then
-    fingerprint_decimal=$(($fingerprint_decimal * -1))
-    echo "Converted fingerprint to positive: $fingerprint_decimal"
-fi
-
-# Final output in required format
+# Step 7: Format the output
+echo "Step 7: Formatting output"
 echo "{
-    fingerprint: bigInt('$fingerprint_decimal'),
-    n: bigInt('$modulus'),
-    e: $exponent
+    fingerprint: bigInt('$fingerprint'),
+    n: bigInt(
+        '$modulus_decimal',
+    ),
+    e: $exponent,
 }"
