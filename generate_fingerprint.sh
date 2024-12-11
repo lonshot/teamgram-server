@@ -22,8 +22,9 @@ fi
 
 # Step 1: Extract modulus (n) from the private key
 echo "Step 1: Extracting modulus (n)"
-modulus=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -modulus | sed 's/Modulus=//')
-echo "Modulus (hex): $modulus"
+modulus_hex=$(openssl rsa -in "$PRIVATE_KEY_PATH" -noout -modulus | sed 's/Modulus=//')
+modulus_decimal=$(echo "ibase=16; $modulus_hex" | bc)
+echo "Modulus (decimal): $modulus_decimal"
 
 # Step 2: Extract exponent (e) from the private key
 echo "Step 2: Extracting public exponent (e)"
@@ -32,7 +33,7 @@ echo "Public Exponent: $exponent"
 
 # Step 3: Convert modulus and exponent to binary
 echo "Step 3: Converting modulus and exponent to binary"
-modulus_bin=$(echo "$modulus" | xxd -r -p)
+modulus_bin=$(echo "$modulus_hex" | xxd -r -p)
 exponent_bin=$(printf "%x" "$exponent" | xxd -r -p)
 
 # Step 4: Construct TL-serialized public key
@@ -48,3 +49,13 @@ echo "SHA1 Hash: $fingerprint_sha1"
 echo "Step 6: Extracting fingerprint"
 fingerprint=$(printf "%d" $((0x${fingerprint_sha1: -16})))
 echo "Fingerprint: $fingerprint"
+
+# Step 7: Format the output
+echo "Step 7: Formatting output"
+echo "{
+    fingerprint: bigInt('$fingerprint'),
+    n: bigInt(
+        '$modulus_decimal',
+    ),
+    e: $exponent,
+}"
