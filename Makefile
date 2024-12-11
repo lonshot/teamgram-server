@@ -138,6 +138,9 @@ prune:
 check:
 	sudo lsof -i:$(port)
 
+listen:
+	sudo lsof -i -P -n | grep LISTEN
+
 # Pull latest updates from git
 pull:
 	git reset --hard
