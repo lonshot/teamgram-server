@@ -130,7 +130,7 @@ services:
       PMA_PORT: 3306
     restart: always
     ports:
-      - 8080:80
+      - 8090:80
     depends_on:
       - mysql
     networks:
