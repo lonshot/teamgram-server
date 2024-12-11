@@ -70,7 +70,19 @@ httpserver:
 
 # Clean binary files
 clean:
-	rm -rf pwm/bin/*
+	rm -rf pwm/bin/idgen
+	rm -rf pwm/bin/status
+	rm -rf pwm/bin/dfs
+	rm -rf pwm/bin/media
+	rm -rf pwm/bin/authsession
+	rm -rf pwm/bin/biz
+	rm -rf pwm/bin/msg
+	rm -rf pwm/bin/sync
+	rm -rf pwm/bin/bff
+	rm -rf pwm/bin/session
+	rm -rf pwm/bin/gateway
+	rm -rf pwm/bin/gnetway
+	rm -rf pwm/bin/httpserver
 
 # Clean logs directory
 clean-logs:
