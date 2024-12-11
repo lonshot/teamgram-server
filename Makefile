@@ -135,6 +135,9 @@ start-main:
 prune:
 	docker system prune -a
 
+check:
+	sudo lsof -i:$(port)
+
 # Pull latest updates from git
 pull:
 	git reset --hard
