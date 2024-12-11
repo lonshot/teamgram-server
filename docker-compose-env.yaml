@@ -138,5 +138,5 @@ services:
 
 networks:
   pwm_net:
-    external:
-      name: pwm_shared_network
+    name: pwm_shared_network
+    external: true
