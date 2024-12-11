@@ -108,8 +108,18 @@ reset:
 	rm -rf data
 	mkdir data
 
+# Start shared network
+start-network:
+	@echo "Checking if the shared network 'pwm_shared_network' exists..."
+	@if ! docker network ls --format '{{.Name}}' | grep -q '^pwm_shared_network$$'; then \
+		echo "Shared network 'pwm_shared_network' does not exist. Creating..."; \
+		docker network create --driver bridge --subnet=172.20.0.0/16 pwm_shared_network; \
+	else \
+		echo "Shared network 'pwm_shared_network' already exists."; \
+	fi
+
 # Start dependencies (e.g., MySQL, MinIO)
-start-deps:
+start-deps: start-network
 	@echo "Starting dependencies..."
 	docker compose -f ./docker-compose-env.yaml up -d
 
