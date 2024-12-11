@@ -57,12 +57,12 @@ DROP TABLE IF EXISTS `auth_keys`;
 CREATE TABLE `auth_keys` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `auth_key_id` bigint NOT NULL,
-  `body` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_key_id` (`auth_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,7 +93,7 @@ CREATE TABLE `auth_seq_updates` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_id` (`auth_id`,`user_id`,`seq`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,17 +118,17 @@ CREATE TABLE `auth_users` (
   `user_id` bigint NOT NULL DEFAULT '0',
   `hash` bigint NOT NULL DEFAULT '0',
   `layer` int NOT NULL DEFAULT '0',
-  `device_model` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `platform` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `system_version` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `device_model` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `platform` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `system_version` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `api_id` int NOT NULL DEFAULT '0',
-  `app_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `app_version` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `app_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `app_version` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `date_created` bigint NOT NULL DEFAULT '0',
   `date_actived` bigint NOT NULL DEFAULT '0',
-  `ip` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `country` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `region` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `ip` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `country` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `region` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `state` int NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -136,7 +136,7 @@ CREATE TABLE `auth_users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_key_id` (`auth_key_id`,`user_id`),
   KEY `auth_key_id_2` (`auth_key_id`,`user_id`,`deleted`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,23 +161,23 @@ CREATE TABLE `auths` (
   `auth_key_id` bigint NOT NULL,
   `layer` int NOT NULL DEFAULT '0',
   `api_id` int NOT NULL,
-  `device_model` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `system_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `app_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `system_lang_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `lang_pack` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `lang_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `system_code` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `proxy` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `device_model` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `system_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `app_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `system_lang_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `lang_pack` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `lang_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `system_code` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `proxy` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `params` json NOT NULL,
-  `client_ip` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `client_ip` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `date_active` bigint NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_key_id` (`auth_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,13 +200,13 @@ DROP TABLE IF EXISTS `bot_commands`;
 CREATE TABLE `bot_commands` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `bot_id` bigint NOT NULL,
-  `command` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `description` varchar(10240) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `command` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `description` varchar(10240) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `bot_id` (`bot_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -230,20 +230,20 @@ CREATE TABLE `bots` (
   `bot_id` bigint NOT NULL,
   `bot_type` int NOT NULL DEFAULT '0',
   `creator_user_id` bigint NOT NULL DEFAULT '0',
-  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `description` varchar(10240) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `description` varchar(10240) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `bot_chat_history` tinyint(1) NOT NULL DEFAULT '0',
   `bot_nochats` tinyint(1) NOT NULL DEFAULT '1',
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   `bot_inline_geo` tinyint(1) NOT NULL DEFAULT '0',
   `bot_info_version` int NOT NULL DEFAULT '1',
-  `bot_inline_placeholder` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `bot_inline_placeholder` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `bot_id` (`bot_id`),
   UNIQUE KEY `token` (`token`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -340,7 +340,7 @@ CREATE TABLE `chat_participants` (
   `chat_id` bigint NOT NULL,
   `user_id` bigint NOT NULL,
   `participant_type` int DEFAULT '0',
-  `link` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `link` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `usage2` int NOT NULL DEFAULT '0',
   `admin_rights` int NOT NULL DEFAULT '0',
   `inviter_user_id` bigint NOT NULL DEFAULT '0',
@@ -357,7 +357,7 @@ CREATE TABLE `chat_participants` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `chat_id_2` (`chat_id`,`user_id`),
   KEY `chat_id` (`chat_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,14 +382,14 @@ CREATE TABLE `chats` (
   `access_hash` bigint NOT NULL,
   `random_id` bigint NOT NULL,
   `participant_count` int NOT NULL,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `about` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `about` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `photo_id` bigint NOT NULL DEFAULT '0',
   `default_banned_rights` bigint NOT NULL DEFAULT '0',
   `migrated_to_id` bigint NOT NULL DEFAULT '0',
   `migrated_to_access_hash` bigint NOT NULL DEFAULT '0',
   `available_reactions_type` int NOT NULL DEFAULT '0',
-  `available_reactions` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `available_reactions` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `deactivated` tinyint(1) NOT NULL DEFAULT '0',
   `noforwards` tinyint(1) NOT NULL DEFAULT '0',
   `ttl_period` int NOT NULL DEFAULT '0',
@@ -398,7 +398,7 @@ CREATE TABLE `chats` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -422,18 +422,18 @@ CREATE TABLE `devices` (
   `auth_key_id` bigint NOT NULL,
   `user_id` bigint NOT NULL,
   `token_type` int NOT NULL,
-  `token` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `no_muted` tinyint(1) NOT NULL DEFAULT '0',
   `locked_period` int NOT NULL DEFAULT '0',
   `app_sandbox` tinyint(1) NOT NULL DEFAULT '0',
-  `secret` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `other_uids` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `secret` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `other_uids` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `state` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_key_id` (`auth_key_id`,`user_id`,`token_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -458,7 +458,7 @@ CREATE TABLE `dialog_filters` (
   `dialog_filter_id` int NOT NULL,
   `is_chatlist` tinyint(1) NOT NULL DEFAULT '0',
   `joined_by_slug` tinyint(1) NOT NULL DEFAULT '0',
-  `slug` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `slug` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `has_my_invites` int NOT NULL DEFAULT '0',
   `dialog_filter` json NOT NULL,
   `order_value` bigint NOT NULL DEFAULT '0',
@@ -467,7 +467,7 @@ CREATE TABLE `dialog_filters` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`dialog_filter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -507,7 +507,7 @@ CREATE TABLE `dialogs` (
   `folder_pinned` bigint NOT NULL DEFAULT '0',
   `has_scheduled` tinyint(1) NOT NULL DEFAULT '0',
   `ttl_period` int NOT NULL DEFAULT '0',
-  `theme_emoticon` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `theme_emoticon` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `date2` bigint NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -515,7 +515,7 @@ CREATE TABLE `dialogs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`peer_type`,`peer_id`),
   UNIQUE KEY `user_id_2` (`user_id`,`peer_dialog_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -539,11 +539,11 @@ CREATE TABLE `documents` (
   `document_id` bigint NOT NULL,
   `access_hash` bigint NOT NULL,
   `dc_id` int NOT NULL,
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `file_size` bigint NOT NULL,
-  `uploaded_file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `ext` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `mime_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `uploaded_file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `ext` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `mime_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `thumb_id` bigint NOT NULL DEFAULT '0',
   `video_thumb_id` bigint NOT NULL DEFAULT '0',
   `version` int NOT NULL DEFAULT '0',
@@ -553,7 +553,7 @@ CREATE TABLE `documents` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `document_id` (`document_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -579,11 +579,11 @@ CREATE TABLE `encrypted_files` (
   `dc_id` int NOT NULL,
   `file_size` bigint NOT NULL,
   `key_fingerprint` int NOT NULL,
-  `md5_checksum` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `md5_checksum` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -607,7 +607,7 @@ CREATE TABLE `hash_tags` (
   `user_id` bigint NOT NULL,
   `peer_type` int NOT NULL,
   `peer_id` bigint NOT NULL,
-  `hash_tag` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hash_tag` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `hash_tag_message_id` int NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -617,7 +617,7 @@ CREATE TABLE `hash_tags` (
   KEY `user_id` (`user_id`,`hash_tag`),
   KEY `user_id_2` (`user_id`,`peer_type`,`peer_id`,`hash_tag`),
   KEY `user_id_3` (`user_id`,`hash_tag_message_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -642,7 +642,7 @@ CREATE TABLE `identify_role` (
   `NormalizedName` varchar(256) DEFAULT NULL,
   `ConcurrencyStamp` text,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -670,7 +670,7 @@ CREATE TABLE `identify_role_claims` (
   PRIMARY KEY (`Id`),
   KEY `FK_RoleClaims_Role` (`RoleId`),
   CONSTRAINT `FK_RoleClaims_Role` FOREIGN KEY (`RoleId`) REFERENCES `identify_role` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -710,7 +710,7 @@ CREATE TABLE `identify_user` (
   `ProfilePicture` longblob,
   `UsernameChangeLimit` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -738,7 +738,7 @@ CREATE TABLE `identify_user_claims` (
   PRIMARY KEY (`Id`),
   KEY `FK_UserClaims_User` (`UserId`),
   CONSTRAINT `FK_UserClaims_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -765,7 +765,7 @@ CREATE TABLE `identify_user_logins` (
   PRIMARY KEY (`LoginProvider`,`ProviderKey`),
   KEY `FK_UserLogins_User` (`UserId`),
   CONSTRAINT `FK_UserLogins_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -791,7 +791,7 @@ CREATE TABLE `identify_user_roles` (
   KEY `FK_UserRoles_Role` (`RoleId`),
   CONSTRAINT `FK_UserRoles_Role` FOREIGN KEY (`RoleId`) REFERENCES `identify_role` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `FK_UserRoles_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -818,7 +818,7 @@ CREATE TABLE `identify_user_tokens` (
   `Value` text,
   PRIMARY KEY (`UserId`,`LoginProvider`,`Name`),
   CONSTRAINT `FK_UserTokens_User` FOREIGN KEY (`UserId`) REFERENCES `identify_user` (`Id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -846,7 +846,7 @@ CREATE TABLE `imported_contacts` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   UNIQUE KEY `user_id_2` (`user_id`,`imported_user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -879,12 +879,12 @@ CREATE TABLE `messages` (
   `random_id` bigint NOT NULL DEFAULT '0',
   `message_filter_type` int NOT NULL DEFAULT '0',
   `message_data` json DEFAULT NULL,
-  `message` varchar(6000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `message` varchar(6000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `mentioned` tinyint(1) NOT NULL DEFAULT '0',
   `media_unread` tinyint(1) NOT NULL DEFAULT '0',
   `pinned` tinyint(1) NOT NULL DEFAULT '0',
   `has_reaction` tinyint(1) NOT NULL DEFAULT '0',
-  `reaction` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `reaction` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `reaction_date` bigint NOT NULL DEFAULT '0',
   `reaction_unread` tinyint(1) NOT NULL DEFAULT '0',
   `date2` bigint NOT NULL DEFAULT '0',
@@ -908,7 +908,7 @@ CREATE TABLE `messages` (
   CONSTRAINT `FK_messages_gameconfig` FOREIGN KEY (`GameConfigId`) REFERENCES `net_gameconfig` (`Id`) ON DELETE SET NULL ON UPDATE SET NULL,
   CONSTRAINT `FK_messages_pair` FOREIGN KEY (`PairId`) REFERENCES `net_playerpair` (`PlayerPairId`) ON DELETE SET NULL ON UPDATE SET NULL,
   CONSTRAINT `FK_messages_pairgame` FOREIGN KEY (`PairGameId`) REFERENCES `net_pairgame` (`PairGameId`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -934,7 +934,7 @@ CREATE TABLE `net_areas` (
   `Latitude` decimal(9,6) DEFAULT NULL,
   `Longitude` decimal(9,6) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -958,7 +958,7 @@ CREATE TABLE `net_brands` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `BrandName` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -987,7 +987,7 @@ CREATE TABLE `net_broadcastmessage` (
   `HtmlContent` longtext NOT NULL,
   `Title` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`BroadcastMessageId`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1018,7 +1018,7 @@ CREATE TABLE `net_broadcastmessageuser` (
   KEY `FK_BroadcastMessageUser_User` (`UserId`),
   CONSTRAINT `FK_BroadcastMessageUser_BroadcastMessage` FOREIGN KEY (`BroadcastMessageId`) REFERENCES `net_broadcastmessage` (`BroadcastMessageId`),
   CONSTRAINT `FK_BroadcastMessageUser_User` FOREIGN KEY (`UserId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1045,7 +1045,7 @@ CREATE TABLE `net_chain` (
   PRIMARY KEY (`Id`),
   KEY `FK_Chain_Task` (`ChainId`),
   CONSTRAINT `FK_Chain_Task` FOREIGN KEY (`ChainId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1076,7 +1076,7 @@ CREATE TABLE `net_completedchain` (
   CONSTRAINT `FK_CompletedChain_CompletedTask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_CompletedChain_Tasks` FOREIGN KEY (`ChainId`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_CompletedChain_Tasks1` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1110,7 +1110,7 @@ CREATE TABLE `net_completedtask` (
   CONSTRAINT `FK_CompletedTask_GameConfig` FOREIGN KEY (`GameConfigId`) REFERENCES `net_gameconfig` (`Id`),
   CONSTRAINT `FK_CompletedTask_PairGame` FOREIGN KEY (`PairGameId`) REFERENCES `net_pairgame` (`PairGameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_CompletedTask_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1133,7 +1133,7 @@ CREATE TABLE `net_configurabletext` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1159,7 +1159,7 @@ CREATE TABLE `net_country` (
   `ShortName` varchar(20) DEFAULT NULL,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1189,7 +1189,7 @@ CREATE TABLE `net_filltext` (
   KEY `FK_FillText_Task` (`TaskId`),
   CONSTRAINT `FK_FillText_Language` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`),
   CONSTRAINT `FK_FillText_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2619 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2619 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1220,7 +1220,7 @@ CREATE TABLE `net_game` (
   PRIMARY KEY (`GameId`),
   KEY `FK_Game_GameType` (`Type`),
   CONSTRAINT `FK_Game_GameType` FOREIGN KEY (`Type`) REFERENCES `net_gametype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1229,7 +1229,6 @@ CREATE TABLE `net_game` (
 
 LOCK TABLES `net_game` WRITE;
 /*!40000 ALTER TABLE `net_game` DISABLE KEYS */;
-INSERT INTO `net_game` VALUES (41,1,1,'Game F1245, F1246, F1247, F1248, F1254',0,NULL,NULL),(42,1,1,'Game F1245, F1246, F1247, F1248, F1254',0,NULL,NULL),(43,1,1,'Game F1595, F1798, F1207, F1050, F1239',0,NULL,NULL),(44,1,1,'Game P1027, F1515, F1252, F1017, F1662',0,NULL,NULL);
 /*!40000 ALTER TABLE `net_game` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1253,7 +1252,7 @@ CREATE TABLE `net_gameconfig` (
   CONSTRAINT `FK_GameConfig_Game` FOREIGN KEY (`GameId`) REFERENCES `net_game` (`GameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_GameConfig_TaskF` FOREIGN KEY (`TaskForF`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_GameConfig_TaskM` FOREIGN KEY (`TaskForM`) REFERENCES `net_tasks` (`TaskId`)
-) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=166 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1262,7 +1261,6 @@ CREATE TABLE `net_gameconfig` (
 
 LOCK TABLES `net_gameconfig` WRITE;
 /*!40000 ALTER TABLE `net_gameconfig` DISABLE KEYS */;
-INSERT INTO `net_gameconfig` VALUES (146,41,'F1245','F1245',1),(147,41,'F1246','F1246',2),(148,41,'F1247','F1247',3),(149,41,'F1248','F1248',4),(150,41,'F1254','F1254',5),(151,42,'F1245','F1245',1),(152,42,'F1246','F1246',2),(153,42,'F1247','F1247',3),(154,42,'F1248','F1248',4),(155,42,'F1254','F1254',5),(156,43,'F1595','F1595',1),(157,43,'F1798','F1798',2),(158,43,'F1207','F1207',3),(159,43,'F1050','F1050',4),(160,43,'F1239','F1239',5),(161,44,'P1027','P1027',1),(162,44,'F1515','F1515',2),(163,44,'F1252','F1252',3),(164,44,'F1017','F1017',4),(165,44,'F1662','F1662',5);
 /*!40000 ALTER TABLE `net_gameconfig` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1277,7 +1275,7 @@ CREATE TABLE `net_gametype` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1301,7 +1299,7 @@ CREATE TABLE `net_gender` (
   `Id` int NOT NULL,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1327,7 +1325,7 @@ CREATE TABLE `net_generatorparameters` (
   `Factor` double DEFAULT NULL,
   `BaseValue` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1353,7 +1351,7 @@ CREATE TABLE `net_geographicalarea` (
   `TitleHeb` varchar(100) DEFAULT NULL,
   `MatchKey` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1377,7 +1375,7 @@ CREATE TABLE `net_keywords` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Keyword` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1401,7 +1399,7 @@ CREATE TABLE `net_language` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1432,7 +1430,7 @@ CREATE TABLE `net_loginsession` (
   `DeviceToken` varchar(250) DEFAULT NULL,
   `DeviceType` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1459,7 +1457,7 @@ CREATE TABLE `net_mediacomment` (
   `Comment` text,
   `Created` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1491,7 +1489,7 @@ CREATE TABLE `net_newgamerules` (
   `MinScore` int DEFAULT NULL,
   `MaxScore` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1520,7 +1518,7 @@ CREATE TABLE `net_news` (
   `Created` datetime NOT NULL,
   `Modified` datetime NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1547,7 +1545,7 @@ CREATE TABLE `net_newscomment` (
   `Comment` text,
   `Created` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1571,7 +1569,7 @@ CREATE TABLE `net_offensivereport` (
   `PlayerId` bigint DEFAULT NULL,
   `OffensivePlayerId` bigint DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1607,7 +1605,7 @@ CREATE TABLE `net_pairgame` (
   KEY `FK_PairGame_PlayerPair_idx` (`PlayerPairId`),
   CONSTRAINT `FK_PairGame_Game` FOREIGN KEY (`GameId`) REFERENCES `net_game` (`GameId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_PairGame_PlayerPair` FOREIGN KEY (`PlayerPairId`) REFERENCES `net_playerpair` (`PlayerPairId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1616,7 +1614,6 @@ CREATE TABLE `net_pairgame` (
 
 LOCK TABLES `net_pairgame` WRITE;
 /*!40000 ALTER TABLE `net_pairgame` DISABLE KEYS */;
-INSERT INTO `net_pairgame` VALUES (37,7,41,'2024-12-07 23:45:39',1,NULL,NULL,NULL,NULL,NULL,5);
 /*!40000 ALTER TABLE `net_pairgame` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1631,7 +1628,7 @@ CREATE TABLE `net_pairstatus` (
   `Id` int NOT NULL,
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1656,7 +1653,7 @@ CREATE TABLE `net_passion` (
   `TitleEn` varchar(100) DEFAULT NULL,
   `TitleHeb` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`PassionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1699,7 +1696,7 @@ CREATE TABLE `net_playerpair` (
   CONSTRAINT `FK_PlayerPair_PairStatus` FOREIGN KEY (`Status`) REFERENCES `net_pairstatus` (`Id`),
   CONSTRAINT `FK_PlayerPair_UserFemale` FOREIGN KEY (`Player2`) REFERENCES `users` (`id`),
   CONSTRAINT `FK_PlayerPair_UserMale` FOREIGN KEY (`Player1`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1708,7 +1705,6 @@ CREATE TABLE `net_playerpair` (
 
 LOCK TABLES `net_playerpair` WRITE;
 /*!40000 ALTER TABLE `net_playerpair` DISABLE KEYS */;
-INSERT INTO `net_playerpair` VALUES (7,777002,777001,37,NULL,'2024-12-07 01:36:39',1,NULL,NULL,NULL,0,0,'2024-12-07 23:50:19');
 /*!40000 ALTER TABLE `net_playerpair` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1736,7 +1732,7 @@ CREATE TABLE `net_q234` (
   KEY `FK_Q234_Task` (`TaskId`),
   CONSTRAINT `FK_Q234_Language` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`),
   CONSTRAINT `FK_Q234_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1762,7 +1758,7 @@ CREATE TABLE `net_resourcestring` (
   `En` longtext,
   `He` longtext,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1786,7 +1782,7 @@ CREATE TABLE `net_role` (
   `Name` varchar(50) DEFAULT NULL,
   `Description` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1811,7 +1807,7 @@ CREATE TABLE `net_sexualorientation` (
   `TitleEn` varchar(100) DEFAULT NULL,
   `TitleHeb` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`SexualOrientationId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1852,7 +1848,7 @@ CREATE TABLE `net_sysparam` (
   `PlayNowMessageKey` varchar(100) DEFAULT NULL,
   `DefaultRegisterUserState` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1885,7 +1881,7 @@ CREATE TABLE `net_taskanswer` (
   PRIMARY KEY (`Id`),
   KEY `fk_taskanswer_completedtask_idx` (`CompletedTaskId`),
   CONSTRAINT `fk_taskanswer_completedtask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1919,7 +1915,7 @@ CREATE TABLE `net_taskanswerfeedback` (
   CONSTRAINT `FK_TaskAnswerComment_TaskAnswer` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskAnswerFeedback_TaskLike` FOREIGN KEY (`LikeTypeId`) REFERENCES `net_tasklike` (`Id`),
   CONSTRAINT `FK_TaskAnswerFeedback_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1942,7 +1938,7 @@ CREATE TABLE `net_taskauthor` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `AuthorName` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1967,7 +1963,7 @@ CREATE TABLE `net_taskkeyword` (
   `TaskId` varchar(50) DEFAULT NULL,
   `KeywordId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1993,7 +1989,7 @@ CREATE TABLE `net_tasklike` (
   `ImagePath` varchar(512) DEFAULT NULL,
   `IsActive` tinyint DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2026,7 +2022,7 @@ CREATE TABLE `net_taskmaxstep` (
   CONSTRAINT `FK_TaskMaxStep_PlayerPair` FOREIGN KEY (`PlayerPairId`) REFERENCES `net_playerpair` (`PlayerPairId`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskMaxStep_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`),
   CONSTRAINT `FK_TaskMaxStep_User` FOREIGN KEY (`PlayerId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2058,7 +2054,7 @@ CREATE TABLE `net_tasknotification` (
   CONSTRAINT `FK_TaskNotification_CompletedTask` FOREIGN KEY (`CompletedTaskId`) REFERENCES `net_completedtask` (`CompletedTaskId`),
   CONSTRAINT `FK_TaskNotification_User` FOREIGN KEY (`PlayerToId`) REFERENCES `users` (`id`),
   CONSTRAINT `FK_TaskNotification_UserFrom` FOREIGN KEY (`PlayerFromId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2113,7 +2109,7 @@ CREATE TABLE `net_tasks` (
   CONSTRAINT `FK_Tasks_TaskAuthor` FOREIGN KEY (`Author`) REFERENCES `net_taskauthor` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Tasks_TaskStatus` FOREIGN KEY (`Status`) REFERENCES `net_taskstatus` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Tasks_TaskTypes` FOREIGN KEY (`Type`) REFERENCES `net_tasktype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1730 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1730 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2137,7 +2133,7 @@ CREATE TABLE `net_taskstatus` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2164,7 +2160,7 @@ CREATE TABLE `net_tasksubsubtype` (
   PRIMARY KEY (`Id`),
   KEY `FK_TaskSubSubType_TaskSubType` (`SubType`),
   CONSTRAINT `FK_TaskSubSubType_TaskSubType` FOREIGN KEY (`SubType`) REFERENCES `net_tasksubtype` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2189,7 +2185,7 @@ CREATE TABLE `net_tasksubtype` (
   `TypeId` int NOT NULL,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2222,7 +2218,7 @@ CREATE TABLE `net_tasktext` (
   KEY `FK_TaskText_Task` (`TaskId`),
   CONSTRAINT `FK_TaskText_Languages` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_TaskText_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2246,7 +2242,7 @@ CREATE TABLE `net_tasktype` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2272,7 +2268,7 @@ CREATE TABLE `net_textinmultilanguages` (
   `text` longtext,
   `LanguageId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1037 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1037 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2300,7 +2296,7 @@ CREATE TABLE `net_timesfortask` (
   PRIMARY KEY (`Id`),
   KEY `FK_TimesForTask_Task` (`TaskId`),
   CONSTRAINT `FK_TimesForTask_Task` FOREIGN KEY (`TaskId`) REFERENCES `net_tasks` (`TaskId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2326,7 +2322,7 @@ CREATE TABLE `net_userblock` (
   `BlockByUser` int NOT NULL,
   `CreateOn` datetime NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2352,7 +2348,7 @@ CREATE TABLE `net_userdislike` (
   `Timestamp` datetime DEFAULT NULL,
   `MessageId` int DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2378,7 +2374,7 @@ CREATE TABLE `net_userreport` (
   `CreateOn` datetime NOT NULL,
   `ReportType` int NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2410,7 +2406,7 @@ CREATE TABLE `net_usertracking` (
   `TimeZone` varchar(50) DEFAULT NULL,
   `IP` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`UserId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2434,14 +2430,14 @@ CREATE TABLE `phone_books` (
   `user_id` bigint NOT NULL DEFAULT '0',
   `auth_key_id` bigint NOT NULL,
   `client_id` bigint NOT NULL,
-  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_key_id` (`auth_key_id`,`client_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2463,18 +2459,18 @@ DROP TABLE IF EXISTS `photo_sizes`;
 CREATE TABLE `photo_sizes` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `photo_size_id` bigint NOT NULL,
-  `size_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `size_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `width` int NOT NULL,
   `height` int NOT NULL,
   `file_size` int NOT NULL,
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `cached_type` int NOT NULL DEFAULT '0',
-  `cached_bytes` varchar(4096) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `cached_bytes` varchar(4096) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `photo_size_id` (`photo_size_id`,`size_type`),
   KEY `photo_id` (`photo_size_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2483,7 +2479,6 @@ CREATE TABLE `photo_sizes` (
 
 LOCK TABLES `photo_sizes` WRITE;
 /*!40000 ALTER TABLE `photo_sizes` DISABLE KEYS */;
-INSERT INTO `photo_sizes` VALUES (1,1856174242589052928,'a',160,160,2905,'a/1856174242589052928.dat',0,'','2024-11-12 03:16:40'),(2,1856174242589052928,'b',320,320,7907,'b/1856174242589052928.dat',0,'','2024-11-12 03:16:40'),(3,1856174242589052928,'c',640,640,20761,'c/1856174242589052928.dat',0,'','2024-11-12 03:16:40'),(4,1856174242589052928,'d',1280,1280,54809,'d/1856174242589052928.dat',0,'','2024-11-12 03:16:40'),(5,1856174621989015552,'a',160,160,5034,'a/1856174621989015552.dat',0,'','2024-11-12 03:18:10'),(6,1856174621989015552,'b',320,320,14067,'b/1856174621989015552.dat',0,'','2024-11-12 03:18:10'),(7,1856174621989015552,'c',640,640,38034,'c/1856174621989015552.dat',0,'','2024-11-12 03:18:10'),(8,1856174621989015552,'d',1280,1280,99052,'d/1856174621989015552.dat',0,'','2024-11-12 03:18:10');
 /*!40000 ALTER TABLE `photo_sizes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2504,12 +2499,12 @@ CREATE TABLE `photos` (
   `has_video` tinyint(1) NOT NULL DEFAULT '0',
   `size_id` bigint NOT NULL DEFAULT '0',
   `video_size_id` bigint NOT NULL DEFAULT '0',
-  `input_file_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `ext` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `input_file_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `ext` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `photo_id` (`photo_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2518,7 +2513,6 @@ CREATE TABLE `photos` (
 
 LOCK TABLES `photos` WRITE;
 /*!40000 ALTER TABLE `photos` DISABLE KEYS */;
-INSERT INTO `photos` VALUES (1,1856174242589052928,742922141327252048,0,1,1731381400,0,0,0,'GOOGLE101324298970822306388.png','.png','2024-11-12 03:16:40'),(2,1856174621989015552,742922141818292982,0,1,1731381490,0,0,0,'GOOGLE116270684444265774714.png','.png','2024-11-12 03:18:10');
 /*!40000 ALTER TABLE `photos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2531,14 +2525,14 @@ DROP TABLE IF EXISTS `popular_contacts`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `popular_contacts` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `importers` int NOT NULL DEFAULT '1',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phone` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2559,11 +2553,11 @@ DROP TABLE IF EXISTS `predefined_users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `predefined_users` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   `registered_user_id` bigint NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -2571,7 +2565,7 @@ CREATE TABLE `predefined_users` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phone` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2594,7 +2588,7 @@ CREATE TABLE `reactions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
   `message_id` bigint NOT NULL,
-  `reaction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reaction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `peer_id` bigint NOT NULL,
   `peer_type` int NOT NULL,
   `read` tinyint(1) NOT NULL DEFAULT '0',
@@ -2608,7 +2602,7 @@ CREATE TABLE `reactions` (
   KEY `idx_read` (`read`),
   CONSTRAINT `fk_reactions_message_id` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_reactions_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2640,7 +2634,7 @@ CREATE TABLE `saved_dialogs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`peer_type`,`peer_id`),
   KEY `user_id_2` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2663,7 +2657,7 @@ CREATE TABLE `theme_settings` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `theme_id` bigint NOT NULL,
   `message_colors_animated` tinyint(1) DEFAULT '0',
-  `base_theme` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_theme` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `accent_color` int DEFAULT NULL,
   `outbox_accent_color` int DEFAULT NULL,
   `message_colors` json DEFAULT NULL,
@@ -2675,7 +2669,7 @@ CREATE TABLE `theme_settings` (
   KEY `fk_theme_settings_wallpaper_id` (`wallpaper_id`),
   CONSTRAINT `fk_theme_settings_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_theme_settings_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2696,8 +2690,8 @@ DROP TABLE IF EXISTS `themes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `themes` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `creator` tinyint(1) DEFAULT '0',
   `default` tinyint(1) DEFAULT '0',
   `for_chat` tinyint(1) DEFAULT '0',
@@ -2706,7 +2700,7 @@ CREATE TABLE `themes` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2727,10 +2721,10 @@ DROP TABLE IF EXISTS `unregistered_contacts`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `unregistered_contacts` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `importer_user_id` bigint NOT NULL,
-  `import_first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `import_last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `import_first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `import_last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `imported` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -2738,7 +2732,7 @@ CREATE TABLE `unregistered_contacts` (
   UNIQUE KEY `phone` (`phone`,`importer_user_id`),
   KEY `phone_2` (`phone`,`importer_user_id`,`imported`),
   KEY `phone_3` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2761,9 +2755,9 @@ CREATE TABLE `user_contacts` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `owner_user_id` bigint NOT NULL,
   `contact_user_id` bigint NOT NULL,
-  `contact_phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `contact_first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `contact_last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `contact_phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `contact_first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `contact_last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `mutual` tinyint(1) NOT NULL DEFAULT '0',
   `close_friend` tinyint(1) NOT NULL DEFAULT '0',
   `stories_hidden` tinyint(1) NOT NULL DEFAULT '0',
@@ -2774,7 +2768,7 @@ CREATE TABLE `user_contacts` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `owner_user_id` (`owner_user_id`,`contact_user_id`),
   KEY `owner_user_id_2` (`owner_user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2783,7 +2777,6 @@ CREATE TABLE `user_contacts` (
 
 LOCK TABLES `user_contacts` WRITE;
 /*!40000 ALTER TABLE `user_contacts` DISABLE KEYS */;
-INSERT INTO `user_contacts` VALUES (7,777001,777002,'GOOGLE116270684444265774714','Cin','Long',1,0,0,0,1733508254648,'2024-12-06 18:04:15','2024-12-06 18:04:14'),(8,777001,777001,'GOOGLE101324298970822306388','Phuc','Vo',0,0,0,0,1733508254655,'2024-12-06 18:04:15','2024-12-06 18:04:14'),(9,777001,777000,'42777','Pwm','Service',0,0,0,0,1733508254661,'2024-12-06 18:04:15','2024-12-06 18:04:14'),(10,777002,777001,'GOOGLE101324298970822306388','Phuc','Vo',1,0,0,0,1733508254667,'2024-12-06 18:04:15','2024-12-06 18:04:14'),(11,777002,777002,'GOOGLE116270684444265774714','Cin','Long',0,0,0,0,1733508254674,'2024-12-06 18:04:15','2024-12-06 18:04:14'),(12,777002,777000,'42777','Pwm','Service',0,0,0,0,1733508254682,'2024-12-06 18:04:15','2024-12-06 18:04:14');
 /*!40000 ALTER TABLE `user_contacts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2806,7 +2799,7 @@ CREATE TABLE `user_global_privacy_settings` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2833,13 +2826,13 @@ CREATE TABLE `user_notify_settings` (
   `show_previews` int NOT NULL DEFAULT '-1',
   `silent` int NOT NULL DEFAULT '-1',
   `mute_until` int NOT NULL DEFAULT '-1',
-  `sound` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'default',
+  `sound` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'default',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`peer_type`,`peer_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2870,7 +2863,7 @@ CREATE TABLE `user_peer_blocks` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id_2` (`user_id`,`peer_type`,`peer_id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2908,7 +2901,7 @@ CREATE TABLE `user_peer_settings` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`peer_type`,`peer_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2936,7 +2929,7 @@ CREATE TABLE `user_presences` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2945,7 +2938,6 @@ CREATE TABLE `user_presences` (
 
 LOCK TABLES `user_presences` WRITE;
 /*!40000 ALTER TABLE `user_presences` DISABLE KEYS */;
-INSERT INTO `user_presences` VALUES (1,777001,1731411207,0,'2024-11-12 03:16:39','2024-11-12 11:33:27'),(3,777002,1731392486,0,'2024-11-12 03:18:10','2024-11-12 06:21:26');
 /*!40000 ALTER TABLE `user_presences` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2965,7 +2957,7 @@ CREATE TABLE `user_privacies` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`key_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3004,7 +2996,6 @@ CREATE TABLE `user_profile_photos` (
 
 LOCK TABLES `user_profile_photos` WRITE;
 /*!40000 ALTER TABLE `user_profile_photos` DISABLE KEYS */;
-INSERT INTO `user_profile_photos` VALUES (1,777001,1856174242589052928,1731381400,0,'2024-11-12 03:16:40','2024-11-12 03:16:40'),(2,777002,1856174621989015552,1731381490,0,'2024-11-12 03:18:10','2024-11-12 03:18:10');
 /*!40000 ALTER TABLE `user_profile_photos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3026,7 +3017,7 @@ CREATE TABLE `user_pts_updates` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`pts`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3035,7 +3026,6 @@ CREATE TABLE `user_pts_updates` (
 
 LOCK TABLES `user_pts_updates` WRITE;
 /*!40000 ALTER TABLE `user_pts_updates` DISABLE KEYS */;
-INSERT INTO `user_pts_updates` VALUES (1,777001,1,1,1,'{\"pts_INT32\": 1, \"pts_count\": 1, \"predicate_name\": \"updateNewMessage\", \"message_MESSAGE\": {\"id\": 1, \"date\": 1731381401, \"message\": \"Login code: 81240. Do not give this code to anyone, even if they say they are from Teamgram!\\n\\nThis code can be used to log in to your Teamgram account. We never ask it for anything else.\\n\\nIf you didn\'t request this code by trying to log in on another device, simply ignore this message.\", \"peer_id\": {\"user_id\": 777000, \"predicate_name\": \"peerUser\"}, \"entities\": [{\"length\": 11, \"predicate_name\": \"messageEntityBold\"}, {\"length\": 3, \"offset\": 22, \"predicate_name\": \"messageEntityBold\"}], \"predicate_name\": \"message\"}}',1731381401,'2024-11-12 03:16:41'),(2,777001,1,0,2,'{\"messages\": [1], \"pts_INT32\": 1, \"predicate_name\": \"updateDeleteMessages\"}',1731381427,'2024-11-12 03:17:07'),(3,777001,2,1,4,'{\"max_id\": 1, \"peer_PEER\": {\"user_id\": 777000, \"predicate_name\": \"peerUser\"}, \"pts_INT32\": 2, \"pts_count\": 1, \"predicate_name\": \"updateReadHistoryInbox\"}',1731381427,'2024-11-12 03:17:07'),(4,777002,1,1,1,'{\"pts_INT32\": 1, \"pts_count\": 1, \"predicate_name\": \"updateNewMessage\", \"message_MESSAGE\": {\"id\": 1, \"date\": 1731381492, \"message\": \"Login code: 89623. Do not give this code to anyone, even if they say they are from Teamgram!\\n\\nThis code can be used to log in to your Teamgram account. We never ask it for anything else.\\n\\nIf you didn\'t request this code by trying to log in on another device, simply ignore this message.\", \"peer_id\": {\"user_id\": 777000, \"predicate_name\": \"peerUser\"}, \"entities\": [{\"length\": 11, \"predicate_name\": \"messageEntityBold\"}, {\"length\": 3, \"offset\": 22, \"predicate_name\": \"messageEntityBold\"}], \"predicate_name\": \"message\"}}',1731381492,'2024-11-12 03:18:12'),(5,777002,1,0,2,'{\"messages\": [1], \"pts_INT32\": 1, \"predicate_name\": \"updateDeleteMessages\"}',1731381514,'2024-11-12 03:18:34'),(6,777002,2,1,4,'{\"max_id\": 1, \"peer_PEER\": {\"user_id\": 777000, \"predicate_name\": \"peerUser\"}, \"pts_INT32\": 2, \"pts_count\": 1, \"predicate_name\": \"updateReadHistoryInbox\"}',1731381514,'2024-11-12 03:18:34');
 /*!40000 ALTER TABLE `user_pts_updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3049,14 +3039,14 @@ DROP TABLE IF EXISTS `user_settings`;
 CREATE TABLE `user_settings` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
-  `key2` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `value` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key2` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `value` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`key2`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3086,7 +3076,7 @@ CREATE TABLE `user_themes` (
   KEY `user_themes_user_id_idx` (`user_id`),
   KEY `user_themes_theme_id_idx` (`theme_id`),
   CONSTRAINT `fk_user_themes_theme_id` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3116,7 +3106,7 @@ CREATE TABLE `user_wallpapers` (
   KEY `user_wallpapers_user_id_idx` (`user_id`),
   KEY `user_wallpapers_wallpaper_id_idx` (`wallpaper_id`),
   CONSTRAINT `fk_user_wallpapers_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3137,7 +3127,7 @@ DROP TABLE IF EXISTS `username`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `username` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `peer_type` int NOT NULL DEFAULT '0',
   `peer_id` bigint NOT NULL DEFAULT '0',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -3145,7 +3135,7 @@ CREATE TABLE `username` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3169,23 +3159,23 @@ CREATE TABLE `users` (
   `user_type` int NOT NULL DEFAULT '2',
   `access_hash` bigint NOT NULL,
   `secret_key_id` bigint NOT NULL DEFAULT '0',
-  `first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `country_code` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `last_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `country_code` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   `support` tinyint(1) NOT NULL DEFAULT '0',
   `scam` tinyint(1) NOT NULL DEFAULT '0',
   `fake` tinyint(1) NOT NULL DEFAULT '0',
   `premium` tinyint(1) NOT NULL DEFAULT '0',
-  `about` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `about` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `state` int NOT NULL DEFAULT '0',
   `is_bot` tinyint(1) NOT NULL DEFAULT '0',
   `account_days_ttl` int NOT NULL DEFAULT '180',
   `photo_id` bigint NOT NULL DEFAULT '0',
   `restricted` tinyint(1) NOT NULL DEFAULT '0',
-  `restriction_reason` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `restriction_reason` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `archive_and_mute_new_noncontact_peers` tinyint(1) NOT NULL DEFAULT '0',
   `emoji_status_document_id` bigint NOT NULL DEFAULT '0',
   `emoji_status_until` int NOT NULL DEFAULT '0',
@@ -3194,45 +3184,45 @@ CREATE TABLE `users` (
   `color_background_emoji_id` bigint NOT NULL DEFAULT '0',
   `profile_color` int NOT NULL DEFAULT '0',
   `profile_color_background_emoji_id` bigint NOT NULL DEFAULT '0',
-  `birthday` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `birthday` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `delete_reason` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `delete_reason` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `Email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `RegistrationEmail` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `RegistrationPhone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RegistrationEmail` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RegistrationPhone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Gender` int DEFAULT NULL,
   `LastAccessDate` datetime DEFAULT NULL,
   `Active` tinyint DEFAULT NULL,
-  `OnlineStatus` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `OnlineStatus` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `MaxContactCount` int DEFAULT NULL,
   `MaxFavoriteCount` int DEFAULT NULL,
   `LastLogin` datetime DEFAULT NULL,
-  `IOSPushToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `AndroidPushToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `IOSPushToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `AndroidPushToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `MaxAllowedPartners` int DEFAULT NULL,
   `YearOfBirth` int DEFAULT NULL,
   `Area` int DEFAULT NULL,
   `PlayWith` int DEFAULT NULL,
   `RegisteredByFacebook` tinyint DEFAULT NULL,
-  `ReferenceAccount` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `RegistrationId` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ReferenceAccount` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RegistrationId` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `PartnersFromAge` int DEFAULT NULL,
   `PartnersToAge` int DEFAULT NULL,
   `PartnersGender` int DEFAULT NULL,
-  `Passions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `Passions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `ActiveTimestamp` datetime DEFAULT NULL,
-  `Platform` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `LatestAppVersion` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `LastSuggestedPartners` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `Platform` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `LatestAppVersion` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `LastSuggestedPartners` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `LastFetchSuggestionTimestamp` datetime DEFAULT NULL,
-  `Regions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Regions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `RegistrationTime` datetime DEFAULT NULL,
-  `Religion` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `PartnerReligions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `RegistrationType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `PartnerRegions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Religion` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PartnerReligions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RegistrationType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PartnerRegions` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `RegistrationValidated` tinyint DEFAULT NULL,
   `RegistrationBirthday` datetime DEFAULT NULL,
   `LanguageId` int DEFAULT '1',
@@ -3246,7 +3236,7 @@ CREATE TABLE `users` (
   CONSTRAINT `FK_Users_Genders` FOREIGN KEY (`Gender`) REFERENCES `net_gender` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Users_Genders_Partner` FOREIGN KEY (`PartnersGender`) REFERENCES `net_gender` (`Id`),
   CONSTRAINT `FK_Users_Language` FOREIGN KEY (`LanguageId`) REFERENCES `net_language` (`Id`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=777003 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=777003 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3255,7 +3245,6 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (777000,4,6599886787491911851,6895602324158323006,'Pwm','Service','pwm','42777','',1,0,0,0,0,'',0,0,180,0,0,'',0,0,0,0,0,0,0,0,'',0,'','2018-09-25 13:43:11','2021-12-17 12:40:51',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),(777001,2,5655566081241563629,-8770178576909348170,'Phuc','Vo','','GOOGLE101324298970822306388','US',0,0,0,0,0,'',0,0,180,1856174242589052928,0,'',0,0,0,0,0,0,0,0,'',0,'','2024-11-12 03:16:39','2024-12-08 23:25:20','aa@gmail.com','aaa@gmail.com','111',1,NULL,1,NULL,NULL,NULL,NULL,NULL,'A',NULL,2003,NULL,NULL,NULL,NULL,'333',NULL,NULL,3,NULL,NULL,NULL,NULL,NULL,'2024-12-07 01:04:15',NULL,NULL,NULL,NULL,'google',NULL,1,NULL,1),(777002,2,7829395744055020234,5613853038694976059,'Cin','Long','','GOOGLE116270684444265774714','US',0,0,0,0,0,'',0,0,180,1856174621989015552,0,'',0,0,0,0,0,0,0,0,'',0,'','2024-11-12 03:18:10','2024-12-06 18:36:40','bb@gmail.com','bbb@gmail.com','222',2,NULL,1,NULL,NULL,NULL,NULL,NULL,'A',NULL,2004,NULL,NULL,NULL,NULL,'111',NULL,NULL,3,NULL,NULL,NULL,NULL,NULL,'2024-12-07 01:36:40',NULL,NULL,NULL,NULL,'google',NULL,1,NULL,1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3269,17 +3258,17 @@ DROP TABLE IF EXISTS `video_sizes`;
 CREATE TABLE `video_sizes` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `video_size_id` bigint NOT NULL,
-  `size_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `size_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `width` int NOT NULL,
   `height` int NOT NULL,
   `file_size` int NOT NULL DEFAULT '0',
   `video_start_ts` double NOT NULL DEFAULT '0',
-  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `video_size_id` (`video_size_id`,`size_type`),
   KEY `video_size_id_2` (`video_size_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3309,13 +3298,13 @@ CREATE TABLE `wallpaper_settings` (
   `fourth_background_color` int DEFAULT NULL,
   `intensity` int DEFAULT NULL,
   `rotation` int DEFAULT NULL,
-  `emoticon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `emoticon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_wallpaper_settings_wallpaper_id` (`wallpaper_id`),
   CONSTRAINT `fk_wallpaper_settings_wallpaper_id` FOREIGN KEY (`wallpaper_id`) REFERENCES `wallpapers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3351,7 +3340,7 @@ CREATE TABLE `wallpapers` (
   PRIMARY KEY (`id`),
   KEY `fk_wallpapers_document_id` (`document_id`),
   CONSTRAINT `fk_wallpapers_document_id` FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3362,14 +3351,6 @@ LOCK TABLES `wallpapers` WRITE;
 /*!40000 ALTER TABLE `wallpapers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `wallpapers` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'pwm'
---
-
---
--- Dumping routines for database 'pwm'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -3380,4 +3361,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-10 14:32:33
+-- Dump completed on 2024-12-11 14:10:10
