@@ -33,7 +33,7 @@ echo "----------------------------------------"
 
 echo "Step 2: Generating SHA-1 hash of the public key..."
 
-# Calculate the SHA-1 hash of the public key (in binary format)
+# Calculate the SHA-1 hash of the public key and output it in binary format
 PUBLIC_KEY_HASH=$(echo "$PUBLIC_KEY" | openssl sha1 -binary 2>&1)
 
 # Check if SHA-1 hash generation was successful
@@ -43,13 +43,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "SHA-1 Hash Generated (binary):"
-echo "$PUBLIC_KEY_HASH"
+# Output the raw binary hash (for debugging)
+echo "SHA-1 Hash (Raw Binary):"
+echo "$PUBLIC_KEY_HASH" | xxd
 echo "----------------------------------------"
 
 echo "Step 3: Converting SHA-1 hash to hexadecimal..."
 
-# Convert the SHA-1 hash (binary) to a hexadecimal value
+# Convert the SHA-1 hash (binary) to a hexadecimal value using `xxd` in hex mode
 HEX_HASH=$(echo "$PUBLIC_KEY_HASH" | xxd -p | tr -d '\n' 2>&1)
 
 # Check if hexadecimal conversion was successful
@@ -65,7 +66,7 @@ echo "----------------------------------------"
 
 echo "Step 4: Converting hexadecimal hash to decimal..."
 
-# Convert the hexadecimal hash to a decimal number
+# Convert the hexadecimal hash to a decimal number using `bc`
 DECIMAL_HASH=$(echo "ibase=16; $HEX_HASH" | bc 2>&1)
 
 # Check if the conversion to decimal was successful
