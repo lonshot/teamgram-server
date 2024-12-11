@@ -1,5 +1,5 @@
 services:
-  pwm:
+  pwm_push_server:
     image: debian:bookworm-slim # ubuntu:22.04  # Use the official Ubuntu base image directly
     restart: always
     ports:
