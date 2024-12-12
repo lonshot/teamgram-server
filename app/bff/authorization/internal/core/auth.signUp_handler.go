@@ -4,15 +4,16 @@ import (
 	"context"
 	"math/rand"
 
-	"github.com/teamgram/marmota/pkg/threading2"
-	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/proto/mtproto/crypto"
 	"pwm-server/app/bff/authorization/internal/logic"
 	"pwm-server/app/bff/authorization/internal/model"
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/service/authsession/authsession"
 	userpb "pwm-server/app/service/biz/user/user"
 	"pwm-server/pkg/phonenumber"
+
+	"github.com/teamgram/marmota/pkg/threading2"
+	"github.com/teamgram/proto/mtproto"
+	"github.com/teamgram/proto/mtproto/crypto"
 )
 
 /*
@@ -167,7 +168,7 @@ func (c *AuthorizationCore) AuthSignUp(in *mtproto.TLAuthSignUp) (*mtproto.Auth_
 		func(ctx context.Context) {
 			// on event
 			c.svcCtx.AuthLogic.DeletePhoneCode(ctx, c.MD.PermAuthKeyId, phoneNumber, in.PhoneCodeHash)
-			c.pushSignInMessage(ctx, user.Id(), codeData.PhoneCode)
+			// c.pushSignInMessage(ctx, user.Id(), codeData.PhoneCode)
 			c.onContactSignUp(ctx, c.MD.PermAuthKeyId, user.Id(), phoneNumber)
 		},
 	).(*mtproto.Auth_Authorization), nil
