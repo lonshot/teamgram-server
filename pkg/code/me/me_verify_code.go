@@ -1,13 +1,12 @@
 package me
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
 	"net/http"
-	"net/url"
 	"pwm-server/pkg/code/dataobject"
-	"strings"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 
@@ -29,28 +28,36 @@ type meVerifyCode struct {
 func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_, codeHash, data string) (
 	*dataobject.VerifyResponse, error,
 ) {
-	// Prepare the form data
-	form := url.Values{}
-	form.Add("phoneNumber", phoneNumber)
-	form.Add("code", code_)
-	form.Add("codeHash", codeHash)
-	form.Add("key", m.code.Key)
-	form.Add("regionId", m.code.RegionId)
-	form.Add("data", data)
+	// Prepare the JSON data
+	requestData := map[string]string{
+		"phoneNumber": phoneNumber,
+		"code":        code_,
+		"codeHash":    codeHash,
+		"key":         m.code.Key,
+		"regionId":    m.code.RegionId,
+		"data":        data,
+	}
+
+	// Convert map to JSON
+	jsonData, err := jsonx.Marshal(requestData)
+	if err != nil {
+		logx.Infof("error marshaling JSON data: %v", err)
+		return nil, err
+	}
 
 	// Prepare the request URL
 	urlV := m.code.SendCodeUrl
 	logx.Infof("sending SMS verification request to: %s", urlV)
 
 	// Create a new HTTP request
-	req, err := http.NewRequest("POST", urlV, strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", urlV, bytes.NewReader(jsonData))
 	if err != nil {
 		logx.Infof("error creating HTTP request: %v", err)
 		return nil, err
 	}
 
 	// Set the headers
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
 
 	// Send the request using the HTTP client
@@ -63,7 +70,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := io.ReadAll(resp.Body) // Use io.ReadAll instead of ioutil.ReadAll
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logx.Infof("error reading response body: %v", err)
 		return nil, err
@@ -95,27 +102,35 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 		return nil
 	}
 
-	// Prepare the form data for the POST request
-	form := url.Values{}
-	form.Add("phoneNumber", codeHash)
-	form.Add("code", code_)
-	form.Add("codeHash", extraData)
-	form.Add("key", m.code.Key)
-	form.Add("regionId", m.code.RegionId)
+	// Prepare the JSON data
+	requestData := map[string]string{
+		"phoneNumber": codeHash,
+		"code":        code_,
+		"codeHash":    extraData,
+		"key":         m.code.Key,
+		"regionId":    m.code.RegionId,
+	}
+
+	// Convert map to JSON
+	jsonData, err := jsonx.Marshal(requestData)
+	if err != nil {
+		logx.Infof("error marshaling JSON data: %v", err)
+		return err
+	}
 
 	// Prepare the request URL
 	urlV := m.code.VerifyCodeUrl
 	logx.Infof("sending verification request to: %s", urlV)
 
 	// Create a new HTTP request
-	req, err := http.NewRequest("POST", urlV, strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", urlV, bytes.NewReader(jsonData))
 	if err != nil {
 		logx.Infof("error creating HTTP request: %v", err)
 		return err
 	}
 
 	// Set the headers
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Pwm-Key", m.code.Secret) // Add the X-Pwm-Key header
 
 	// Send the request using the HTTP client
@@ -128,7 +143,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := io.ReadAll(resp.Body) // Use io.ReadAll instead of ioutil.ReadAll
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logx.Infof("error reading response body: %v", err)
 		return err
