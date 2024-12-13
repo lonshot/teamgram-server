@@ -15,18 +15,18 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UserContactsDO struct {
-	Id               int64  `db:"id" json:"id"`
-	OwnerUserId      int64  `db:"owner_user_id" json:"owner_user_id"`
-	ContactUserId    int64  `db:"contact_user_id" json:"contact_user_id"`
-	ContactPhone     string `db:"contact_phone" json:"contact_phone"`
-	ContactFirstName string `db:"contact_first_name" json:"contact_first_name"`
-	ContactLastName  string `db:"contact_last_name" json:"contact_last_name"`
-	Mutual           bool   `db:"mutual" json:"mutual"`
-	CloseFriend      bool   `db:"close_friend" json:"close_friend"`
-	StoriesHidden    bool   `db:"stories_hidden" json:"stories_hidden"`
-	IsDeleted        bool   `db:"is_deleted" json:"is_deleted"`
-	Date2            int64  `db:"date2" json:"date2"`
+type ApiUserContactsDO struct {
+	Id               int64  `json:"id"`
+	OwnerUserId      int64  `json:"owner_user_id"`
+	ContactUserId    int64  `json:"contact_user_id"`
+	ContactPhone     string `json:"contact_phone"`
+	ContactFirstName string `json:"contact_first_name"`
+	ContactLastName  string `json:"contact_last_name"`
+	Mutual           bool   `json:"mutual"`
+	CloseFriend      bool   `json:"close_friend"`
+	StoriesHidden    bool   `json:"stories_hidden"`
+	IsDeleted        bool   `json:"is_deleted"`
+	Date2            int64  `json:"date2"`
 }
 
 const (
@@ -86,8 +86,8 @@ func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, messa
 // UpdateCache updates the contact list cache for the given user
 func (c *HttpserverCore) UpdateCache(ctx context.Context, payload interface{}) (bool, error) {
 	var updateCachePayload struct {
-		Type string      `json:"type"`
-		Data interface{} `json:"data"`
+		Type string             `json:"type"`
+		Data *ApiUserContactsDO `json:"data"` // Changed to pointer here
 	}
 
 	// Decode the payload into updateCachePayload
@@ -120,12 +120,9 @@ func (c *HttpserverCore) UpdateCache(ctx context.Context, payload interface{}) (
 }
 
 // updateContactCache handles adding or removing a contact from the cache and updating the contact lists
-func (r *HttpserverCore) updateContactCache(contactData interface{}, add bool) (bool, error) {
-	// Type assert the contactData to the expected type
-	contact, ok := contactData.(UserContactsDO)
-	if !ok {
-		return false, fmt.Errorf("invalid contact data format")
-	}
+func (r *HttpserverCore) updateContactCache(contact *ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
+
+	logx.Infof("Decoded contact: %+v", contact)
 
 	// Validate that the necessary fields are present (e.g., valid user IDs)
 	if contact.OwnerUserId == 0 || contact.ContactUserId == 0 {
