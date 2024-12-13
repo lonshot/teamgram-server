@@ -306,10 +306,10 @@ func apiwSecure(ctx *svc.ServiceContext) http.HandlerFunc {
 		// Call the appropriate handler based on the method_name
 		switch request.MethodName {
 		case "push_message":
-			handlePushMessage(ctx, w, r, request.Payload)
+			handlePushMessage(ctx, w, r, &request.Payload)
 
 		case "update_cache":
-			handleUpdateCache(ctx, w, r, request.Payload)
+			handleUpdateCache(ctx, w, r, &request.Payload)
 
 		default:
 			handleBadRequest(w, "Unknown method_name", http.StatusBadRequest)
@@ -318,10 +318,10 @@ func apiwSecure(ctx *svc.ServiceContext) http.HandlerFunc {
 }
 
 // Handle push_message logic
-func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload *interface{}) {
 	var messagePayload struct {
-		UserIds []int64 `json:"userIds"`
-		Message string  `json:"message"`
+		UserIds []int64 `json:"userIds" mapstructure:"userIds"`
+		Message string  `json:"message" mapstructure:"message"`
 	}
 
 	// Decode the payload
@@ -350,7 +350,7 @@ func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.R
 }
 
 // Handle update_cache logic
-func handleUpdateCache(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload interface{}) {
+func handleUpdateCache(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload *interface{}) {
 
 	c := core.New(r.Context(), ctx)
 

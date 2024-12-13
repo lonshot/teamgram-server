@@ -15,17 +15,17 @@ import (
 )
 
 type ApiUserContactsDO struct {
-	Id               int64  `json:"id"`
-	OwnerUserId      int64  `json:"owner_user_id"`
-	ContactUserId    int64  `json:"contact_user_id"`
-	ContactPhone     string `json:"contact_phone"`
-	ContactFirstName string `json:"contact_first_name"`
-	ContactLastName  string `json:"contact_last_name"`
-	Mutual           bool   `json:"mutual"`
-	CloseFriend      bool   `json:"close_friend"`
-	StoriesHidden    bool   `json:"stories_hidden"`
-	IsDeleted        bool   `json:"is_deleted"`
-	Date2            int64  `json:"date2"`
+	Id               int64  `json:"id" mapstructure:"id"`
+	OwnerUserId      int64  `json:"owner_user_id" mapstructure:"owner_user_id"`
+	ContactUserId    int64  `json:"contact_user_id" mapstructure:"contact_user_id"`
+	ContactPhone     string `json:"contact_phone" mapstructure:"contact_phone"`
+	ContactFirstName string `json:"contact_first_name" mapstructure:"contact_first_name"`
+	ContactLastName  string `json:"contact_last_name" mapstructure:"contact_last_name"`
+	Mutual           bool   `json:"mutual" mapstructure:"mutual"`
+	CloseFriend      bool   `json:"close_friend" mapstructure:"close_friend"`
+	StoriesHidden    bool   `json:"stories_hidden" mapstructure:"stories_hidden"`
+	IsDeleted        bool   `json:"is_deleted" mapstructure:"is_deleted"`
+	Date2            int64  `json:"date2" mapstructure:"date2"`
 }
 
 const (
@@ -83,10 +83,10 @@ func (c *HttpserverCore) PushMessage(userIds []int64, message string) (bool, int
 }
 
 // UpdateCache updates the contact list cache for the given user
-func (c *HttpserverCore) UpdateCache(payload interface{}) (bool, error) {
+func (c *HttpserverCore) UpdateCache(payload *interface{}) (bool, error) {
 	var updateCachePayload struct {
-		Type string            `json:"type"`
-		Data ApiUserContactsDO `json:"data"` // Changed to pointer here
+		Type string             `json:"type" mapstructure:"type"`
+		Data *ApiUserContactsDO `json:"data" mapstructure:"data"`
 	}
 	logx.Infof("Payload before decoding: %v", payload)
 
@@ -106,11 +106,11 @@ func (c *HttpserverCore) UpdateCache(payload interface{}) (bool, error) {
 	switch updateCachePayload.Type {
 	case "add_contact":
 		// Log action type for debugging
-		logx.Infof("Adding contact: %v", updateCachePayload.Data)
+		logx.Infof("Adding contact: %+v", updateCachePayload.Data)
 		return c.updateContactCache(updateCachePayload.Data, true)
 	case "remove_contact":
 		// Log action type for debugging
-		logx.Infof("Removing contact: %v", updateCachePayload.Data)
+		logx.Infof("Removing contact: %+v", updateCachePayload.Data)
 		return c.updateContactCache(updateCachePayload.Data, false)
 	default:
 		// Log unrecognized type
@@ -120,9 +120,9 @@ func (c *HttpserverCore) UpdateCache(payload interface{}) (bool, error) {
 }
 
 // updateContactCache handles adding or removing a contact from the cache and updating the contact lists
-func (r *HttpserverCore) updateContactCache(contact ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
+func (r *HttpserverCore) updateContactCache(contact *ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
 
-	logx.Infof("Decoded contact: %+v", contact)
+	// logx.Infof("Decoded contact: %+v", contact)
 
 	// Validate that the necessary fields are present (e.g., valid user IDs)
 	if contact.OwnerUserId == 0 || contact.ContactUserId == 0 {
