@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -22,6 +21,7 @@ import (
 	"pwm-server/app/interface/httpserver/internal/svc"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -207,6 +207,16 @@ func decryptAES(encryptedData, key []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
+// Function to log intermediate states for debugging
+func logRequestBody(body []byte) {
+	logx.Debugf("Received request body: %s", string(body))
+}
+
+func logDecryptionDetails(encryptedData string, encryptedKey string) {
+	logx.Debugf("Encrypted Data: %s", encryptedData)
+	logx.Debugf("Encrypted Key: %s", encryptedKey)
+}
+
 func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload interface{}) error {
 	// Read request body
 	body, err := io.ReadAll(r.Body)
@@ -215,14 +225,20 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	}
 	defer r.Body.Close()
 
+	// Log raw request body for debugging purposes
+	logRequestBody(body)
+
 	// Parse combined payload
 	var encryptedData struct {
 		EncryptedData string `json:"encryptedData"`
 		EncryptedKey  string `json:"encryptedKey"`
 	}
-	if err := json.Unmarshal(body, &encryptedData); err != nil {
+	if err := jsonx.Unmarshal(body, &encryptedData); err != nil {
 		return fmt.Errorf("failed to parse encrypted payload: %v", err)
 	}
+
+	// Log the encrypted parts (for debugging)
+	logDecryptionDetails(encryptedData.EncryptedData, encryptedData.EncryptedKey)
 
 	// Decode base64-encoded data and key
 	encryptedKey, err := base64.StdEncoding.DecodeString(encryptedData.EncryptedKey)
@@ -234,11 +250,18 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 		return fmt.Errorf("failed to decode encrypted data: %v", err)
 	}
 
+	// Log the decoded values (for debugging)
+	logx.Debugf("Decoded Encrypted Key: %x", encryptedKey)
+	logx.Debugf("Decoded Encrypted Payload: %x", encryptedPayload)
+
 	// Decrypt the AES key using RSA
 	aesKey, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, encryptedKey, nil)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt AES key: %v", err)
 	}
+
+	// Log the decrypted AES key (for debugging)
+	logx.Debugf("Decrypted AES Key: %x", aesKey)
 
 	// Decrypt the payload using AES
 	decryptedPayload, err := decryptAES(encryptedPayload, aesKey)
@@ -246,8 +269,11 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 		return fmt.Errorf("failed to decrypt payload: %v", err)
 	}
 
+	// Log the decrypted payload (for debugging)
+	logx.Debugf("Decrypted Payload: %s", string(decryptedPayload))
+
 	// Parse the decrypted JSON payload
-	if err := json.Unmarshal(decryptedPayload, payload); err != nil {
+	if err := jsonx.Unmarshal(decryptedPayload, payload); err != nil {
 		return fmt.Errorf("invalid JSON format: %v", err)
 	}
 
