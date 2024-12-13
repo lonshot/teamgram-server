@@ -15,7 +15,7 @@ KV:
 KeyFile: "./server_pkcs1.key"
 KeyFingerprint: "12240908862933197005"
 SecureAPIKey: "5968B32525344964B9D062CDF1313DFA74DE84AF7FE14A659D29D1FDD8266C04"
-VerifySameNetwork: true
+VerifySameNetwork: false
 
 MsgClient:
   Etcd:
