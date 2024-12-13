@@ -89,26 +89,50 @@ func (c *HttpserverCore) UpdateCache(ctx context.Context, payload interface{}) (
 		Type string      `json:"type"`
 		Data interface{} `json:"data"`
 	}
+
+	// Decode the payload into updateCachePayload
 	if err := mapstructure.Decode(payload, &updateCachePayload); err != nil {
-		return false, err
+		logx.Errorf("Failed to decode payload: %v", err)
+		return false, fmt.Errorf("failed to decode payload: %w", err)
 	}
 
+	// Check if Type is present and valid
+	if updateCachePayload.Type == "" {
+		logx.Errorf("Missing or empty 'type' field in payload")
+		return false, fmt.Errorf("missing or empty 'type' field in payload")
+	}
+
+	// Switch on the 'type' field to determine the action
 	switch updateCachePayload.Type {
 	case "add_contact":
+		// Log action type for debugging
+		logx.Infof("Adding contact: %v", updateCachePayload.Data)
 		return c.updateContactCache(updateCachePayload.Data, true)
 	case "remove_contact":
+		// Log action type for debugging
+		logx.Infof("Removing contact: %v", updateCachePayload.Data)
 		return c.updateContactCache(updateCachePayload.Data, false)
+	default:
+		// Log unrecognized type
+		logx.Errorf("Unrecognized update type: %s", updateCachePayload.Type)
+		return false, fmt.Errorf("unrecognized update type: %s", updateCachePayload.Type)
 	}
-	return true, nil
 }
 
 // updateContactCache handles adding or removing a contact from the cache and updating the contact lists
 func (r *HttpserverCore) updateContactCache(contactData interface{}, add bool) (bool, error) {
-	var contact UserContactsDO
-	if err := mapstructure.Decode(contactData, &contact); err != nil {
-		return false, err
+	// Type assert the contactData to the expected type
+	contact, ok := contactData.(UserContactsDO)
+	if !ok {
+		return false, fmt.Errorf("invalid contact data format")
 	}
 
+	// Validate that the necessary fields are present (e.g., valid user IDs)
+	if contact.OwnerUserId == 0 || contact.ContactUserId == 0 {
+		return false, fmt.Errorf("invalid contact data: OwnerUserId or ContactUserId is zero")
+	}
+
+	// Generate the cache key
 	key := r.genContactCacheKey(contact.OwnerUserId, contact.ContactUserId)
 
 	// Access kv store from the Dao context
@@ -117,7 +141,7 @@ func (r *HttpserverCore) updateContactCache(contactData interface{}, add bool) (
 	// Serialize the contact data
 	data, err := jsonx.MarshalToString(contact)
 	if err != nil {
-		logx.Errorf("Failed to serialize contact data: %v", err)
+		logx.Errorf("Failed to serialize contact data for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 		return false, err
 	}
 
@@ -127,17 +151,18 @@ func (r *HttpserverCore) updateContactCache(contactData interface{}, add bool) (
 			logx.Errorf("Failed to add contact to cache for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 			return false, err
 		}
-		logx.Infof("Added contact to cache: %s, data: %s", key, data)
+		logx.Infof("Added contact to cache for OwnerID: %d, ContactID: %d, data: %s", contact.OwnerUserId, contact.ContactUserId, data)
 	} else {
 		if _, err := kvStore.Del(key); err != nil {
 			logx.Errorf("Failed to remove contact from cache for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 			return false, err
 		}
-		logx.Infof("Removed contact from cache: %s, data: %s", key, data)
+		logx.Infof("Removed contact from cache for OwnerID: %d, ContactID: %d", contact.OwnerUserId, contact.ContactUserId)
 	}
 
 	// Update contact lists
 	if err := r.updateContactLists(contact.OwnerUserId, contact.ContactUserId, add); err != nil {
+		logx.Errorf("Failed to update contact lists for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 		return false, err
 	}
 
