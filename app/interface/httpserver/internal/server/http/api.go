@@ -333,7 +333,7 @@ func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.R
 
 	// Initialize core context
 	c := core.New(r.Context(), ctx)
-	success, failedCount := c.PushMessage(r.Context(), messagePayload.UserIds, messagePayload.Message)
+	success, failedCount := c.PushMessage(messagePayload.UserIds, messagePayload.Message)
 
 	// Check if message was successfully sent to all users
 	if success {
@@ -354,7 +354,7 @@ func handleUpdateCache(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.R
 
 	c := core.New(r.Context(), ctx)
 
-	success, err := c.UpdateCache(r.Context(), payload)
+	success, err := c.UpdateCache(payload)
 	// Check if there was an error or the operation was unsuccessful
 	if err != nil {
 		logx.Errorf("Failed to update cache: %v", err)

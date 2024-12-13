@@ -1,7 +1,6 @@
 package core
 
 import (
-	"context"
 	"fmt"
 	"math/rand"
 	"time"
@@ -36,7 +35,7 @@ const (
 
 // PushMessage sends a message to the specified users
 // Returns true if all messages were successfully sent, otherwise returns false and the error
-func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, message string) (bool, int) {
+func (c *HttpserverCore) PushMessage(userIds []int64, message string) (bool, int) {
 	// Flag to track if any errors occurred
 	var hasError bool
 	var failedCount int
@@ -53,7 +52,7 @@ func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, messa
 
 		// Attempt to send the message to the user
 		_, err := c.svcCtx.Dao.MsgClient.MsgPushUserMessage(
-			ctx,
+			c.ctx,
 			&msgpb.TLMsgPushUserMessage{
 				UserId:    int64(env2.ServiceUserId),
 				AuthKeyId: 0,
@@ -84,11 +83,12 @@ func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, messa
 }
 
 // UpdateCache updates the contact list cache for the given user
-func (c *HttpserverCore) UpdateCache(ctx context.Context, payload interface{}) (bool, error) {
+func (c *HttpserverCore) UpdateCache(payload interface{}) (bool, error) {
 	var updateCachePayload struct {
-		Type string             `json:"type"`
-		Data *ApiUserContactsDO `json:"data"` // Changed to pointer here
+		Type string            `json:"type"`
+		Data ApiUserContactsDO `json:"data"` // Changed to pointer here
 	}
+	logx.Infof("Payload before decoding: %v", payload)
 
 	// Decode the payload into updateCachePayload
 	if err := mapstructure.Decode(payload, &updateCachePayload); err != nil {
@@ -120,7 +120,7 @@ func (c *HttpserverCore) UpdateCache(ctx context.Context, payload interface{}) (
 }
 
 // updateContactCache handles adding or removing a contact from the cache and updating the contact lists
-func (r *HttpserverCore) updateContactCache(contact *ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
+func (r *HttpserverCore) updateContactCache(contact ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
 
 	logx.Infof("Decoded contact: %+v", contact)
 
