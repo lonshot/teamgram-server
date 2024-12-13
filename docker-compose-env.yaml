@@ -82,7 +82,7 @@ services:
       MYSQL_USER: pwm
       MYSQL_PASSWORD: pass123456a
     ports:
-      - 127.0.0.1:3306:3306
+      - 3306:3306
     volumes:
       - ./data/mysql/data:/var/lib/mysql
       - ./pwm/sql:/docker-entrypoint-initdb.d/
