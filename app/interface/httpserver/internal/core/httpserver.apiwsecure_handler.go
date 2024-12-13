@@ -122,7 +122,7 @@ func (c *HttpserverCore) UpdateCache(payload interface{}) (bool, error) {
 // updateContactCache handles adding or removing a contact from the cache and updating the contact lists
 func (r *HttpserverCore) updateContactCache(contact *ApiUserContactsDO, add bool) (bool, error) { // Pass as pointer
 
-	logx.Infof("Decoded contact: %+v", contact)
+	// logx.Infof("Decoded contact: %+v", contact)
 
 	// Validate that the necessary fields are present (e.g., valid user IDs)
 	if contact.OwnerUserId == 0 || contact.ContactUserId == 0 {
