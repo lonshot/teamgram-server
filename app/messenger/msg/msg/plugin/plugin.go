@@ -1,16 +1,11 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package plugin
 
 import (
 	"context"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/username/username"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 type MsgPlugin interface {

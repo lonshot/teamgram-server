@@ -1,21 +1,16 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
 	"context"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
 	user_client "pwm-server/app/service/biz/user/client"
 	userpb "pwm-server/app/service/biz/user/user"
 	media_client "pwm-server/app/service/media/client"
 	mediapb "pwm-server/app/service/media/media"
 	"pwm-server/pkg/phonenumber"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

@@ -1,14 +1,9 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/dialog/internal/dal/dataobject"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 func (d *Dao) MakeSavedDialog(do *dataobject.SavedDialogsDO) *mtproto.SavedDialog {

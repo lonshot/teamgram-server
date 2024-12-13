@@ -1,9 +1,3 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package httpx
 
 import (
@@ -11,8 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/pkg/httpx/render"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"google.golang.org/protobuf/encoding/protojson"

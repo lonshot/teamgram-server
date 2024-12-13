@@ -1,17 +1,12 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package core
 
 import (
 	"context"
 
+	"pwm-server/app/interface/httpserver/internal/svc"
+
 	"github.com/teamgram/proto/mtproto"
 	"github.com/teamgram/proto/mtproto/rpc/metadata"
-	"pwm-server/app/interface/httpserver/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

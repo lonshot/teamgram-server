@@ -1,16 +1,11 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package gnet
 
 import (
 	"errors"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/interface/gnetway/internal/server/gnet/codec"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/panjf2000/gnet/v2"
 	"github.com/zeromicro/go-zero/core/logx"

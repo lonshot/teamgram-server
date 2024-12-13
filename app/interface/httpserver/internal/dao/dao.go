@@ -1,9 +1,3 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
@@ -12,10 +6,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/teamgram/marmota/pkg/cache"
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/interface/httpserver/internal/config"
 	sessionpb "pwm-server/app/interface/session/session"
+	msg_client "pwm-server/app/messenger/msg/msg/client"
+
+	"github.com/teamgram/marmota/pkg/cache"
+	"github.com/teamgram/marmota/pkg/net/rpcx"
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/collection"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -27,6 +24,7 @@ type Dao struct {
 	cache                  *cache.LRUCache
 	handshakeStateCtxCache *collection.Cache
 	Handshake              *handshake
+	msg_client.MsgClient
 }
 
 // New new a dao and return.
@@ -35,6 +33,7 @@ func New(c config.Config) (dao *Dao) {
 	dao.session = NewSession(c)
 	dao.cache = cache.NewLRUCache(10 * 1024 * 1024) // cache capacity: 10MB
 	dao.handshakeStateCtxCache, _ = collection.NewCache(time.Minute)
+	dao.MsgClient = msg_client.NewMsgClient(rpcx.GetCachedRpcClient(c.MsgClient))
 
 	keyFingerprint, err := strconv.ParseUint(c.KeyFingerprint, 10, 64)
 	if err != nil {

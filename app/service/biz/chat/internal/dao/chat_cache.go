@@ -1,9 +1,3 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
@@ -11,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
+	"pwm-server/app/service/media/media"
+
 	"github.com/teamgram/marmota/pkg/stores/sqlc"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"github.com/teamgram/proto/mtproto"
-	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
-	"pwm-server/app/service/media/media"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/mr"

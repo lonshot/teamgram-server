@@ -1,12 +1,3 @@
-/*
- * Created from 'scheme.tl' by 'mtprotoc'
- *
- * Copyright (c) 2024-present, Teamgram Studio (https://teamgram.io).
- *  All rights reserved.
- *
- * Author: teamgramio (teamgram.io@gmail.com)
- */
-
 package config
 
 import (
@@ -17,6 +8,8 @@ import (
 type Config struct {
 	Http           rest.RestConf
 	Session        zrpc.RpcClientConf
+	MsgClient      zrpc.RpcClientConf
 	KeyFile        string
 	KeyFingerprint string
+	SecureAPIKey   string
 }

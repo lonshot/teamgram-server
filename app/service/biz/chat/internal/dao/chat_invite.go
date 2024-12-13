@@ -1,17 +1,12 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
 	"context"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/chat/internal/dal/dataobject"
 	"pwm-server/pkg/env2"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MakeChatInviteExported

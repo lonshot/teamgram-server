@@ -1,18 +1,13 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package plugin
 
 import (
 	"context"
 	"sort"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/username/username"
 	"pwm-server/pkg/mention"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"mvdan.cc/xurls/v2"
 )

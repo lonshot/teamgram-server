@@ -1,9 +1,3 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package main
 
 import (
@@ -11,10 +5,11 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/teamgram/marmota/pkg/stores/sqlx"
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/media/internal/config"
 	"pwm-server/app/service/media/internal/svc"
+
+	"github.com/teamgram/marmota/pkg/stores/sqlx"
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/conf"
 )

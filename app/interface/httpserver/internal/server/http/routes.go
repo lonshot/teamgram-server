@@ -13,10 +13,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/proto/mtproto/rpc/metadata"
 	"pwm-server/app/interface/httpserver/internal/core"
 	"pwm-server/app/interface/httpserver/internal/svc"
+
+	"github.com/teamgram/proto/mtproto"
+	"github.com/teamgram/proto/mtproto/rpc/metadata"
 
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -25,6 +26,11 @@ import (
 func RegisterHandlers(engine *rest.Server, serverCtx *svc.ServiceContext) {
 	engine.AddRoutes(
 		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/apiw_secure",
+				Handler: apiwSecure(serverCtx),
+			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/api",

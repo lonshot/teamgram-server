@@ -1,9 +1,3 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package sess
 
 import (
@@ -15,12 +9,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/teamgram/marmota/pkg/queue2"
-	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/proto/mtproto/rpc/metadata"
 	"pwm-server/app/interface/session/internal/dao"
 	"pwm-server/app/service/authsession/authsession"
 	"pwm-server/app/service/status/status"
+
+	"github.com/teamgram/marmota/pkg/queue2"
+	"github.com/teamgram/proto/mtproto"
+	"github.com/teamgram/proto/mtproto/rpc/metadata"
 
 	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/jsonx"

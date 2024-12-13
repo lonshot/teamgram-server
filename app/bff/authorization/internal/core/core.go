@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/proto/mtproto/rpc/metadata"
 	"pwm-server/app/bff/authorization/internal/svc"
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/pkg/code/conf"
 	"pwm-server/pkg/env2"
 	"pwm-server/pkg/phonenumber"
+
+	"github.com/teamgram/proto/mtproto"
+	"github.com/teamgram/proto/mtproto/rpc/metadata"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -74,7 +75,7 @@ func (c *AuthorizationCore) pushSignInMessage(ctx context.Context, signInUserId 
 		message := mtproto.MakeTLMessage(&mtproto.Message{
 			Out:     true,
 			Date:    int32(time.Now().Unix()),
-			FromId:  mtproto.MakePeerUser(777000),
+			FromId:  mtproto.MakePeerUser(int64(env2.ServiceUserId)),
 			PeerId:  mtproto.MakeTLPeerUser(&mtproto.Peer{UserId: signInUserId}).To_Peer(),
 			Message: fmt.Sprintf(signInMessageTpl, code, env2.MyAppName, env2.MyAppName),
 			Entities: []*mtproto.MessageEntity{
@@ -102,7 +103,7 @@ func (c *AuthorizationCore) pushSignInMessage(ctx context.Context, signInUserId 
 		c.svcCtx.Dao.MsgClient.MsgPushUserMessage(
 			ctx,
 			&msgpb.TLMsgPushUserMessage{
-				UserId:    777000,
+				UserId:    int64(env2.ServiceUserId),
 				AuthKeyId: 0,
 				PeerType:  mtproto.PEER_USER,
 				PeerId:    signInUserId,

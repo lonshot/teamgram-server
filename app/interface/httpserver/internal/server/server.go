@@ -1,12 +1,3 @@
-/*
- * Created from 'scheme.tl' by 'mtprotoc'
- *
- * Copyright (c) 2024-present, Teamgram Studio (https://teamgram.io).
- *  All rights reserved.
- *
- * Author: teamgramio (teamgram.io@gmail.com)
- */
-
 package server
 
 import (
@@ -38,7 +29,7 @@ func (s *Server) Initialize() error {
 	logx.Infov(c)
 	ctx := svc.NewServiceContext(c)
 
-	s.httpSrv = http.New(ctx, c.Http)
+	s.httpSrv = http.New(ctx, c)
 
 	return nil
 }

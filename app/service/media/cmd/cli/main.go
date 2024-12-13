@@ -1,9 +1,3 @@
-// Copyright 2022 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package main
 
 import (
@@ -12,6 +6,7 @@ import (
 
 	media_client "pwm-server/app/service/media/client"
 	"pwm-server/app/service/media/media"
+
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"

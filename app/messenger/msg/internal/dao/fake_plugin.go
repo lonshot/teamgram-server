@@ -1,16 +1,11 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
 	"context"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/username/username"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 func (d *Dao) ReadReactionUnreadMessage(ctx context.Context, userId int64, msgId int32) error {

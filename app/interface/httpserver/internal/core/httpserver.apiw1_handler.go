@@ -1,9 +1,3 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package core
 
 import (
@@ -11,10 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/teamgram/proto/mtproto"
-	"github.com/teamgram/proto/mtproto/crypto"
 	"pwm-server/app/interface/httpserver/internal/dao"
 	sessionpb "pwm-server/app/interface/session/session"
+
+	"github.com/teamgram/proto/mtproto"
+	"github.com/teamgram/proto/mtproto/crypto"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

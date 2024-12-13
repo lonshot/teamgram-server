@@ -1,16 +1,11 @@
-// Copyright 2024 Teamgram Authors
-//  All rights reserved.
-//
-// Author: Benqi (wubenqi@gmail.com)
-//
-
 package dao
 
 import (
 	"context"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/message/internal/dal/dataobject"
+
+	"github.com/teamgram/proto/mtproto"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
