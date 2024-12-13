@@ -1,7 +1,11 @@
 package http
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -164,27 +168,92 @@ func validateRequest(r *http.Request) (string, error) {
 
 	return "", nil
 }
+func pkcs7Unpad(data []byte) ([]byte, error) {
+	length := len(data)
+	if length == 0 {
+		return nil, fmt.Errorf("invalid padding size")
+	}
+	padding := int(data[length-1])
+	if padding > length || padding > aes.BlockSize {
+		return nil, fmt.Errorf("invalid padding size")
+	}
+	return data[:length-padding], nil
+}
+func decryptAES(encryptedData, key []byte) ([]byte, error) {
+	// Extract IV (first 16 bytes) and ciphertext
+	if len(encryptedData) < aes.BlockSize {
+		return nil, fmt.Errorf("ciphertext too short")
+	}
+	iv := encryptedData[:aes.BlockSize]
+	ciphertext := encryptedData[aes.BlockSize:]
+
+	// Initialize AES cipher
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create AES cipher: %v", err)
+	}
+
+	// Decrypt using AES CBC
+	decrypted := make([]byte, len(ciphertext))
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(decrypted, ciphertext)
+
+	// Remove padding
+	decrypted, err = pkcs7Unpad(decrypted)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unpad decrypted data: %v", err)
+	}
+
+	return decrypted, nil
+}
 
 func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload interface{}) error {
-	// Read and decrypt request body
+	// Read request body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read request body: %v", err)
 	}
 	defer r.Body.Close()
 
-	decryptedBody, err := decryptMessage(string(body), privateKey)
-	if err != nil {
-		return fmt.Errorf("failed to decrypt request body: %v", err)
+	// Parse combined payload
+	var encryptedData struct {
+		EncryptedData string `json:"encryptedData"`
+		EncryptedKey  string `json:"encryptedKey"`
+	}
+	if err := json.Unmarshal(body, &encryptedData); err != nil {
+		return fmt.Errorf("failed to parse encrypted payload: %v", err)
 	}
 
-	// Parse JSON payload
-	if err := json.Unmarshal([]byte(decryptedBody), payload); err != nil {
+	// Decode base64-encoded data and key
+	encryptedKey, err := base64.StdEncoding.DecodeString(encryptedData.EncryptedKey)
+	if err != nil {
+		return fmt.Errorf("failed to decode encrypted key: %v", err)
+	}
+	encryptedPayload, err := base64.StdEncoding.DecodeString(encryptedData.EncryptedData)
+	if err != nil {
+		return fmt.Errorf("failed to decode encrypted data: %v", err)
+	}
+
+	// Decrypt the AES key using RSA
+	aesKey, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, encryptedKey, nil)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt AES key: %v", err)
+	}
+
+	// Decrypt the payload using AES
+	decryptedPayload, err := decryptAES(encryptedPayload, aesKey)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt payload: %v", err)
+	}
+
+	// Parse the decrypted JSON payload
+	if err := json.Unmarshal(decryptedPayload, payload); err != nil {
 		return fmt.Errorf("invalid JSON format: %v", err)
 	}
 
 	return nil
 }
+
 func apiwSecure(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Validate request
