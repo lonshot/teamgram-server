@@ -1925,7 +1925,7 @@ CREATE TABLE `net_sysparam` (
 --
 
 INSERT INTO `net_sysparam` (`Id`, `MaxOfPartners`, `AdminEmail`, `DisableEditingAvatar`, `RequirePhoneVerfication`, `AndroidInviteMessage`, `iOSInviteMessage`, `StaticPartnerDuration`, `StaticPartnerUnit`, `PartnerMatchingAgeUp`, `PartnerMatchingAgeDowm`, `LatestAppVersion`, `AgeRangeUpperLimit`, `AgeRangeLowerLimit`, `PlayButtonIdleTime`, `HobbiesListVisible`, `PlayNowMode`, `PlayNowMessageKey`, `DefaultRegisterUserState`) VALUES
-(1, 6, 'info@play-with-me.net', 0, 1, '[name] invited you to play. Click [url] to start!', '[name] invited you to play. Click [url] to start!', 4, 'hour', NULL, NULL, '3.2.6', -1, -1, 10, 1, 3, 'play_now_message', 2);
+(1, 6, 'info@play-with-me.net', 0, 1, 'Hey! [name] has invited you to join them in an exciting game of Play with Me! Click here to join the fun: [url]', 'Hey! [name] has invited you to join them in an exciting game of Play with Me! Click here to join the fun: [url]', 4, 'hour', NULL, NULL, '3.2.6', -1, -1, 10, 1, 3, 'play_now_message', 2);
 
 -- --------------------------------------------------------
 
