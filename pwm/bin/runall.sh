@@ -49,4 +49,4 @@ run_service "session" "session.yaml"
 # run_service "gateway" "gateway.yaml"
 run_service "httpserver" "httpserver.yaml"
 
-run_service "gnetway" "../etc/gnetway.yaml"
+run_service "gnetway" "gnetway.yaml"
