@@ -17,15 +17,18 @@ import (
 	"pwm-server/app/interface/httpserver/internal/core"
 	"pwm-server/app/interface/httpserver/internal/svc"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
 var PrivateKey *rsa.PrivateKey
 var SecureAPIKey string
+var VerifySameNetwork bool
 
 func Initialize(c config.Config) {
 	logx.Info("Initializing configuration...")
 
+	VerifySameNetwork = c.VerifySameNetwork
 	// Secure API Key Setup
 	SecureAPIKey = c.SecureAPIKey
 	logx.Infof("Secure API Key loaded: %s", SecureAPIKey)
@@ -64,7 +67,26 @@ func Initialize(c config.Config) {
 }
 
 // Validate if client and server are in the same LAN (based on first 3 parts of the IP)
-func validateSameLAN(clientIP, serverIP string) bool {
+func validateSameLAN(r *http.Request) bool {
+	if !VerifySameNetwork {
+		return true
+	}
+	// Validate client IP (without port)
+	clientIP, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		logx.Errorf("Failed to extract client IP from %s: %v", r.RemoteAddr, err)
+		return false
+	}
+
+	// Validate server IP (without port)
+	serverIP, _, err := net.SplitHostPort(r.Host)
+	if err != nil {
+		// If r.Host doesn't contain a port, SplitHostPort would fail. So we just use the whole host as serverIP.
+		serverIP = r.Host
+	}
+	// Remove any port information from server IP if present
+	serverIP = strings.Split(serverIP, ":")[0]
+
 	// Determine if both are IPv4 or IPv6
 	if isIPv4(clientIP) && isIPv4(serverIP) {
 		// For IPv4, compare the first 3 octets
@@ -72,10 +94,11 @@ func validateSameLAN(clientIP, serverIP string) bool {
 		serverParts := strings.Split(serverIP, ".")
 
 		if len(clientParts) < 3 || len(serverParts) < 3 {
-			logx.Errorf("Invalid IPv4 address format.")
+			logx.Errorf("Invalid IPv4 address format. Client IP: %s, Server IP: %s", clientIP, serverIP)
 			return false
 		}
 
+		// Compare the first 3 parts of the IPv4 address
 		if clientParts[0] == serverParts[0] && clientParts[1] == serverParts[1] && clientParts[2] == serverParts[2] {
 			return true
 		}
@@ -85,17 +108,20 @@ func validateSameLAN(clientIP, serverIP string) bool {
 		serverParts := strings.Split(serverIP, ":")
 
 		if len(clientParts) < 3 || len(serverParts) < 3 {
-			logx.Errorf("Invalid IPv6 address format.")
+			logx.Errorf("Invalid IPv6 address format. Client IP: %s, Server IP: %s", clientIP, serverIP)
 			return false
 		}
 
+		// Compare the first 3 segments of the IPv6 address
 		if clientParts[0] == serverParts[0] && clientParts[1] == serverParts[1] && clientParts[2] == serverParts[2] {
 			return true
 		}
 	} else {
-		logx.Errorf("IP address types do not match (one is IPv4, the other is IPv6).")
+		logx.Errorf("IP address types do not match (one is IPv4, the other is IPv6). Client IP: %s, Server IP: %s", clientIP, serverIP)
 	}
 
+	// If no match, log and return false
+	logx.Errorf("Forbidden: clientIP=%s serverIP=%s", clientIP, serverIP)
 	return false
 }
 
@@ -132,12 +158,7 @@ func validateRequest(r *http.Request) (string, error) {
 	if apiKey != SecureAPIKey {
 		return "Unauthorized", fmt.Errorf("invalid API key")
 	}
-
-	// Validate client IP
-	clientIP, _, _ := net.SplitHostPort(r.RemoteAddr)
-	serverIP := r.Host // Assume server IP is in r.Host, adjust if needed
-	if !validateSameLAN(clientIP, serverIP) {
-		logx.Errorf("Forbidden: clientIP=%s serverIP=%s", clientIP, serverIP)
+	if !validateSameLAN(r) {
 		return "Forbidden", fmt.Errorf("client IP not in same lan as server IP")
 	}
 
@@ -164,7 +185,6 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 
 	return nil
 }
-
 func apiwSecure(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Validate request
@@ -173,28 +193,89 @@ func apiwSecure(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		// Define payload structure
-		var payload struct {
-			UserIds []int64 `json:"userIds"`
-			Message string  `json:"message"`
+		// Define structure for method_name and payload
+		var request struct {
+			MethodName string      `json:"method_name"`
+			Payload    interface{} `json:"payload"`
 		}
 
-		// Parse and decrypt body
-		if err := parseAndDecryptBody(r, PrivateKey, &payload); err != nil {
+		// Parse and decrypt body into request struct
+		if err := parseAndDecryptBody(r, PrivateKey, &request); err != nil {
 			handleBadRequest(w, "Invalid Request Body", http.StatusBadRequest)
 			return
 		}
 
-		// Call pushMessage for each userId
-		c := core.New(
-			r.Context(),
-			ctx,
-		)
-		c.PushMessage(r.Context(), payload.UserIds, payload.Message)
+		// Call the appropriate handler based on the method_name
+		switch request.MethodName {
+		case "push_message":
+			handlePushMessage(ctx, w, r, request.Payload)
 
-		// Return success
-		logx.Infof("Message sent successfully to %d users", len(payload.UserIds))
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Message sent successfully"))
+		case "update_cache":
+			handleUpdateCache(ctx, w, r, request.Payload)
+
+		default:
+			handleBadRequest(w, "Unknown method_name", http.StatusBadRequest)
+		}
 	}
+}
+
+// Handle push_message logic
+func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload interface{}) {
+	var messagePayload struct {
+		UserIds []int64 `json:"userIds"`
+		Message string  `json:"message"`
+	}
+	if err := mapstructure.Decode(payload, &messagePayload); err != nil {
+		handleBadRequest(w, "Invalid Payload for push_message", http.StatusBadRequest)
+		return
+	}
+
+	// Process push_message logic
+	c := core.New(r.Context(), ctx)
+	success, err := c.PushMessage(r.Context(), messagePayload.UserIds, messagePayload.Message)
+
+	// Check if there was an error or the operation was unsuccessful
+	if err != nil {
+		logx.Errorf("Failed to push message: %v", err)
+		handleBadRequest(w, "Failed to send message", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if message was successfully sent to all users
+	if !success {
+		logx.Infof("Failed to send message to some users")
+		handleBadRequest(w, "Failed to send message to all users", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with success
+	logx.Infof("Message sent successfully to %d users", len(messagePayload.UserIds))
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Message sent successfully"))
+}
+
+// Handle update_cache logic
+func handleUpdateCache(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request, payload interface{}) {
+
+	c := core.New(r.Context(), ctx)
+
+	success, err := c.UpdateCache(r.Context(), payload)
+	// Check if there was an error or the operation was unsuccessful
+	if err != nil {
+		logx.Errorf("Failed to update cache: %v", err)
+		handleBadRequest(w, "Failed to update cache", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if message was successfully sent to all users
+	if !success {
+		logx.Infof("Failed to update cache")
+		handleBadRequest(w, "Failed to update cache", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with success
+	logx.Infof("Update cache successfully")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Update cache successfully"))
 }

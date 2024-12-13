@@ -12,6 +12,7 @@ Http:
 
 KeyFile: "./server_pkcs1.key"
 KeyFingerprint: "12240908862933197005"
+VerifySameNetwork: true
 
 Session:
   Etcd:

@@ -12,6 +12,7 @@ import (
 
 	"github.com/teamgram/marmota/pkg/cache"
 	"github.com/teamgram/marmota/pkg/net/rpcx"
+	"github.com/teamgram/marmota/pkg/stores/kv"
 	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/collection"
@@ -25,6 +26,7 @@ type Dao struct {
 	handshakeStateCtxCache *collection.Cache
 	Handshake              *handshake
 	msg_client.MsgClient
+	KV kv.Store
 }
 
 // New new a dao and return.
@@ -35,6 +37,7 @@ func New(c config.Config) (dao *Dao) {
 	dao.handshakeStateCtxCache, _ = collection.NewCache(time.Minute)
 	dao.MsgClient = msg_client.NewMsgClient(rpcx.GetCachedRpcClient(c.MsgClient))
 
+	dao.KV = kv.NewStore(c.KV)
 	keyFingerprint, err := strconv.ParseUint(c.KeyFingerprint, 10, 64)
 	if err != nil {
 		panic(c.KeyFingerprint)
