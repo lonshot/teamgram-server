@@ -127,13 +127,13 @@ func (r *HttpserverCore) updateContactCache(contactData interface{}, add bool) (
 			logx.Errorf("Failed to add contact to cache for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 			return false, err
 		}
-		logx.Infof("Added contact to cache: %s", key)
+		logx.Infof("Added contact to cache: %s, data: %s", key, data)
 	} else {
 		if _, err := kvStore.Del(key); err != nil {
 			logx.Errorf("Failed to remove contact from cache for OwnerID: %d, ContactID: %d: %v", contact.OwnerUserId, contact.ContactUserId, err)
 			return false, err
 		}
-		logx.Infof("Removed contact from cache: %s", key)
+		logx.Infof("Removed contact from cache: %s, data: %s", key, data)
 	}
 
 	// Update contact lists

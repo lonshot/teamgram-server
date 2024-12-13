@@ -273,7 +273,7 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	}
 
 	// Log the decrypted payload (for debugging)
-	// logx.Debugf("Decrypted Payload: %s", string(decryptedPayload))
+	logx.Debugf("Decrypted Payload: %s", string(decryptedPayload))
 
 	// Parse the decrypted JSON payload
 	if err := jsonx.Unmarshal(decryptedPayload, payload); err != nil {
