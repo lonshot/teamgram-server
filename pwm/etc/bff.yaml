@@ -1,0 +1,73 @@
+Name: bff.bff
+ListenOn: 127.0.0.1:20010
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: bff.bff
+Timeout: 0
+Log:
+  Mode: file
+  Path: ../logs/bff
+  Level: debug
+KV:
+  - Host: localhost:6379
+
+Code:
+  Name: "me"
+  SendCodeUrl: "http://pwm_web_server:8080/api/v1/send_secret_code"
+  VerifyCodeUrl: "http://pwm_web_server:8080/api/v1/verify_secret_code"
+  PushMessageUrl: "http://pwm_web_server:8080/api/v1/push_message"
+  Key: "pwm-server"
+  Secret: "cde23a1529ca4534bec2c78aa3642e6944cb2748337c4226998c79d3a678cddb"
+  RegionId: ""
+  DummyCode: "12345"
+
+BizServiceClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.biz_service
+AuthSessionClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.authsession
+MediaClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.media
+  Timeout: 0
+IdgenClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.idgen
+MsgClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: messenger.msg
+  Timeout: 0
+DfsClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.dfs
+  Timeout: 0
+StatusClient:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: service.status
+
+SyncClient:
+  Topic:   "Sync-T"
+  Brokers:
+    - 127.0.0.1:9092
+
+Mysql:
+  DSN: root:@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4&parseTime=true
+  Active: 64
+  Idle: 64
+  IdleTimeout: 4h
