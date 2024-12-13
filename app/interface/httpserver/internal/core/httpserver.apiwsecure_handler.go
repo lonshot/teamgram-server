@@ -36,8 +36,13 @@ const (
 
 // PushMessage sends a message to the specified users
 // Returns true if all messages were successfully sent, otherwise returns false and the error
-func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, message string) (bool, error) {
+func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, message string) (bool, int) {
+	// Flag to track if any errors occurred
+	var hasError bool
+	var failedCount int
+	// Iterate over each userId and attempt to send the message
 	for _, userId := range userIds {
+		// Create the message
 		msg := mtproto.MakeTLMessage(&mtproto.Message{
 			Out:     true,
 			Date:    int32(time.Now().Unix()),
@@ -64,14 +69,18 @@ func (c *HttpserverCore) PushMessage(ctx context.Context, userIds []int64, messa
 				}).To_OutboxMessage(),
 			})
 
-		// If error occurs while pushing the message, return false and the error
+		// If error occurs while pushing the message, log it and continue
 		if err != nil {
-			return false, err
+			// Log the error and continue sending to the next user
+			logx.Errorf("Error sending message to user %d: %v", userId, err)
+			hasError = true
+			failedCount++
+			// Optionally, you can log the error with more details if required.
 		}
 	}
 
-	// Return true if all messages were successfully sent
-	return true, nil
+	// If there were errors, return false, otherwise return true
+	return !hasError, failedCount
 }
 
 // UpdateCache updates the contact list cache for the given user

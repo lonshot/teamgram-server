@@ -179,11 +179,14 @@ func pkcs7Unpad(data []byte) ([]byte, error) {
 	}
 	return data[:length-padding], nil
 }
+
 func decryptAES(encryptedData, key []byte) ([]byte, error) {
-	// Extract IV (first 16 bytes) and ciphertext
+	// Ensure the encrypted data is large enough for an IV and ciphertext
 	if len(encryptedData) < aes.BlockSize {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
+
+	// Extract IV (first 16 bytes) and ciphertext (remaining bytes)
 	iv := encryptedData[:aes.BlockSize]
 	ciphertext := encryptedData[aes.BlockSize:]
 
@@ -207,15 +210,15 @@ func decryptAES(encryptedData, key []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
-// Function to log intermediate states for debugging
-func logRequestBody(body []byte) {
-	logx.Debugf("Received request body: %s", string(body))
-}
+// // Function to log intermediate states for debugging
+// func logRequestBody(body []byte) {
+// 	logx.Debugf("Received request body: %s", string(body))
+// }
 
-func logDecryptionDetails(encryptedData string, encryptedKey string) {
-	logx.Debugf("Encrypted Data: %s", encryptedData)
-	logx.Debugf("Encrypted Key: %s", encryptedKey)
-}
+// func logDecryptionDetails(encryptedData string, encryptedKey string) {
+// 	logx.Debugf("Encrypted Data: %s", encryptedData)
+// 	logx.Debugf("Encrypted Key: %s", encryptedKey)
+// }
 
 func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload interface{}) error {
 	// Read request body
@@ -226,7 +229,7 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	defer r.Body.Close()
 
 	// Log raw request body for debugging purposes
-	logRequestBody(body)
+	// logRequestBody(body)
 
 	// Parse combined payload
 	var encryptedData struct {
@@ -238,7 +241,7 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	}
 
 	// Log the encrypted parts (for debugging)
-	logDecryptionDetails(encryptedData.EncryptedData, encryptedData.EncryptedKey)
+	// logDecryptionDetails(encryptedData.EncryptedData, encryptedData.EncryptedKey)
 
 	// Decode base64-encoded data and key
 	encryptedKey, err := base64.StdEncoding.DecodeString(encryptedData.EncryptedKey)
@@ -251,8 +254,8 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	}
 
 	// Log the decoded values (for debugging)
-	logx.Debugf("Decoded Encrypted Key: %x", encryptedKey)
-	logx.Debugf("Decoded Encrypted Payload: %x", encryptedPayload)
+	// logx.Debugf("Decoded Encrypted Key: %x", encryptedKey)
+	// logx.Debugf("Decoded Encrypted Payload: %x", encryptedPayload)
 
 	// Decrypt the AES key using RSA
 	aesKey, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, encryptedKey, nil)
@@ -270,7 +273,7 @@ func parseAndDecryptBody(r *http.Request, privateKey *rsa.PrivateKey, payload in
 	}
 
 	// Log the decrypted payload (for debugging)
-	logx.Debugf("Decrypted Payload: %s", string(decryptedPayload))
+	// logx.Debugf("Decrypted Payload: %s", string(decryptedPayload))
 
 	// Parse the decrypted JSON payload
 	if err := jsonx.Unmarshal(decryptedPayload, payload); err != nil {
@@ -320,33 +323,30 @@ func handlePushMessage(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.R
 		UserIds []int64 `json:"userIds"`
 		Message string  `json:"message"`
 	}
+
+	// Decode the payload
 	if err := mapstructure.Decode(payload, &messagePayload); err != nil {
+		logx.Errorf("Invalid Payload for push_message: %v", err) // Log the error for invalid payload
 		handleBadRequest(w, "Invalid Payload for push_message", http.StatusBadRequest)
 		return
 	}
 
-	// Process push_message logic
+	// Initialize core context
 	c := core.New(r.Context(), ctx)
-	success, err := c.PushMessage(r.Context(), messagePayload.UserIds, messagePayload.Message)
-
-	// Check if there was an error or the operation was unsuccessful
-	if err != nil {
-		logx.Errorf("Failed to push message: %v", err)
-		handleBadRequest(w, "Failed to send message", http.StatusInternalServerError)
-		return
-	}
+	success, failedCount := c.PushMessage(r.Context(), messagePayload.UserIds, messagePayload.Message)
 
 	// Check if message was successfully sent to all users
-	if !success {
-		logx.Infof("Failed to send message to some users")
-		handleBadRequest(w, "Failed to send message to all users", http.StatusInternalServerError)
-		return
+	if success {
+		// Log success and send a response
+		logx.Infof("Message sent successfully to %d users", len(messagePayload.UserIds))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Message sent successfully to all users"))
+	} else {
+		// Log failure for partial success and send a response
+		logx.Infof("Failed to send message to some users. Total users: %d, Successful sends: %d", len(messagePayload.UserIds), len(messagePayload.UserIds)-failedCount) // `getFailedCount` can be used to get the count of failed users.
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Message sent to some users, but failed for others"))
 	}
-
-	// Respond with success
-	logx.Infof("Message sent successfully to %d users", len(messagePayload.UserIds))
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Message sent successfully"))
 }
 
 // Handle update_cache logic
