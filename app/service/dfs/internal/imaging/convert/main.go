@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/minio/minio-go/v7"
 

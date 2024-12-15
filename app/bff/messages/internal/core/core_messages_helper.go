@@ -2,20 +2,21 @@ package core
 
 import (
 	"context"
-	"github.com/teamgram/proto/mtproto/rpc/metadata"
+	// "github.com/teamgram/proto/mtproto/rpc/metadata"
 	"math/rand"
-	"mvdan.cc/xurls/v2"
-	"pwm-server/app/service/biz/username/username"
-	"pwm-server/pkg/mention"
-	"sort"
+	// "mvdan.cc/xurls/v2"
+	// "pwm-server/app/service/biz/username/username"
+	// "pwm-server/pkg/mention"
+	// "sort"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/sync/sync"
 	"pwm-server/app/service/biz/dialog/dialog"
 	userpb "pwm-server/app/service/biz/user/user"
 	mediapb "pwm-server/app/service/media/media"
 	"pwm-server/pkg/phonenumber"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // draft
@@ -293,123 +294,123 @@ func (c *MessagesCore) makeMediaByInputMedia(media *mtproto.InputMedia) (
 func (c *MessagesCore) fixMessageEntities(
 	fromId int64, peer *mtproto.PeerUtil, noWebpage bool, message *mtproto.Message, hasBot func() bool,
 ) (*mtproto.Message, error) {
-	var (
-		entities mtproto.MessageEntitySlice
-		idxList  []int
-	)
+	// var (
+	// 	entities mtproto.MessageEntitySlice
+	// 	idxList  []int
+	// )
 
-	getIdxList := func() []int {
-		if len(idxList) == 0 {
-			idxList = mention.EncodeStringToUTF16Index(message.Message)
-		}
-		return idxList
-	}
+	// getIdxList := func() []int {
+	// 	if len(idxList) == 0 {
+	// 		idxList = mention.EncodeStringToUTF16Index(message.Message)
+	// 	}
+	// 	return idxList
+	// }
 
-	// Extract URLs and convert them into message entities
-	extractUrls := func() {
-		rIndexes := xurls.Relaxed().FindAllStringIndex(message.Message, -1)
-		if len(rIndexes) > 0 {
-			getIdxList()
-			for _, v := range rIndexes {
-				entityUrl := mtproto.MakeTLMessageEntityUrl(
-					&mtproto.MessageEntity{
-						Offset: int32(idxList[v[0]]),
-						Length: int32(idxList[v[1]] - idxList[v[0]]),
-					},
-				)
-				entities = append(entities, entityUrl.To_MessageEntity())
-			}
-		}
-	}
+	// // Extract URLs and convert them into message entities
+	// extractUrls := func() {
+	// 	rIndexes := xurls.Relaxed().FindAllStringIndex(message.Message, -1)
+	// 	if len(rIndexes) > 0 {
+	// 		getIdxList()
+	// 		for _, v := range rIndexes {
+	// 			entityUrl := mtproto.MakeTLMessageEntityUrl(
+	// 				&mtproto.MessageEntity{
+	// 					Offset: int32(idxList[v[0]]),
+	// 					Length: int32(idxList[v[1]] - idxList[v[0]]),
+	// 				},
+	// 			)
+	// 			entities = append(entities, entityUrl.To_MessageEntity())
+	// 		}
+	// 	}
+	// }
 
-	// Webpage preview for the first URL
-	addWebpagePreview := func() {
-		firstUrl := ""
-		rIndexes := xurls.Relaxed().FindAllStringIndex(message.Message, -1)
-		if len(rIndexes) > 0 {
-			firstUrl = message.Message[rIndexes[0][0]:rIndexes[0][1]]
-		}
-		if !noWebpage && firstUrl != "" && c.svcCtx.Plugin != nil {
-			ctx, _ := metadata.RpcMetadataToOutgoing(c.ctx, c.MD)
-			webpage, _ := c.svcCtx.Plugin.GetWebpagePreview(ctx, firstUrl)
-			if webpage != nil {
-				message.Media = mtproto.MakeTLMessageMediaWebPage(
-					&mtproto.MessageMedia{
-						Webpage: webpage,
-					},
-				).To_MessageMedia()
-			}
-		}
-	}
+	// // Webpage preview for the first URL
+	// addWebpagePreview := func() {
+	// 	firstUrl := ""
+	// 	rIndexes := xurls.Relaxed().FindAllStringIndex(message.Message, -1)
+	// 	if len(rIndexes) > 0 {
+	// 		firstUrl = message.Message[rIndexes[0][0]:rIndexes[0][1]]
+	// 	}
+	// 	if !noWebpage && firstUrl != "" && c.svcCtx.Plugin != nil {
+	// 		ctx, _ := metadata.RpcMetadataToOutgoing(c.ctx, c.MD)
+	// 		webpage, _ := c.svcCtx.Plugin.GetWebpagePreview(ctx, firstUrl)
+	// 		if webpage != nil {
+	// 			message.Media = mtproto.MakeTLMessageMediaWebPage(
+	// 				&mtproto.MessageMedia{
+	// 					Webpage: webpage,
+	// 				},
+	// 			).To_MessageMedia()
+	// 		}
+	// 	}
+	// }
 
-	// Process mention tags
-	processMentions := func() {
-		tags := mention.GetTags('@', message.Message, '(', ')')
-		for _, tag := range tags {
-			getIdxList()
-			mention2 := mtproto.MakeTLMessageEntityMention(
-				&mtproto.MessageEntity{
-					Offset: int32(idxList[tag.Index]),
-					Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
-				},
-			).To_MessageEntity()
+	// // Process mention tags
+	// processMentions := func() {
+	// 	tags := mention.GetTags('@', message.Message, '(', ')')
+	// 	for _, tag := range tags {
+	// 		getIdxList()
+	// 		mention2 := mtproto.MakeTLMessageEntityMention(
+	// 			&mtproto.MessageEntity{
+	// 				Offset: int32(idxList[tag.Index]),
+	// 				Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
+	// 			},
+	// 		).To_MessageEntity()
 
-			if v, _ := c.svcCtx.Dao.UsernameClient.UsernameResolveUsername(
-				c.ctx, &username.TLUsernameResolveUsername{
-					Username: tag.Tag,
-				},
-			); v != nil && v.GetPredicateName() == mtproto.Predicate_peerUser {
-				mention2.UserId_INT64 = v.UserId
-			}
-			entities = append(entities, mention2)
-		}
-	}
+	// 		if v, _ := c.svcCtx.Dao.UsernameClient.UsernameResolveUsername(
+	// 			c.ctx, &username.TLUsernameResolveUsername{
+	// 				Username: tag.Tag,
+	// 			},
+	// 		); v != nil && v.GetPredicateName() == mtproto.Predicate_peerUser {
+	// 			mention2.UserId_INT64 = v.UserId
+	// 		}
+	// 		entities = append(entities, mention2)
+	// 	}
+	// }
 
-	// Process hashtags
-	processHashtags := func() {
-		tags := mention.GetTags('#', message.Message)
-		for _, tag := range tags {
-			getIdxList()
-			hashtag := mtproto.MakeTLMessageEntityHashtag(
-				&mtproto.MessageEntity{
-					Offset: int32(idxList[tag.Index]),
-					Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
-					Url:    "#" + tag.Tag,
-				},
-			).To_MessageEntity()
-			entities = append(entities, hashtag)
-		}
-	}
+	// // Process hashtags
+	// processHashtags := func() {
+	// 	tags := mention.GetTags('#', message.Message)
+	// 	for _, tag := range tags {
+	// 		getIdxList()
+	// 		hashtag := mtproto.MakeTLMessageEntityHashtag(
+	// 			&mtproto.MessageEntity{
+	// 				Offset: int32(idxList[tag.Index]),
+	// 				Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
+	// 				Url:    "#" + tag.Tag,
+	// 			},
+	// 		).To_MessageEntity()
+	// 		entities = append(entities, hashtag)
+	// 	}
+	// }
 
-	// Process bot commands
-	processBotCommands := func() {
-		if hasBot != nil && hasBot() {
-			tags := mention.GetTags('/', message.Message)
-			for _, tag := range tags {
-				getIdxList()
-				botCommand := mtproto.MakeTLMessageEntityBotCommand(
-					&mtproto.MessageEntity{
-						Offset: int32(idxList[tag.Index]),
-						Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
-					},
-				).To_MessageEntity()
-				entities = append(entities, botCommand)
-			}
-		}
-	}
+	// // Process bot commands
+	// processBotCommands := func() {
+	// 	if hasBot != nil && hasBot() {
+	// 		tags := mention.GetTags('/', message.Message)
+	// 		for _, tag := range tags {
+	// 			getIdxList()
+	// 			botCommand := mtproto.MakeTLMessageEntityBotCommand(
+	// 				&mtproto.MessageEntity{
+	// 					Offset: int32(idxList[tag.Index]),
+	// 					Length: int32(idxList[tag.Index+len(tag.Tag)+1] - idxList[tag.Index]),
+	// 				},
+	// 			).To_MessageEntity()
+	// 			entities = append(entities, botCommand)
+	// 		}
+	// 	}
+	// }
 
-	// Extract URLs and add webpage preview if needed
-	extractUrls()
-	addWebpagePreview()
+	// // Extract URLs and add webpage preview if needed
+	// extractUrls()
+	// addWebpagePreview()
 
-	// Process mentions, hashtags, and bot commands
-	processMentions()
-	processHashtags()
-	processBotCommands()
+	// // Process mentions, hashtags, and bot commands
+	// processMentions()
+	// processHashtags()
+	// processBotCommands()
 
-	// Sort entities by offset and update the message entities
-	sort.Sort(entities)
-	message.Entities = entities
+	// // Sort entities by offset and update the message entities
+	// sort.Sort(entities)
+	// message.Entities = entities
 
 	return message, nil
 }

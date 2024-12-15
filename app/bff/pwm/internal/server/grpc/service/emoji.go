@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"io/ioutil"
+
 	"github.com/teamgram/proto/mtproto"
 	"github.com/zeromicro/go-zero/core/jsonx"
-	"io/ioutil"
 )
 
 type EmojiKeywords struct {
