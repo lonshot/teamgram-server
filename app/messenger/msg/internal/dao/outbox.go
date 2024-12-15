@@ -751,7 +751,7 @@ func (d *Dao) sendMessageToOutboxV2(ctx context.Context, fromId int64, peer *mtp
 		DialogMessageId:   dialogMessageId,
 		MessageFilterType: mtproto.GetMediaType(message),
 		Message:           message,
-		Mentioned:         false,
+		Mentioned:         message.Mentioned,
 		MediaUnread:       message.MediaUnread,
 		Pinned:            false,
 		Pts:               pts,
