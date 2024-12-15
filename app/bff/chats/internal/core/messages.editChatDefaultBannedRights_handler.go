@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/sync/sync"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	"time"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesEditChatDefaultBannedRights
@@ -60,7 +61,7 @@ func (c *ChatsCore) MessagesEditChatDefaultBannedRights(in *mtproto.TLMessagesEd
 			Seq:     0,
 		}).To_Updates()
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("messages.editChatDefaultBannedRights blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.editChatDefaultBannedRights blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

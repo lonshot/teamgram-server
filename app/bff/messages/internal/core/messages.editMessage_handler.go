@@ -1,12 +1,14 @@
 package core
 
 import (
-	"google.golang.org/protobuf/proto"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
+	"google.golang.org/protobuf/proto"
+
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/service/biz/message/message"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -38,7 +40,7 @@ func (c *MessagesCore) MessagesEditMessage(in *mtproto.TLMessagesEditMessage) (*
 			},
 		)
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("messages.editMessage blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.editMessage blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

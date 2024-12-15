@@ -3,11 +3,12 @@ package core
 import (
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/sync/sync"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	"pwm-server/app/service/biz/dialog/dialog"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesSaveDraft
@@ -86,7 +87,7 @@ func (c *DraftsCore) MessagesSaveDraft(in *mtproto.TLMessagesSaveDraft) (*mtprot
 			chats := c.svcCtx.Plugin.GetChannelListByIdList(c.ctx, c.MD.UserId, peer.PeerId)
 			syncUpdates.PushChat(chats...)
 		} else {
-			c.Logger.Errorf("messages.saveDraft blocked, License key from https://teamgram.net required to unlock enterprise features.")
+			c.Logger.Errorf("messages.saveDraft blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 			return nil, mtproto.ErrEnterpriseIsBlocked
 		}
 	}

@@ -305,6 +305,6 @@ func (c *BFFProxyClient) TryReturnFakeRpcResult(object mtproto.TLObject) (mtprot
 		).To_Account_WebAuthorizations(), nil
 	}
 
-	logx.Errorf("%s blocked, License key from https://teamgram.net required to unlock enterprise features.", rt.Name())
+	logx.Errorf("%s blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.", rt.Name())
 	return nil, mtproto.ErrEnterpriseIsBlocked
 }

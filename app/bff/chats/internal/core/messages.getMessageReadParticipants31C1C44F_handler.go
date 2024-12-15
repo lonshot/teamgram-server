@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	"pwm-server/app/service/biz/dialog/dialog"
 	"pwm-server/app/service/biz/message/message"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesGetMessageReadParticipants31C1C44F
@@ -64,7 +65,7 @@ func (c *ChatsCore) MessagesGetMessageReadParticipants31C1C44F(in *mtproto.TLMes
 			}
 		})
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("messages.getMessageReadParticipants blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.getMessageReadParticipants blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

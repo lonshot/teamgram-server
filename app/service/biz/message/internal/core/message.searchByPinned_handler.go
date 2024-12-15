@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/message/internal/dal/dataobject"
 	"pwm-server/app/service/biz/message/message"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessageSearchByPinned
@@ -25,7 +26,7 @@ func (c *MessageCore) MessageSearchByPinned(in *message.TLMessageSearchByPinned)
 				boxList = append(boxList, c.svcCtx.Dao.MakeMessageBox(c.ctx, in.UserId, v))
 			})
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("message.searchByPinned blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("message.searchByPinned blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	}

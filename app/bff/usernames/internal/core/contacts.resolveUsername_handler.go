@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/chat/chat"
 	userpb "pwm-server/app/service/biz/user/user"
 	"pwm-server/app/service/biz/username/username"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // ContactsResolveUsername
@@ -62,7 +63,7 @@ func (c *UsernamesCore) ContactsResolveUsername(in *mtproto.TLContactsResolveUse
 		if c.svcCtx.Plugin != nil {
 			resolvedPeer.Chats = c.svcCtx.Plugin.GetChannelListByIdList(c.ctx, c.MD.UserId, peer.PeerId)
 		} else {
-			c.Logger.Errorf("contacts.resolveUsername blocked, License key from https://teamgram.net required to unlock enterprise features.")
+			c.Logger.Errorf("contacts.resolveUsername blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 		}
 	}
 

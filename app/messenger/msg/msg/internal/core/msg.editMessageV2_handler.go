@@ -1,12 +1,13 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/msg/inbox/inbox"
 	"pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/messenger/msg/msg/plugin"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 	"github.com/zeromicro/go-zero/core/mr"
 )
 
@@ -32,7 +33,7 @@ func (c *MsgCore) MsgEditMessageV2(in *msg.TLMsgEditMessageV2) (*mtproto.Updates
 	case mtproto.PEER_CHAT:
 		rUpdates, err = c.editChatOutgoingMessageV2(in.UserId, in.AuthKeyId, in.PeerId, newMessage, dstMessage)
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:
 		err = mtproto.ErrPeerIdInvalid

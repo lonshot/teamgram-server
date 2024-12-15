@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	messagepb "pwm-server/app/service/biz/message/message"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesGetUnreadMentions
@@ -87,7 +88,7 @@ func (c *MessagesCore) MessagesGetUnreadMentions(in *mtproto.TLMessagesGetUnread
 		//	NextRate: nil,
 		//	Pts:      channel.Pts(),
 		//}).To_Messages_Messages()
-		c.Logger.Errorf("messages.readHistory blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.readHistory blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

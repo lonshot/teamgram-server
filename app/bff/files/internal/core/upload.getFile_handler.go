@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/dfs/dfs"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // UploadGetFile
@@ -77,7 +78,7 @@ func (c *FilesCore) UploadGetFile(in *mtproto.TLUploadGetFile) (*mtproto.Upload_
 			}
 			location = location2
 		} else {
-			c.Logger.Errorf("upload.getFile blocked, License key from https://teamgram.net required to unlock enterprise features.")
+			c.Logger.Errorf("upload.getFile blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 			return nil, mtproto.ErrEnterpriseIsBlocked
 		}
 	case mtproto.Predicate_inputGroupCallStream:

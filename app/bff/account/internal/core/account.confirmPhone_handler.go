@@ -7,7 +7,7 @@ import (
 // AccountConfirmPhone
 // account.confirmPhone#5f2178c3 phone_code_hash:string phone_code:string = Bool;
 func (c *AccountCore) AccountConfirmPhone(in *mtproto.TLAccountConfirmPhone) (*mtproto.Bool, error) {
-	c.Logger.Errorf("account.changePhone blocked, License key from https://teamgram.net required to unlock enterprise features.")
+	c.Logger.Errorf("account.changePhone blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 	return nil, mtproto.ErrEnterpriseIsBlocked
 	//

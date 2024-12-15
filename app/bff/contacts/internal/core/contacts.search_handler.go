@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	userpb "pwm-server/app/service/biz/user/user"
 	"pwm-server/app/service/biz/username/username"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // ContactsSearch
@@ -120,7 +121,7 @@ func (c *ContactsCore) ContactsSearch(in *mtproto.TLContactsSearch) (*mtproto.Co
 					found.Results = append(found.Results, mtproto.MakePeerChannel(ch.GetId()))
 				}
 			} else {
-				c.Logger.Errorf("contacts.search blocked, License key from https://teamgram.net required to unlock enterprise features.")
+				c.Logger.Errorf("contacts.search blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 			}
 		})
 

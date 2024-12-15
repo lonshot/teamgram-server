@@ -8,7 +8,7 @@ import (
 // help.getAppConfig#98914110 = JSONValue;
 func (c *ConfigurationCore) HelpGetAppConfig98914110(in *mtproto.TLHelpGetAppConfig98914110) (*mtproto.JSONValue, error) {
 	// TODO: not impl
-	c.Logger.Errorf("help.getAppConfig blocked, License key from https://teamgram.net required to unlock enterprise features.")
+	c.Logger.Errorf("help.getAppConfig blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 	return mtproto.MakeTLJsonObject(&mtproto.JSONValue{
 		Value_VECTORJSONOBJECTVALUE: []*mtproto.JSONObjectValue{},

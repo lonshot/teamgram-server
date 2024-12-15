@@ -10,7 +10,7 @@ func (c *ConfigurationCore) HelpGetAppConfig61E3F854(in *mtproto.TLHelpGetAppCon
 	*mtproto.Help_AppConfig, error,
 ) {
 	//// TODO: not impl
-	//c.Logger.Errorf("help.getAppConfig blocked, License key from https://teamgram.net required to unlock enterprise features.")
+	//c.Logger.Errorf("help.getAppConfig blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 	return mtproto.MakeTLHelpAppConfig(
 		&mtproto.Help_AppConfig{

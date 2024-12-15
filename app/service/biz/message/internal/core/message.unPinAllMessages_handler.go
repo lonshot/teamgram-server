@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/message/message"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessageUnPinAllMessages
@@ -22,7 +23,7 @@ func (c *MessageCore) MessageUnPinAllMessages(in *message.TLMessageUnPinAllMessa
 			c.svcCtx.Dao.MessagesDAO.UpdateUnPinnedByIdList(c.ctx, in.UserId, idList)
 		}
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("message.unPinAllMessages blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("message.unPinAllMessages blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	}

@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/service/biz/dialog/dialog"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesDeleteHistory
@@ -14,7 +15,7 @@ func (c *MessagesCore) MessagesDeleteHistory(in *mtproto.TLMessagesDeleteHistory
 	)
 
 	if peer.IsChannel() {
-		c.Logger.Errorf("messages.deleteHistory blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.deleteHistory blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	}
 

@@ -3,9 +3,10 @@ package core
 import (
 	"math"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/biz/message/internal/dal/dataobject"
 	"pwm-server/app/service/biz/message/message"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessageSearch
@@ -60,7 +61,7 @@ func (c *MessageCore) MessageSearch(in *message.TLMessageSearch) (*mtproto.Messa
 				})
 		}
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("message.search blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("message.search blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	}

@@ -7,12 +7,13 @@ import (
 	"math"
 	"time"
 
-	"github.com/teamgram/marmota/pkg/hack"
-	"github.com/teamgram/marmota/pkg/stores/sqlx"
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/msg/internal/dal/dataobject"
 	"pwm-server/app/messenger/msg/msg/msg"
 	idgen_client "pwm-server/app/service/idgen/client"
+
+	"github.com/teamgram/marmota/pkg/hack"
+	"github.com/teamgram/marmota/pkg/stores/sqlx"
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -694,7 +695,8 @@ func (d *Dao) SendMessageToOutboxV1(ctx context.Context, fromId int64, peer *mtp
 	return tR.Err
 }
 
-func (d *Dao) sendMessageToOutboxV2(ctx context.Context, fromId int64, peer *mtproto.PeerUtil, outboxMessage *msg.OutboxMessage, out bool) (*mtproto.MessageBox, error) {
+func (d *Dao) sendMessageToOutboxV2(ctx context.Context, fromId int64, peer *mtproto.PeerUtil,
+	outboxMessage *msg.OutboxMessage, out bool) (*mtproto.MessageBox, error) {
 	var (
 		dialogId        = mtproto.MakeDialogId(fromId, peer.PeerType, peer.PeerId)
 		err             error
@@ -750,7 +752,7 @@ func (d *Dao) sendMessageToOutboxV2(ctx context.Context, fromId int64, peer *mtp
 		MessageFilterType: mtproto.GetMediaType(message),
 		Message:           message,
 		Mentioned:         false,
-		MediaUnread:       false,
+		MediaUnread:       message.MediaUnread,
 		Pinned:            false,
 		Pts:               pts,
 		PtsCount:          1,

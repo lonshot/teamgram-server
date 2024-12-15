@@ -5,12 +5,13 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	"pwm-server/app/service/biz/message/message"
 	userpb "pwm-server/app/service/biz/user/user"
 	"pwm-server/app/service/biz/username/username"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -150,7 +151,7 @@ func (c *MessagesCore) makeForwardMessages(
 	switch fromPeer.PeerType {
 	case mtproto.PEER_CHANNEL:
 		// TODO: not impl
-		c.Logger.Errorf("messages.forwardMessages blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.forwardMessages blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	chatpb "pwm-server/app/service/biz/chat/chat"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // MessagesEditChatAbout
@@ -22,7 +23,7 @@ func (c *ChatsCore) MessagesEditChatAbout(in *mtproto.TLMessagesEditChatAbout) (
 			return nil, err
 		}
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("messages.editChatAbout blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("messages.editChatAbout blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:

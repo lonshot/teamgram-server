@@ -1,9 +1,10 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 // AccountGetNotifyExceptions
@@ -55,7 +56,7 @@ func (c *NotificationCore) AccountGetNotifyExceptions(in *mtproto.TLAccountGetNo
 				chats := c.svcCtx.Plugin.GetChannelListByIdList(c.ctx, c.MD.UserId, channelIdList...)
 				rUpdates.PushChat(chats...)
 			} else {
-				c.Logger.Errorf("account.registerDevice blocked, License key from https://teamgram.net required to unlock enterprise features.")
+				c.Logger.Errorf("account.registerDevice blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 			}
 		})
 

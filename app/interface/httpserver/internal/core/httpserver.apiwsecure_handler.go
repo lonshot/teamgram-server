@@ -43,11 +43,12 @@ func (c *HttpserverCore) PushMessage(userIds []int64, message string) (bool, int
 	for _, userId := range userIds {
 		// Create the message
 		msg := mtproto.MakeTLMessage(&mtproto.Message{
-			Out:     true,
-			Date:    int32(time.Now().Unix()),
-			FromId:  mtproto.MakePeerUser(int64(env2.ServiceUserId)),
-			PeerId:  mtproto.MakeTLPeerUser(&mtproto.Peer{UserId: userId}).To_Peer(),
-			Message: message,
+			Out:         true,
+			Date:        int32(time.Now().Unix()),
+			MediaUnread: true,
+			FromId:      mtproto.MakePeerUser(int64(env2.ServiceUserId)),
+			PeerId:      mtproto.MakeTLPeerUser(&mtproto.Peer{UserId: userId}).To_Peer(),
+			Message:     message,
 		}).To_Message()
 
 		// Attempt to send the message to the user

@@ -5,12 +5,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/msg/inbox/inbox"
 	"pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/messenger/msg/msg/plugin"
 	chatpb "pwm-server/app/service/biz/chat/chat"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 
 	"github.com/zeromicro/go-zero/core/mr"
 )
@@ -35,7 +36,7 @@ func (c *MsgCore) MsgSendMessageV2(in *msg.TLMsgSendMessageV2) (*mtproto.Updates
 
 	for _, outBox := range outBoxList {
 		if outBox.GetScheduleDate().GetValue() != 0 {
-			c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://teamgram.net required to unlock enterprise features.")
+			c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 			return nil, mtproto.ErrEnterpriseIsBlocked
 		}
 	}
@@ -70,7 +71,7 @@ func (c *MsgCore) MsgSendMessageV2(in *msg.TLMsgSendMessageV2) (*mtproto.Updates
 			}
 		}
 	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://teamgram.net required to unlock enterprise features.")
+		c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 		return nil, mtproto.ErrEnterpriseIsBlocked
 	default:
 		c.Logger.Errorf("msg.sendMessageV2 - error: invalid peer(%v)", peer)
@@ -117,12 +118,12 @@ func (c *MsgCore) sendUserOutgoingMessageV2(fromUserId, fromAuthKeyId, toUserId 
 		return nil, err
 	}
 
-	sendMe := fromUserId == toUserId
-	if !sendMe {
-		// TODO(@benqi)
-		// 1. check blocked
-		// 2. span
-	}
+	// sendMe := fromUserId == toUserId
+	// if !sendMe {
+	// 	// TODO(@benqi)
+	// 	// 1. check blocked
+	// 	// 2. span
+	// }
 
 	outBox.Message = plugin.RemakeMessage(
 		c.ctx,

@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/sync/sync"
 	"pwm-server/app/service/biz/chat/chat"
 	userpb "pwm-server/app/service/biz/user/user"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 /*
@@ -87,7 +88,7 @@ func (c *NotificationCore) AccountUpdateNotifySettings(in *mtproto.TLAccountUpda
 				return nil, err
 			}
 		} else {
-			c.Logger.Errorf("account.updateNotifySettings blocked, License key from https://teamgram.net required to unlock enterprise features.")
+			c.Logger.Errorf("account.updateNotifySettings blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
 
 			return nil, mtproto.ErrEnterpriseIsBlocked
 		}
