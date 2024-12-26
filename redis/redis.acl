@@ -1,0 +1,2 @@
+user default on nopass ~* +@all
+user external on >A65D0770B69940FEA084C9C8028908F7 ~* +@all
