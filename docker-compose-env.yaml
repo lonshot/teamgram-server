@@ -62,7 +62,7 @@ services:
     image: redis
     container_name: redis
     ports:
-      - 127.0.0.1:6379:6379
+      - 6599:6379
     volumes:
       - ./data/redis/data:/data:rw
     environment:
