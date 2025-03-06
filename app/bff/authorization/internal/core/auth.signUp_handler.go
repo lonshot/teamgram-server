@@ -122,6 +122,7 @@ func (c *AuthorizationCore) AuthSignUp(in *mtproto.TLAuthSignUp) (*mtproto.Auth_
 
 	if err != nil {
 		c.Logger.Errorf("create user secret key error")
+		err = mtproto.ErrInternalServerError
 		return nil, err
 	}
 
@@ -139,6 +140,7 @@ func (c *AuthorizationCore) AuthSignUp(in *mtproto.TLAuthSignUp) (*mtproto.Auth_
 		LastName:    lastName,
 	}); err != nil {
 		c.Logger.Errorf("createNewUser error: %v", err)
+		err = mtproto.ErrInternalServerError
 		return nil, err
 	}
 
