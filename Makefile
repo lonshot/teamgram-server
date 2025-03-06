@@ -84,7 +84,7 @@ clean:
 	rm -rf pwm/bin/gnetway
 	rm -rf pwm/bin/httpserver
 
-# Clean logs directory
+# Clean logs directory 
 clean-logs:
 	@echo "Cleaning logs..."
 	rm -rf pwm/logs/*
