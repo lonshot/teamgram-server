@@ -4140,7 +4140,7 @@ CREATE TABLE `user_contacts` (
   `id` bigint(20) NOT NULL,
   `owner_user_id` bigint(20) NOT NULL,
   `contact_user_id` bigint(20) NOT NULL,
-  `contact_phone` varchar(32) NOT NULL DEFAULT '',
+  `contact_phone` varchar(100) NOT NULL DEFAULT '',
   `contact_first_name` varchar(255) NOT NULL DEFAULT '',
   `contact_last_name` varchar(255) NOT NULL DEFAULT '',
   `mutual` tinyint(1) NOT NULL DEFAULT '0',
