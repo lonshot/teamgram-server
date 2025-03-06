@@ -10,7 +10,7 @@ services:
       - "8801:8801"
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    entrypoint: ["/bin/sh", "-c", "/app/docker/entrypoint.sh"]
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint.sh"]
     networks:
       - pwm_net
 
