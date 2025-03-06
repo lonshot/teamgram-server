@@ -1,0 +1,19 @@
+Name: service.authsession
+ListenOn: 0.0.0.0:20450
+Etcd:
+  Hosts:
+    - etcd:2379
+  Key: service.authsession
+Log:
+  Mode: file
+  Path: ../logs/authsession
+  Level: debug
+Mysql:
+  DSN: pwm:pass123456a@tcp(mysql:3306)/pwm?charset=utf8mb4&parseTime=true
+  Active: 64
+  Idle: 64
+  IdleTimeout: 4h
+Cache:
+  - Host: redis:6379
+KV:
+  - Host: redis:6379
