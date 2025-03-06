@@ -3853,7 +3853,7 @@ CREATE TABLE `phone_books` (
   `user_id` bigint(20) NOT NULL DEFAULT '0',
   `auth_key_id` bigint(20) NOT NULL,
   `client_id` bigint(20) NOT NULL,
-  `phone` varchar(32) NOT NULL,
+  `phone` varchar(100) NOT NULL,
   `first_name` varchar(64) NOT NULL,
   `last_name` varchar(64) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -3908,7 +3908,7 @@ CREATE TABLE `photo_sizes` (
 
 CREATE TABLE `popular_contacts` (
   `id` bigint(20) NOT NULL,
-  `phone` varchar(32) NOT NULL,
+  `phone` varchar(100) NOT NULL,
   `importers` int(11) NOT NULL DEFAULT '1',
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -3923,7 +3923,7 @@ CREATE TABLE `popular_contacts` (
 
 CREATE TABLE `predefined_users` (
   `id` bigint(20) NOT NULL,
-  `phone` varchar(32) NOT NULL,
+  `phone` varchar(100) NOT NULL,
   `first_name` varchar(255) NOT NULL DEFAULT '',
   `last_name` varchar(255) NOT NULL DEFAULT '',
   `username` varchar(255) NOT NULL,
@@ -4018,7 +4018,7 @@ CREATE TABLE `theme_settings` (
 
 CREATE TABLE `unregistered_contacts` (
   `id` bigint(20) NOT NULL,
-  `phone` varchar(32) NOT NULL,
+  `phone` varchar(100) NOT NULL,
   `importer_user_id` bigint(20) NOT NULL,
   `import_first_name` varchar(64) NOT NULL,
   `import_last_name` varchar(64) NOT NULL,
@@ -4057,7 +4057,7 @@ CREATE TABLE `users` (
   `first_name` varchar(64) NOT NULL DEFAULT '',
   `last_name` varchar(64) NOT NULL DEFAULT '',
   `username` varchar(64) NOT NULL DEFAULT '',
-  `phone` varchar(32) NOT NULL,
+  `phone` varchar(100) NOT NULL,
   `country_code` varchar(3) NOT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   `support` tinyint(1) NOT NULL DEFAULT '0',
