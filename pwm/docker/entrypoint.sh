@@ -3,7 +3,7 @@
 #   echo ">>> Plase set environment variable PWM_HOST to your own server IP. <<<"
 #   exit 1
 # fi
-
+ 
 export PWM_HOST=${PWM_HOST:-"0.0.0.0"}
 export ETCD_URL=${ETCD_URL:-"etcd:2379"}
 export REDIS_HOST=${REDIS_HOST:-"redis:6379"}
