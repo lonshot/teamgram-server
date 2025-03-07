@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/authorization/internal/dao"
 	"pwm-server/app/bff/authorization/internal/model"
 	"pwm-server/pkg/code"
+
+	"github.com/teamgram/proto/mtproto"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -113,12 +114,12 @@ func (m *AuthLogic) DoAuthReSendCode(ctx context.Context,
 		return
 	}
 
-	now := int32(time.Now().Unix())
-	if now > codeData.PhoneCodeExpired {
-		// TODO(@benqi): update timeout state?
-		err = mtproto.ErrPhoneCodeExpired
-		return
-	}
+	// now := int32(time.Now().Unix())
+	// if now > codeData.PhoneCodeExpired {
+	// 	// TODO(@benqi): update timeout state?
+	// 	err = mtproto.ErrPhoneCodeExpired
+	// 	return
+	// }
 
 	if cb != nil {
 		err = cb(codeData)
@@ -175,13 +176,13 @@ func (m *AuthLogic) DoAuthSignIn(ctx context.Context,
 		return
 	}
 
-	now := int32(time.Now().Unix())
-	if now > codeData.PhoneCodeExpired {
-		// TODO(@benqi): update timeout state?
-		// code.dao.AuthPhoneTransactionsDAO.UpdateState(kCodeStateTimeout, do.Id)
-		err = mtproto.ErrPhoneCodeExpired
-		return
-	}
+	// now := int32(time.Now().Unix())
+	// if now > codeData.PhoneCodeExpired {
+	// 	// TODO(@benqi): update timeout state?
+	// 	// code.dao.AuthPhoneTransactionsDAO.UpdateState(kCodeStateTimeout, do.Id)
+	// 	err = mtproto.ErrPhoneCodeExpired
+	// 	return
+	// }
 
 	// TODO(@benqi): check phone code valid, only number etc.
 	//if phoneCode != "12345" && codeData.PhoneCode != phoneCode {
