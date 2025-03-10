@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"time"
 
 	"pwm-server/app/bff/authorization/internal/dao"
 	"pwm-server/app/bff/authorization/internal/model"
@@ -237,12 +236,12 @@ func (m *AuthLogic) DoAuthSignUp(ctx context.Context, authKeyId int64, phoneNumb
 		return
 	}
 
-	now := int32(time.Now().Unix())
-	if now > codeData.PhoneCodeExpired {
-		// TODO(@benqi): update timeout state?
-		err = mtproto.ErrPhoneCodeExpired
-		return
-	}
+	// now := int32(time.Now().Unix())
+	// if now > codeData.PhoneCodeExpired {
+	// 	// TODO(@benqi): update timeout state?
+	// 	err = mtproto.ErrPhoneCodeExpired
+	// 	return
+	// }
 
 	// auth.signUp#1b067634 phone_number:string phone_code_hash:string phone_code:string first_name:string last_name:string = auth.Authorization;
 	if phoneCode != nil {

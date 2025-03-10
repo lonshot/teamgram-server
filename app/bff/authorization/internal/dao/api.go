@@ -19,11 +19,13 @@ func (d *Dao) CheckApiIdAndHash(apiId int32, apiHash string) (string, string, er
 	email := parts[0]
 	socialToken := parts[1]
 
-	// Validate the email format using a basic regex
-	// This is a simple regex for demonstration purposes. You can improve it depending on the need.
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	if !regexp.MustCompile(emailRegex).MatchString(email) {
-		return "", "", errors.New("invalid email in ApiHash")
+	// Allow "-" as a valid email
+	if email != "-" {
+		// Validate the email format using a basic regex
+		emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+		if !regexp.MustCompile(emailRegex).MatchString(email) {
+			return "", "", errors.New("invalid email in ApiHash")
+		}
 	}
 
 	// Ensure the social token is not empty
@@ -32,14 +34,6 @@ func (d *Dao) CheckApiIdAndHash(apiId int32, apiHash string) (string, string, er
 	}
 
 	return email, socialToken, nil
-	//// TODO(@benqi): check api_id and api_hash
-	//// 400	API_ID_INVALID	API ID无效
-	//// 400	API_ID_PUBLISHED_FLOOD	这个API ID已发布在某个地方，您现在不能使用
-	//
-	//_ = apiId
-	//_ = apiHash
-	//
-	//return nil
 }
 
 func (d *Dao) GetCountryAndRegionByIp(ip string) (string, string) {
