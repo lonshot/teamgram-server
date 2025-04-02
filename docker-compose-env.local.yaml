@@ -102,7 +102,7 @@ services:
     container_name: minio
     ports:
       - 127.0.0.1:9000:9000
-      - 9001:9001
+      - 127.0.0.1:9001:9001
     volumes:
       - ./data/minio/data:/data
     environment:
@@ -122,19 +122,19 @@ services:
     networks:
       - pwm_net
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-    restart: always
-    ports:
-      - 8090:80
-    depends_on:
-      - mysql
-    networks:
-      - pwm_net
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   container_name: phpmyadmin
+  #   environment:
+  #     PMA_HOST: mysql
+  #     PMA_PORT: 3306
+  #   restart: always
+  #   ports:
+  #     - 8090:80
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - pwm_net
 
 networks:
   pwm_net:
