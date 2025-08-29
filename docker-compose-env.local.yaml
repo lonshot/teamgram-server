@@ -106,8 +106,8 @@ services:
     volumes:
       - ./data/minio/data:/data
     environment:
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: pwm1234aa
+      MINIO_ACCESS_KEY: pwm-dotnet-api
+      MINIO_SECRET_KEY: pwm@dotnet2025!secure
     command: server /data --console-address ":9001"
     restart: always
     networks:

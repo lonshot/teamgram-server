@@ -18,8 +18,8 @@ Cache:
   - Host: redis:6379
 Minio:
   Endpoint: minio:9000
-  AccessKeyID: minio
-  SecretAccessKey: pwm1234aa
+  AccessKeyID: pwm-dotnet-api
+  SecretAccessKey: pwm@dotnet2025!secure
   UseSSL: false
 IdGen:
   Etcd:

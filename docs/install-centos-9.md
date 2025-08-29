@@ -71,8 +71,8 @@ chmod +x minio
 ./minio server /data &
 ```
 Console: http://ip:xxxxx ...
-RootUser: minioadmin
-RootPass: minioadmin
+RootUser: admin
+RootPass: pwm@admin2025!
 ```
 firewall-cmd --zone=public --permanent --add-port=xxxxx/tcp
 firewall-cmd --reload
@@ -140,8 +140,8 @@ make
 ```
 vim ../pwm/etc/dfs.yaml
 {
-AccessKeyID: minioadmin
-SecretAccessKey: minioadmin
+AccessKeyID: pwm-dotnet-api
+SecretAccessKey: pwm@dotnet2025!secure
 
 SSDB:
   - Host: 127.0.0.1:9221

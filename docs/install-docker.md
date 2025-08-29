@@ -101,8 +101,8 @@ volumes:
 - /Volumes/data/teamgram/volumes/minio/data:/data
 - /Volumes/data/teamgram/volumes/minio/config:/root/.minio
 environment:
-MINIO_ROOT_USER: minio
-MINIO_ROOT_PASSWORD: pwm1234aa
+MINIO_ROOT_USER: admin
+MINIO_ROOT_PASSWORD: pwm@admin2025!
 
 zookeeper:
 image: wurstmeister/zookeeper
