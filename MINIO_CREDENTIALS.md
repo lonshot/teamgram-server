@@ -27,10 +27,12 @@
 
 ## Policy Details
 The `.NET server service account` has the following permissions:
-- `s3:GetObject` - Download files
-- `s3:PutObject` - Upload files
-- `s3:DeleteObject` - Delete files
-- `s3:ListBucket` - List bucket contents
+- `s3:*` - **Full S3 access** (all operations on all buckets)
+  - Create/delete buckets
+  - Upload/download/delete files
+  - List all buckets and contents
+  - Set bucket policies and ACLs
+  - All other S3 operations
 
 ## Usage in .NET Application
 ```csharp

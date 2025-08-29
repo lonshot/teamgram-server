@@ -34,24 +34,10 @@ cat > /tmp/pwm-policy.json << EOF
     {
       "Effect": "Allow",
       "Action": [
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject",
-        "s3:ListBucket"
+        "s3:*"
       ],
       "Resource": [
-        "arn:aws:s3:::documents/*",
-        "arn:aws:s3:::encryptedfiles/*",
-        "arn:aws:s3:::photos/*",
-        "arn:aws:s3:::videos/*",
-        "arn:aws:s3:::thumbnails/*",
-        "arn:aws:s3:::upload/*",
-        "arn:aws:s3:::documents",
-        "arn:aws:s3:::encryptedfiles",
-        "arn:aws:s3:::photos",
-        "arn:aws:s3:::videos",
-        "arn:aws:s3:::thumbnails",
-        "arn:aws:s3:::upload"
+        "arn:aws:s3:::*"
       ]
     }
   ]
