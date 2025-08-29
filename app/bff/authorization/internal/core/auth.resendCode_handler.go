@@ -1,11 +1,12 @@
 package core
 
 import (
-	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/bff/authorization/internal/logic"
 	"pwm-server/app/bff/authorization/internal/model"
 	"pwm-server/pkg/error_types"
 	"strings"
+
+	"github.com/teamgram/proto/mtproto"
 )
 
 /*
@@ -36,8 +37,8 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 		c.Logger.Errorf("auth.resendCode - error: %v", err)
 		return nil, err
 	}
-	// Split the ApiHash by "@@"
-	parts := strings.Split(in.PhoneCodeHash, "@@")
+	// Split the ApiHash by "@!@"
+	parts := strings.Split(in.PhoneCodeHash, "@!@")
 	if len(parts) != 2 {
 		err := error_types.ErrPhoneCodeNotFound
 		c.Logger.Errorf("auth.resendCode - error: %v", err)
@@ -47,7 +48,7 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 	phoneCodeHash := parts[0]
 	apiHash := parts[1]
 
-	parts2 := strings.Split(apiHash, "@@")
+	parts2 := strings.Split(apiHash, "~~!~~")
 	if len(parts2) != 2 {
 		return nil, error_types.ErrPhoneApiHashInvalid
 	}

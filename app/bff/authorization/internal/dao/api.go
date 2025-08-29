@@ -10,8 +10,8 @@ import (
 )
 
 func (d *Dao) CheckApiIdAndHash(apiId int32, apiHash string) (string, string, error) {
-	// Split the ApiHash by "@@"
-	parts := strings.Split(apiHash, "@@")
+	// Split the ApiHash by "~~!~~"
+	parts := strings.Split(apiHash, "~~!~~")
 	if len(parts) != 2 {
 		return "", "", errors.New("invalid ApiHash format")
 	}
