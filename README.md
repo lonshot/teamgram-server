@@ -127,7 +127,50 @@ docker-compose -f ./docker-compose-env.yaml up -d
 # run docker-compose
 docker-compose up -d
 ```
-	
+
+## Redis Admin Proxy
+
+For administrative access to Redis, this project includes a secure Redis proxy service that provides password-protected access to the Redis instance.
+
+### Features
+- **Password Authentication**: Requires admin authentication before allowing Redis operations  
+- **External Access**: Safely exposes Redis to external admin tools
+- **Connection Limiting**: Configurable maximum concurrent connections
+- **Full Protocol Support**: Compatible with all Redis clients and tools
+
+### Quick Start
+```bash
+# Start Redis admin proxy
+./scripts/redis-proxy.sh start
+
+# Test connection
+redis-cli -h localhost -p 6380 -a admin_redis_2025!
+
+# Check status  
+./scripts/redis-proxy.sh status
+
+# View logs
+./scripts/redis-proxy.sh logs -f
+```
+
+### Configuration
+The proxy runs on port `6380` by default with password `admin_redis_2025!`. You can customize these settings in `docker-compose-env.yaml`:
+
+```yaml
+redis-admin-proxy:
+  environment:
+    REDIS_ADMIN_PASSWORD: "your_secure_password"
+    REDIS_PROXY_PORT: 6380
+    REDIS_MAX_CONNECTIONS: 100
+```
+
+### Admin Tools Connection Examples
+- **redis-cli**: `redis-cli -h your-server -p 6380 -a admin_redis_2025!`
+- **Redis Desktop Manager**: Host: `your-server`, Port: `6380`, Auth: `admin_redis_2025!`  
+- **RedisInsight**: Standalone connection with Host: `your-server`, Port: `6380`, Password: `admin_redis_2025!`
+
+📚 **Full documentation**: [docs/redis-admin-proxy.md](docs/redis-admin-proxy.md)
+
 ## Compatible clients
 **Important**: default signIn verify code is **12345**
 
