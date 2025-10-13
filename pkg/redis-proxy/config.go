@@ -28,7 +28,7 @@ func LoadConfig() *Config {
 		AdminPassword:  getEnvOrDefault("REDIS_ADMIN_PASSWORD", "admin_redis_2025!"),
 		RedisHost:      getEnvOrDefault("REDIS_HOST", "redis"),
 		RedisPort:      getEnvIntOrDefault("REDIS_PORT", 6379),
-		RedisPassword:  getEnvOrDefault("REDIS_PASSWORD", "A65D0770B69940FEA084C9C8028908F7"),
+		RedisPassword:  getEnvOrDefault("REDIS_PASSWORD", ""),
 		MaxConnections: getEnvIntOrDefault("REDIS_MAX_CONNECTIONS", 100),
 		EnableLogging:  getEnvBoolOrDefault("REDIS_ENABLE_LOGGING", true),
 	}

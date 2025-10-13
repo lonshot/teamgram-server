@@ -1,0 +1,5 @@
+        // Authenticate with Redis backend if password is set
+        if p.config.RedisPassword !=  {
+                authCmd := fmt.Sprintf("*3\r\n\\r\nAUTH\r\n\\r\nexternal\r\n\$%d\r\n%s\r\n",
+                        len(p.config.RedisPassword), p.config.RedisPassword)
+                redisConn.Write([]byte(authCmd))

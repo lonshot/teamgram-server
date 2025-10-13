@@ -167,6 +167,9 @@ func (p *ProxyServer) handleConnection(clientConn net.Conn) {
 	defer redisConn.Close()
 
 	// Authenticate with Redis backend if password is set
+        if p.config.EnableLogging {
+                log.Printf("Connection %d: Redis password length: %d, value: %q", connID, len(p.config.RedisPassword), p.config.RedisPassword)
+        }
 	if p.config.RedisPassword != "" {
 		authCmd := fmt.Sprintf("*2\r\n$4\r\nAUTH\r\n$%d\r\n%s\r\n",
 			len(p.config.RedisPassword), p.config.RedisPassword)
