@@ -5,7 +5,6 @@ services:
     restart: always
     ports:
       - "10443:10443"
-      - "11443:11443"
       - "5222:5222"
       - "8801:8801"
     volumes:
@@ -13,6 +12,21 @@ services:
     entrypoint: ["/bin/sh", "/app/docker/entrypoint.sh"]
     networks:
       - pwm_net
+
+  nginx_wss:
+    container_name: nginx_wss
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "11443:11443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/wss.conf:/etc/nginx/conf.d/wss.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - pwm_net
+    depends_on:
+      - pwm_push_server
 
 networks:
   pwm_net:

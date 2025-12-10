@@ -21,7 +21,7 @@ Gnetway:
         - 0.0.0.0:5222
     - Proto: websocket
       Addresses:
-        - 0.0.0.0:11443
+        - 0.0.0.0:11444
   Multicore: false
   SendBuf: 65536
   ReceiveBuf: 65536
