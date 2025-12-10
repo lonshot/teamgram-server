@@ -22,7 +22,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/wss.conf:/etc/nginx/conf.d/wss.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ~/dotnet/letsencrypt:/etc/letsencrypt:ro
     networks:
       - pwm_net
     depends_on:
