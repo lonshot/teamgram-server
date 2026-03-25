@@ -25,7 +25,7 @@
             FROM
                 users
             WHERE
-                phone=:phone LIMIT 1
+                phone=:phone AND deleted = 0 LIMIT 1
         </sql>
     </operation>
 
@@ -36,7 +36,7 @@
             FROM
                 users
             WHERE
-                id=:id LIMIT 1
+                id=:id AND deleted = 0 LIMIT 1
         </sql>
     </operation>
 
@@ -51,7 +51,7 @@
             FROM
                 users
             WHERE
-                id < :maxId ORDER BY id DESC LIMIT 1
+                id < :maxId AND deleted = 0 ORDER BY id DESC LIMIT 1
             ]]>
         </sql>
     </operation>
@@ -66,7 +66,7 @@
             FROM
                 users
             WHERE
-                id IN (:id_list)
+                id IN (:id_list) AND deleted = 0
         </sql>
     </operation>
 
@@ -80,7 +80,7 @@
             FROM
                 users
             WHERE
-                phone IN (:phoneList)
+                phone IN (:phoneList) AND deleted = 0
         </sql>
     </operation>
 
@@ -97,7 +97,7 @@
             FROM
                 users
             WHERE
-                (username LIKE :q OR first_name LIKE :q2 OR last_name LIKE :q2) AND id NOT IN(:id_list) LIMIT :limit
+                deleted = 0 AND (username LIKE :q OR first_name LIKE :q2 OR last_name LIKE :q2) AND id NOT IN(:id_list) LIMIT :limit
         </sql>
     </operation>
 
@@ -113,7 +113,7 @@
             FROM
                 users
             WHERE
-                username LIKE :q2 AND id NOT IN(:id_list) LIMIT :limit
+                deleted = 0 AND username LIKE :q2 AND id NOT IN(:id_list) LIMIT :limit
         </sql>
     </operation>
 
@@ -187,7 +187,7 @@
             FROM
                 users
             WHERE
-                username=:username LIMIT 1
+                username=:username AND deleted = 0 LIMIT 1
         </sql>
     </operation>
 
@@ -198,7 +198,7 @@
             FROM
                 users
             WHERE
-                id=:id
+                id=:id AND deleted = 0
         </sql>
     </operation>
 
@@ -220,7 +220,7 @@
             FROM
                 users
             WHERE
-                id=:id LIMIT 1
+                id=:id AND deleted = 0 LIMIT 1
         </sql>
     </operation>
 
@@ -231,7 +231,7 @@
             FROM
                 users
             WHERE
-                id=:id
+                id=:id AND deleted = 0
         </sql>
     </operation>
 

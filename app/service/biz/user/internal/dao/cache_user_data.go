@@ -295,6 +295,9 @@ func (d *Dao) GetCacheUserDataListByIdList(ctx context.Context, idList []int64) 
 			if err != nil {
 				return nil, err
 			}
+			if c == nil || c.GetUserData() == nil || c.GetUserData().GetDeleted() {
+				return nil, nil
+			}
 
 			cDataList = append(cDataList, c)
 

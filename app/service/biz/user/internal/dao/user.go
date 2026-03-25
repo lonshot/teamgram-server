@@ -292,7 +292,9 @@ func (d *Dao) GetImmutableUser(ctx context.Context, id int64, privacy bool, cont
 	).To_ImmutableUser()
 
 	if userData.Deleted {
-		return immutableUser, nil
+		err := mtproto.ErrInputUserDeactivated
+		logx.WithContext(ctx).Errorf("user.getImmutableUser - deleted user: %d", id)
+		return nil, err
 	}
 
 	if userData.UserType == user.UserTypeUnknown ||
@@ -774,7 +776,9 @@ func (d *Dao) GetImmutableUserV2(
 	).To_ImmutableUser()
 
 	if userData.Deleted {
-		return immutableUser, nil
+		err := mtproto.ErrInputUserDeactivated
+		logx.WithContext(ctx).Errorf("user.getImmutableUserV2 - deleted user: %d", id)
+		return nil, err
 	}
 
 	if userData.UserType == user.UserTypeUnknown ||

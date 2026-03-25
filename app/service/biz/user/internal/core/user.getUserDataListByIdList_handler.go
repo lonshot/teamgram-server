@@ -14,6 +14,9 @@ func (c *UserCore) UserGetUserDataListByIdList(in *user.TLUserGetUserDataListByI
 
 	cDataList := c.svcCtx.Dao.GetCacheUserDataListByIdList(c.ctx, in.UserIdList)
 	for _, cData := range cDataList {
+		if cData == nil || cData.GetUserData() == nil || cData.GetUserData().GetDeleted() {
+			continue
+		}
 		users.Datas = append(users.Datas, cData.GetUserData())
 	}
 

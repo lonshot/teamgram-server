@@ -13,6 +13,10 @@ func (c *UserCore) UserGetUserDataById(in *user.TLUserGetUserDataById) (*mtproto
 		c.Logger.Errorf("user.getUserDataById - error: not found userId(%d)", in.UserId)
 		return nil, mtproto.ErrUserIdInvalid
 	}
+	if cacheData.GetUserData() == nil || cacheData.GetUserData().GetDeleted() {
+		c.Logger.Errorf("user.getUserDataById - deleted userId(%d)", in.UserId)
+		return nil, mtproto.ErrInputUserDeactivated
+	}
 
 	return cacheData.UserData, nil
 }

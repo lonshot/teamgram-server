@@ -137,10 +137,10 @@ func (dao *UsersDAO) InsertTestUserTx(tx *sqlx.Tx, do *dataobject.UsersDO) (last
 }
 
 // SelectByPhoneNumber
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = :phone limit 1
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = :phone and deleted = 0 limit 1
 func (dao *UsersDAO) SelectByPhoneNumber(ctx context.Context, phone string) (rValue *dataobject.UsersDO, err error) {
 	var (
-		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = ? limit 1"
+		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = ? and deleted = 0 limit 1"
 		do    = &dataobject.UsersDO{}
 	)
 	err = dao.db.QueryRowPartial(ctx, do, query, phone)
@@ -160,10 +160,10 @@ func (dao *UsersDAO) SelectByPhoneNumber(ctx context.Context, phone string) (rVa
 }
 
 // SelectById
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id = :id limit 1
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id = :id and deleted = 0 limit 1
 func (dao *UsersDAO) SelectById(ctx context.Context, id int64) (rValue *dataobject.UsersDO, err error) {
 	var (
-		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id = ? limit 1"
+		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id = ? and deleted = 0 limit 1"
 		do    = &dataobject.UsersDO{}
 	)
 	err = dao.db.QueryRowPartial(ctx, do, query, id)
@@ -183,10 +183,10 @@ func (dao *UsersDAO) SelectById(ctx context.Context, id int64) (rValue *dataobje
 }
 
 // SelectNextTestUserId
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id < :maxId order by id desc limit 1
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id < :maxId and deleted = 0 order by id desc limit 1
 func (dao *UsersDAO) SelectNextTestUserId(ctx context.Context, maxId int64) (rValue *dataobject.UsersDO, err error) {
 	var (
-		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id < ? order by id desc limit 1"
+		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id < ? and deleted = 0 order by id desc limit 1"
 		do    = &dataobject.UsersDO{}
 	)
 	err = dao.db.QueryRowPartial(ctx, do, query, maxId)
@@ -206,10 +206,10 @@ func (dao *UsersDAO) SelectNextTestUserId(ctx context.Context, maxId int64) (rVa
 }
 
 // SelectUsersByIdList
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (:id_list)
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (:id_list) and deleted = 0
 func (dao *UsersDAO) SelectUsersByIdList(ctx context.Context, idList []int64) (rList []dataobject.UsersDO, err error) {
 	var (
-		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (%s)", sqlx.InInt64List(idList))
+		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (%s) and deleted = 0", sqlx.InInt64List(idList))
 		values []dataobject.UsersDO
 	)
 	if len(idList) == 0 {
@@ -230,10 +230,10 @@ func (dao *UsersDAO) SelectUsersByIdList(ctx context.Context, idList []int64) (r
 }
 
 // SelectUsersByIdListWithCB
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (:id_list)
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (:id_list) and deleted = 0
 func (dao *UsersDAO) SelectUsersByIdListWithCB(ctx context.Context, idList []int64, cb func(sz, i int, v *dataobject.UsersDO)) (rList []dataobject.UsersDO, err error) {
 	var (
-		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (%s)", sqlx.InInt64List(idList))
+		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id in (%s) and deleted = 0", sqlx.InInt64List(idList))
 		values []dataobject.UsersDO
 	)
 	if len(idList) == 0 {
@@ -261,10 +261,10 @@ func (dao *UsersDAO) SelectUsersByIdListWithCB(ctx context.Context, idList []int
 }
 
 // SelectUsersByPhoneList
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (:phoneList)
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (:phoneList) and deleted = 0
 func (dao *UsersDAO) SelectUsersByPhoneList(ctx context.Context, phoneList []string) (rList []dataobject.UsersDO, err error) {
 	var (
-		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (%s)", sqlx.InStringList(phoneList))
+		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (%s) and deleted = 0", sqlx.InStringList(phoneList))
 		values []dataobject.UsersDO
 	)
 	if len(phoneList) == 0 {
@@ -285,10 +285,10 @@ func (dao *UsersDAO) SelectUsersByPhoneList(ctx context.Context, phoneList []str
 }
 
 // SelectUsersByPhoneListWithCB
-// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (:phoneList)
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (:phoneList) and deleted = 0
 func (dao *UsersDAO) SelectUsersByPhoneListWithCB(ctx context.Context, phoneList []string, cb func(sz, i int, v *dataobject.UsersDO)) (rList []dataobject.UsersDO, err error) {
 	var (
-		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (%s)", sqlx.InStringList(phoneList))
+		query  = fmt.Sprintf("select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone in (%s) and deleted = 0", sqlx.InStringList(phoneList))
 		values []dataobject.UsersDO
 	)
 	if len(phoneList) == 0 {
@@ -319,7 +319,7 @@ func (dao *UsersDAO) SelectUsersByPhoneListWithCB(ctx context.Context, phoneList
 // select id from users where (username like :q or first_name like :q2 or last_name like :q2) and id not in (:id_list) limit :limit
 func (dao *UsersDAO) SearchByQueryString(ctx context.Context, q string, q2 string, idList []int64, limit int32) (rList []int64, err error) {
 	var (
-		query = fmt.Sprintf("select id from users where (username like ? or first_name like ? or last_name like ?) and id not in (%s) limit ?", sqlx.InInt64List(idList))
+		query = fmt.Sprintf("select id from users where deleted = 0 and (username like ? or first_name like ? or last_name like ?) and id not in (%s) limit ?", sqlx.InInt64List(idList))
 	)
 
 	if len(idList) == 0 {
@@ -340,7 +340,7 @@ func (dao *UsersDAO) SearchByQueryString(ctx context.Context, q string, q2 strin
 // select id from users where (username like :q or first_name like :q2 or last_name like :q2) and id not in (:id_list) limit :limit
 func (dao *UsersDAO) SearchByQueryStringWithCB(ctx context.Context, q string, q2 string, idList []int64, limit int32, cb func(sz, i int, v int64)) (rList []int64, err error) {
 	var (
-		query = fmt.Sprintf("select id from users where (username like ? or first_name like ? or last_name like ?) and id not in (%s) limit ?", sqlx.InInt64List(idList))
+		query = fmt.Sprintf("select id from users where deleted = 0 and (username like ? or first_name like ? or last_name like ?) and id not in (%s) limit ?", sqlx.InInt64List(idList))
 	)
 
 	if len(idList) == 0 {
