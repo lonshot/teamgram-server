@@ -78,9 +78,54 @@ func (d *Dao) CreateNewUserV2(
 	}
 	if lastInsertId, _, err2 := d.UsersDAO.Insert(ctx, userDO); err2 != nil {
 		if sqlx.IsDuplicate(err2) {
-			err2 = mtproto.ErrPhoneNumberOccupied
+			// Recover soft-deleted account with the same phone instead of failing registration.
+			oldUserDO, e2 := d.UsersDAO.SelectByPhoneNumberAny(ctx, phone)
+			if e2 != nil {
+				return nil, e2
+			}
+			if oldUserDO != nil && oldUserDO.Deleted {
+				updateMap := map[string]interface{}{
+					"user_type":        user.UserTypeRegular,
+					"access_hash":      userDO.AccessHash,
+					"secret_key_id":    secretKeyId,
+					"first_name":       firstName,
+					"last_name":        lastName,
+					"phone":            phone,
+					"country_code":     countryCode,
+					"verified":         false,
+					"about":            "",
+					"is_bot":           false,
+					"account_days_ttl": int32(180),
+					"premium":          true,
+					"deleted":          false,
+					"delete_reason":    "",
+				}
+				if _, e2 = d.UsersDAO.UpdateUser(ctx, updateMap, oldUserDO.Id); e2 != nil {
+					return nil, e2
+				}
+
+				oldUserDO.UserType = user.UserTypeRegular
+				oldUserDO.AccessHash = userDO.AccessHash
+				oldUserDO.SecretKeyId = secretKeyId
+				oldUserDO.FirstName = firstName
+				oldUserDO.LastName = lastName
+				oldUserDO.Phone = phone
+				oldUserDO.CountryCode = countryCode
+				oldUserDO.Verified = false
+				oldUserDO.About = ""
+				oldUserDO.IsBot = false
+				oldUserDO.AccountDaysTtl = 180
+				oldUserDO.Premium = true
+				oldUserDO.Deleted = false
+				oldUserDO.DeleteReason = ""
+				userDO = oldUserDO
+			} else {
+				err2 = mtproto.ErrPhoneNumberOccupied
+				return nil, err2
+			}
+		} else {
+			return nil, err2
 		}
-		return nil, err2
 		//result.Err = err2
 		//return
 	} else {

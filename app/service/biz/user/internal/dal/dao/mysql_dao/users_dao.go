@@ -159,6 +159,29 @@ func (dao *UsersDAO) SelectByPhoneNumber(ctx context.Context, phone string) (rVa
 	return
 }
 
+// SelectByPhoneNumberAny
+// select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = :phone limit 1
+func (dao *UsersDAO) SelectByPhoneNumberAny(ctx context.Context, phone string) (rValue *dataobject.UsersDO, err error) {
+	var (
+		query = "select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where phone = ? limit 1"
+		do    = &dataobject.UsersDO{}
+	)
+	err = dao.db.QueryRowPartial(ctx, do, query, phone)
+
+	if err != nil {
+		if !errors.Is(err, sqlx.ErrNotFound) {
+			logx.WithContext(ctx).Errorf("queryx in SelectByPhoneNumberAny(_), error: %v", err)
+			return
+		} else {
+			err = nil
+		}
+	} else {
+		rValue = do
+	}
+
+	return
+}
+
 // SelectById
 // select id, user_type, access_hash, secret_key_id, first_name, last_name, username, phone, country_code, verified, support, scam, fake, premium, about, state, is_bot, account_days_ttl, photo_id, restricted, restriction_reason, archive_and_mute_new_noncontact_peers, emoji_status_document_id, emoji_status_until, stories_max_id, color, color_background_emoji_id, profile_color, profile_color_background_emoji_id, birthday, deleted, delete_reason from users where id = :id and deleted = 0 limit 1
 func (dao *UsersDAO) SelectById(ctx context.Context, id int64) (rValue *dataobject.UsersDO, err error) {
