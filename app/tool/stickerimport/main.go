@@ -26,15 +26,16 @@ import (
 )
 
 type options struct {
-	Source  string
-	Config  string
-	DryRun  bool
-	Resume  bool
-	Verify  bool
-	Workers int
-	SetID   string
-	Offset  int
-	Limit   int
+	Source      string
+	Config      string
+	DryRun      bool
+	Resume      bool
+	Verify      bool
+	Workers     int
+	SetID       string
+	Offset      int
+	Limit       int
+	CatalogOnly bool
 }
 
 type dryRunResult struct {
@@ -89,6 +90,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 	flags.StringVar(&opts.SetID, "set-id", "", "import one source sticker-set ID after validating the complete dataset")
 	flags.IntVar(&opts.Offset, "offset", 0, "skip source sticker sets before applying limit")
 	flags.IntVar(&opts.Limit, "limit", 0, "limit selected sets after validating the complete dataset")
+	flags.BoolVar(&opts.CatalogOnly, "catalog-only", false, "publish global reactions, featured sets, and keywords after sticker sets are imported")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -184,8 +186,9 @@ func run(args []string, stdout, stderr io.Writer) error {
 			VerifyTimeout: verifyTimeout,
 		})
 	service := importer.New(store, uploader, &idGenerator{client: idgenclient.NewIdgenClient(idgenRPC)}, importer.Options{
-		Workers:  opts.Workers,
-		Reverify: opts.Verify,
+		Workers:     opts.Workers,
+		Reverify:    opts.Verify,
+		CatalogOnly: opts.CatalogOnly,
 	})
 	report, err := service.ImportSets(ctx, dataset, fingerprint, selected)
 	if err != nil {

@@ -43,8 +43,9 @@ type IDGenerator interface {
 }
 
 type Options struct {
-	Workers  int
-	Reverify bool
+	Workers     int
+	Reverify    bool
+	CatalogOnly bool
 }
 
 type Importer struct {
@@ -100,16 +101,18 @@ func (i *Importer) ImportSets(ctx context.Context, dataset *pwm.Dataset, fingerp
 		return nil, fmt.Errorf("publish emoji keywords: %w", err)
 	}
 	report := &Report{ImportID: job.ID, SelectedSets: len(selected)}
-	for _, setIndex := range selected {
-		if setIndex < 0 || setIndex >= len(dataset.Sets) {
-			return nil, fmt.Errorf("selected set index %d is out of range", setIndex)
+	if !i.opts.CatalogOnly {
+		for _, setIndex := range selected {
+			if setIndex < 0 || setIndex >= len(dataset.Sets) {
+				return nil, fmt.Errorf("selected set index %d is out of range", setIndex)
+			}
+			if err = i.importSet(ctx, job.ID, setIndex, &dataset.Sets[setIndex], fingerprint, report); err != nil {
+				return report, err
+			}
+			report.CompletedSets++
 		}
-		if err = i.importSet(ctx, job.ID, setIndex, &dataset.Sets[setIndex], fingerprint, report); err != nil {
-			return report, err
-		}
-		report.CompletedSets++
 	}
-	if selectsCompleteDataset(selected, len(dataset.Sets)) {
+	if i.opts.CatalogOnly || selectsCompleteDataset(selected, len(dataset.Sets)) {
 		if len(dataset.Reactions) > 0 {
 			if err = i.importReactions(ctx, job.ID, dataset, fingerprint, report); err != nil {
 				return report, err
