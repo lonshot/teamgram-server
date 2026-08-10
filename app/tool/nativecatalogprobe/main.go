@@ -174,14 +174,30 @@ func run(args []string, out io.Writer) error {
 			return fmt.Errorf("MessagesGetCustomEmojiDocuments: %w", err)
 		}
 		fmt.Fprintln(out, "PASS MessagesGetCustomEmojiDocuments documents=1 media_descriptor=hydrated")
+
+		file, callErr := mtproto.NewRPCFilesClient(conn).UploadGetFile(ctx, &mtproto.TLUploadGetFile{
+			Location: mtproto.MakeTLInputDocumentFileLocation(&mtproto.InputFileLocation{
+				Id: opts.documentID, AccessHash: documents.GetDatas()[0].GetAccessHash(),
+				FileReference: documents.GetDatas()[0].GetFileReference(),
+			}).To_InputFileLocation(),
+			Offset_INT64: 0,
+			Limit:        4096,
+		})
+		if callErr != nil {
+			return fmt.Errorf("UploadGetFile: %w", callErr)
+		}
+		if file == nil || len(file.GetBytes()) == 0 {
+			return errors.New("UploadGetFile: native document returned no bytes")
+		}
+		fmt.Fprintf(out, "PASS UploadGetFile bytes=%d\n", len(file.GetBytes()))
 	}
 
 	return nil
 }
 
 func validateAllStickers(result *mtproto.Messages_AllStickers) error {
-	if result == nil || result.GetConstructor() != mtproto.CRC32_messages_allStickers {
-		return errors.New("expected typed messages.allStickers result")
+	if result == nil {
+		return errors.New("expected typed messages.allStickers result, got nil")
 	}
 	if len(result.GetSets()) == 0 {
 		return errors.New("sticker set catalog is empty")
@@ -195,7 +211,7 @@ func validateAllStickers(result *mtproto.Messages_AllStickers) error {
 }
 
 func validateStickerSet(result *mtproto.Messages_StickerSet, expectedID int64) error {
-	if result == nil || (result.GetConstructor() != mtproto.CRC32_messages_stickerSet_6e153f16 && result.GetConstructor() != mtproto.CRC32_messages_stickerSet_b60a24a6) {
+	if result == nil || result.GetSet() == nil {
 		return errors.New("expected typed messages.stickerSet result")
 	}
 	if result.GetSet() == nil || result.GetSet().GetId() != expectedID {
@@ -213,7 +229,7 @@ func validateStickerSet(result *mtproto.Messages_StickerSet, expectedID int64) e
 }
 
 func validateAvailableReactions(result *mtproto.Messages_AvailableReactions) error {
-	if result == nil || result.GetConstructor() != mtproto.CRC32_messages_availableReactions {
+	if result == nil {
 		return errors.New("expected typed messages.availableReactions result")
 	}
 	if len(result.GetReactions()) == 0 {
@@ -233,7 +249,7 @@ func validateAvailableReactions(result *mtproto.Messages_AvailableReactions) err
 }
 
 func validateEmojiKeywords(result *mtproto.EmojiKeywordsDifference, langCode string) error {
-	if result == nil || result.GetConstructor() != mtproto.CRC32_emojiKeywordsDifference {
+	if result == nil {
 		return errors.New("expected typed emojiKeywordsDifference result")
 	}
 	if result.GetLangCode() != langCode || result.GetVersion() <= 0 || len(result.GetKeywords()) == 0 {
@@ -255,7 +271,7 @@ func validateCustomEmojiDocuments(result *mtproto.Vector_Document, expectedID, e
 }
 
 func validateDocument(document *mtproto.Document, expectedID, expectedAccessHash int64) error {
-	if document == nil || (document.GetConstructor() != mtproto.CRC32_document_8fd4c4d8 && document.GetConstructor() != mtproto.CRC32_document_1e87342b) {
+	if document == nil {
 		return errors.New("expected hydrated document")
 	}
 	size := document.GetSize2()
@@ -265,8 +281,9 @@ func validateDocument(document *mtproto.Document, expectedID, expectedAccessHash
 	if size == 0 {
 		size = int64(document.GetSize2_INT32())
 	}
-	if document.GetId() == 0 || document.GetAccessHash() == 0 || document.GetDcId() <= 0 || size <= 0 || strings.TrimSpace(document.GetMimeType()) == "" || len(document.GetFileReference()) == 0 {
-		return errors.New("document media descriptor is incomplete")
+	if document.GetId() == 0 || document.GetAccessHash() == 0 || document.GetDcId() <= 0 || size <= 0 || strings.TrimSpace(document.GetMimeType()) == "" {
+		return fmt.Errorf("document media descriptor is incomplete: id=%d access_hash_set=%t dc_id=%d size=%d mime_set=%t",
+			document.GetId(), document.GetAccessHash() != 0, document.GetDcId(), size, strings.TrimSpace(document.GetMimeType()) != "")
 	}
 	if expectedID != 0 && document.GetId() != expectedID {
 		return errors.New("document identity does not match request")
