@@ -60,7 +60,7 @@ func (s Service) installedStickerSets(ctx context.Context, requestHash int64, ca
 	if err != nil {
 		return nil, err
 	}
-	sets, err := s.svcCtx.SelectInstalledStickerSets(ctx, userId, category)
+	sets, err := initializeAndSelectInstalledStickerSets(ctx, s.svcCtx, userId, category)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +69,18 @@ func (s Service) installedStickerSets(ctx context.Context, requestHash int64, ca
 		return mtproto.MakeTLMessagesAllStickersNotModified(&mtproto.Messages_AllStickers{}).To_Messages_AllStickers(), nil
 	}
 	return mtproto.MakeTLMessagesAllStickers(&mtproto.Messages_AllStickers{Hash: hash, Sets: buildStickerSets(sets)}).To_Messages_AllStickers(), nil
+}
+
+type installedStickerSetStore interface {
+	InitializeUserStickerCatalog(context.Context, int64, uint8) error
+	SelectInstalledStickerSets(context.Context, int64, uint8) ([]dataobject.StickerSetDO, error)
+}
+
+func initializeAndSelectInstalledStickerSets(ctx context.Context, store installedStickerSetStore, userId int64, category uint8) ([]dataobject.StickerSetDO, error) {
+	if err := store.InitializeUserStickerCatalog(ctx, userId, category); err != nil {
+		return nil, err
+	}
+	return store.SelectInstalledStickerSets(ctx, userId, category)
 }
 
 func (s Service) MessagesGetStickerSet(ctx context.Context, in *mtproto.TLMessagesGetStickerSet) (*mtproto.Messages_StickerSet, error) {

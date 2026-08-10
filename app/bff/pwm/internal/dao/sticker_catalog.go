@@ -349,6 +349,37 @@ func (d *Dao) SelectInstalledStickerSets(ctx context.Context, userId int64, cate
 	return rows, err
 }
 
+func (d *Dao) InitializeUserStickerCatalog(ctx context.Context, userId int64, category uint8) error {
+	if userId <= 0 || category < 1 || category > 3 {
+		return mtproto.ErrStickersetInvalid
+	}
+	return d.db.Transact(ctx, func(tx *sqlx.Tx) error {
+		return initializeUserStickerCatalogTx(tx, userId, category)
+	})
+}
+
+type stickerCatalogTx interface {
+	Exec(string, ...interface{}) (sql.Result, error)
+}
+
+func initializeUserStickerCatalogTx(tx stickerCatalogTx, userId int64, category uint8) error {
+	result, err := tx.Exec(`INSERT IGNORE INTO user_sticker_catalog_state (user_id, category) VALUES (?, ?)`, userId, category)
+	if err != nil {
+		return err
+	}
+	inserted, err := result.RowsAffected()
+	if err != nil || inserted == 0 {
+		return err
+	}
+	_, err = tx.Exec(`INSERT IGNORE INTO user_sticker_sets
+		(user_id, sticker_set_id, category, archived, order2, installed_at)
+		SELECT ?, id, ?, 0, display_order, 0 FROM sticker_sets
+		WHERE import_state = 2 AND archived = 0
+		AND ((? = 1 AND masks = 0 AND emojis = 0) OR (? = 2 AND masks = 1 AND emojis = 0) OR (? = 3 AND emojis = 1))
+		ORDER BY display_order, id`, userId, category, category, category, category)
+	return err
+}
+
 func (d *Dao) InstallStickerSet(ctx context.Context, userId int64, setId uint64, category uint8, archived bool, installedAt int32) error {
 	const query = `INSERT INTO user_sticker_sets (user_id, sticker_set_id, category, archived, order2, installed_at)
 		SELECT ?, ?, ?, ?, COALESCE(MAX(order2), 0) + 1, ? FROM user_sticker_sets WHERE user_id = ? AND category = ?
