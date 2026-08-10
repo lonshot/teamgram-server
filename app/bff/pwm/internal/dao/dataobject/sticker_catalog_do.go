@@ -125,3 +125,11 @@ type CoveredStickerSetDO struct {
 	StickerSetDO
 	CoverDocumentId int64 `db:"cover_document_id"`
 }
+
+type EmojiKeywordDO struct {
+	LanguageCode string `db:"language_code"`
+	Version      uint32 `db:"version"`
+	Keyword      string `db:"keyword"`
+	Emoticon     string `db:"emoticon"`
+	Order2       uint32 `db:"order2"`
+}

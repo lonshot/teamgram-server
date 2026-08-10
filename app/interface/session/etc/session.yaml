@@ -62,6 +62,7 @@ BFFProxyClients:
     #"/mtproto.RPCCreditCards": "bff.bff"
     "/mtproto.RPCDialogs": "bff.bff"
     "/mtproto.RPCDrafts": "bff.bff"
+    "/mtproto.RPCCustomEmojis": "bff.bff"
     "/mtproto.RPCEmoji": "bff.bff"
     "/mtproto.RPCFolders": "bff.bff"
     #"/mtproto.RPCGames": "bff.bff"

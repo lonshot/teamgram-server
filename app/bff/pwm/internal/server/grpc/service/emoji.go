@@ -2,69 +2,41 @@ package service
 
 import (
 	"context"
-	"io/ioutil"
+	"strings"
 
 	"github.com/teamgram/proto/mtproto"
-	"github.com/zeromicro/go-zero/core/jsonx"
+	"pwm-server/app/bff/pwm/internal/dao/dataobject"
 )
 
-type EmojiKeywords struct {
-	Language string              `json:"language"`
-	Version  int                 `json:"version"`
-	Keywords map[string][]string `json:"keywords"`
-}
-
 func (s Service) MessagesGetEmojiKeywords(ctx context.Context, keywords *mtproto.TLMessagesGetEmojiKeywords) (*mtproto.EmojiKeywordsDifference, error) {
-	// Load emoji keywords from JSON file
-	emojiKeywords, err := loadEmojiKeywords("assets/emoji/emojiKeywords.json")
-	if err != nil {
-		return nil, err
+	if keywords == nil {
+		return nil, mtproto.ErrLangCodeInvalid
 	}
-
-	// Retrieve keywords for the specified language
-	langKeywords := emojiKeywords.Keywords
-
-	// Convert keywords to MTProto format
-	mtprotoKeywords := convertToMTProtoEmojiKeywords(langKeywords)
-
-	// Create EmojiKeywordsDifference
-	diff := mtproto.MakeTLEmojiKeywordsDifference(&mtproto.EmojiKeywordsDifference{
-		Keywords: mtprotoKeywords,
-	}).To_EmojiKeywordsDifference()
-
-	return diff, nil
+	return s.emojiKeywordsDifference(ctx, strings.TrimSpace(keywords.GetLangCode()), 0)
 }
 
 func (s Service) MessagesGetEmojiKeywordsDifference(ctx context.Context, difference *mtproto.TLMessagesGetEmojiKeywordsDifference) (*mtproto.EmojiKeywordsDifference, error) {
-
-	// For static files, there's no difference
-	return mtproto.MakeTLEmojiKeywordsDifference(&mtproto.EmojiKeywordsDifference{
-		PredicateName: "emojiKeywordsDifference",
-		LangCode:      difference.LangCode,
-		FromVersion:   difference.FromVersion,
-		Version:       1,
-		Keywords:      []*mtproto.EmojiKeyword{},
-	}).To_EmojiKeywordsDifference(), nil
+	if difference == nil || difference.GetFromVersion() < 0 {
+		return nil, mtproto.ErrLangCodeInvalid
+	}
+	return s.emojiKeywordsDifference(ctx, strings.TrimSpace(difference.GetLangCode()), difference.GetFromVersion())
 }
 
 func (s Service) MessagesGetEmojiKeywordsLanguages(ctx context.Context, languages *mtproto.TLMessagesGetEmojiKeywordsLanguages) (*mtproto.Vector_EmojiLanguage, error) {
-	// Create a Vector_EmojiLanguage object
-	mtprotoEmojiLanguages := &mtproto.Vector_EmojiLanguage{
-		Datas: []*mtproto.EmojiLanguage{
-			{
-				LangCode: "en",
-			},
-			{
-				LangCode: "he",
-			},
-			{
-				LangCode: "vi",
-			},
-			// ... (add other languages)
-		},
+	available, err := s.svcCtx.SelectEmojiKeywordLanguages(ctx)
+	if err != nil {
+		return nil, err
 	}
-
-	return mtprotoEmojiLanguages, nil
+	requested := []string(nil)
+	if languages != nil {
+		requested = languages.GetLangCodes()
+	}
+	selected := selectEmojiLanguages(available, requested)
+	result := &mtproto.Vector_EmojiLanguage{Datas: make([]*mtproto.EmojiLanguage, 0, len(selected))}
+	for _, language := range selected {
+		result.Datas = append(result.Datas, mtproto.MakeTLEmojiLanguage(&mtproto.EmojiLanguage{LangCode: language}).To_EmojiLanguage())
+	}
+	return result, nil
 }
 
 func (s Service) MessagesGetEmojiURL(ctx context.Context, url *mtproto.TLMessagesGetEmojiURL) (*mtproto.EmojiURL, error) {
@@ -73,30 +45,55 @@ func (s Service) MessagesGetEmojiURL(ctx context.Context, url *mtproto.TLMessage
 	return &mtproto.EmojiURL{}, nil
 }
 
-func convertToMTProtoEmojiKeywords(langKeywords map[string][]string) []*mtproto.EmojiKeyword {
-	mtprotoKeywords := make([]*mtproto.EmojiKeyword, 0, len(langKeywords))
-	for key, emojis := range langKeywords {
-		mtprotoKeyword := &mtproto.EmojiKeyword{
-			Keyword:   key,
-			Emoticons: emojis,
-		}
-		mtprotoKeywords = append(mtprotoKeywords, mtprotoKeyword)
+func (s Service) emojiKeywordsDifference(ctx context.Context, languageCode string, fromVersion int32) (*mtproto.EmojiKeywordsDifference, error) {
+	if languageCode == "" || len(languageCode) > 16 {
+		return nil, mtproto.ErrLangCodeInvalid
 	}
-	return mtprotoKeywords
+	version, err := s.svcCtx.SelectEmojiKeywordVersion(ctx, languageCode)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.svcCtx.SelectEmojiKeywords(ctx, languageCode, fromVersion, version)
+	if err != nil {
+		return nil, err
+	}
+	return mtproto.MakeTLEmojiKeywordsDifference(&mtproto.EmojiKeywordsDifference{
+		LangCode: languageCode, FromVersion: fromVersion, Version: version, Keywords: buildEmojiKeywords(rows),
+	}).To_EmojiKeywordsDifference(), nil
 }
-func loadEmojiKeywords(filePath string) (*EmojiKeywords, error) {
-	// Read the JSON file
-	fileBytes, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
 
-	// Parse the JSON data
-	var emojiKeywords EmojiKeywords
-	err = jsonx.Unmarshal(fileBytes, &emojiKeywords)
-	if err != nil {
-		return nil, err
+func buildEmojiKeywords(rows []dataobject.EmojiKeywordDO) []*mtproto.EmojiKeyword {
+	result := make([]*mtproto.EmojiKeyword, 0)
+	for _, row := range rows {
+		if len(result) == 0 || result[len(result)-1].GetKeyword() != row.Keyword {
+			result = append(result, mtproto.MakeTLEmojiKeyword(&mtproto.EmojiKeyword{Keyword: row.Keyword, Emoticons: []string{row.Emoticon}}).To_EmojiKeyword())
+			continue
+		}
+		result[len(result)-1].Emoticons = append(result[len(result)-1].Emoticons, row.Emoticon)
 	}
+	return result
+}
 
-	return &emojiKeywords, nil
+func selectEmojiLanguages(available, requested []string) []string {
+	if len(requested) == 0 {
+		return available
+	}
+	known := make(map[string]struct{}, len(available))
+	for _, language := range available {
+		known[language] = struct{}{}
+	}
+	selected := make([]string, 0, len(requested))
+	seen := make(map[string]struct{}, len(requested))
+	for _, language := range requested {
+		language = strings.TrimSpace(language)
+		if _, ok := known[language]; !ok {
+			continue
+		}
+		if _, ok := seen[language]; ok {
+			continue
+		}
+		seen[language] = struct{}{}
+		selected = append(selected, language)
+	}
+	return selected
 }

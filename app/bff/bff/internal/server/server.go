@@ -402,6 +402,10 @@ func (s *Server) Initialize() error {
 				MessageClient:     c.BizServiceClient,
 			}
 
+			mtproto.RegisterRPCCustomEmojisServer(
+				grpcServer,
+				pwm_helper.New(pwmConfig),
+			)
 			mtproto.RegisterRPCWallpapersServer(
 				grpcServer,
 				pwm_helper.New(pwmConfig),

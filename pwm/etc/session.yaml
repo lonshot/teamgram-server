@@ -81,6 +81,7 @@ BFFProxyClients:
     "/mtproto.RPCPrivacySettings": "bff.bff"
     "/mtproto.RPCUserProfile": "bff.bff"
     ## New implementation
+    "/mtproto.RPCCustomEmojis": "bff.bff"
     "/mtproto.RPCWallpapers": "bff.bff"
     "/mtproto.RPCStickers": "bff.bff"
     "/mtproto.RPCWebPage": "bff.bff"

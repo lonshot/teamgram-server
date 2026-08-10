@@ -14,6 +14,7 @@ import (
 func New(ctx *svc.ServiceContext, c zrpc.RpcServerConf) *zrpc.RpcServer {
 	s, err := zrpc.NewServer(
 		c, func(grpcServer *grpc.Server) {
+			mtproto.RegisterRPCCustomEmojisServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCWallpapersServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCStickersServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCWebPageServer(grpcServer, service.New(ctx))

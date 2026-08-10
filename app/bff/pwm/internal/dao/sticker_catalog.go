@@ -234,6 +234,87 @@ func (d *Dao) SelectStickerDocumentsByEmoticon(ctx context.Context, emoticon str
 	return rows, err
 }
 
+func (d *Dao) SelectCustomEmojiDocumentIds(ctx context.Context, nativeIds []int64) ([]int64, error) {
+	if len(nativeIds) == 0 {
+		return []int64{}, nil
+	}
+	unique := make([]int64, 0, len(nativeIds))
+	seen := make(map[int64]struct{}, len(nativeIds))
+	for _, id := range nativeIds {
+		if id <= 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		unique = append(unique, id)
+	}
+	if len(unique) == 0 {
+		return []int64{}, nil
+	}
+	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(unique)), ",")
+	args := make([]interface{}, len(unique))
+	for i, id := range unique {
+		args[i] = id
+	}
+	var found []int64
+	err := d.db.QueryRowsPartial(ctx, &found, `SELECT native_document_id FROM sticker_documents
+		WHERE document_kind = 2 AND import_state = 3 AND native_document_id IN (`+placeholders+`)`, args...)
+	if err != nil {
+		return nil, err
+	}
+	available := make(map[int64]struct{}, len(found))
+	for _, id := range found {
+		available[id] = struct{}{}
+	}
+	ordered := make([]int64, 0, len(nativeIds))
+	for _, id := range nativeIds {
+		if _, ok := available[id]; ok {
+			ordered = append(ordered, id)
+		}
+	}
+	return ordered, nil
+}
+
+func (d *Dao) SearchCustomEmojiDocumentIds(ctx context.Context, emoticon string, limit int32) ([]int64, error) {
+	emoticon = strings.TrimSpace(emoticon)
+	if emoticon == "" {
+		return []int64{}, nil
+	}
+	if limit <= 0 || limit > 200 {
+		limit = 200
+	}
+	var ids []int64
+	const query = `SELECT DISTINCT d.native_document_id FROM sticker_packs p
+		JOIN sticker_documents d ON d.id = p.sticker_document_id
+		WHERE d.document_kind = 2 AND d.import_state = 3 AND p.emoticon = ?
+		ORDER BY d.native_document_id LIMIT ?`
+	err := d.db.QueryRowsPartial(ctx, &ids, query, emoticon, limit)
+	return ids, err
+}
+
+func (d *Dao) SelectEmojiKeywordVersion(ctx context.Context, languageCode string) (int32, error) {
+	var version int32
+	err := d.db.QueryRowPartial(ctx, &version, `SELECT COALESCE(MAX(version), 0) FROM emoji_keywords WHERE language_code = ?`, languageCode)
+	return version, err
+}
+
+func (d *Dao) SelectEmojiKeywords(ctx context.Context, languageCode string, fromVersion, throughVersion int32) ([]dataobject.EmojiKeywordDO, error) {
+	rows := make([]dataobject.EmojiKeywordDO, 0)
+	const query = `SELECT language_code, version, keyword, emoticon, order2 FROM emoji_keywords
+		WHERE language_code = ? AND version > ? AND version <= ?
+		ORDER BY keyword_normalized, keyword, version, order2, emoticon, id`
+	err := d.db.QueryRowsPartial(ctx, &rows, query, languageCode, fromVersion, throughVersion)
+	return rows, err
+}
+
+func (d *Dao) SelectEmojiKeywordLanguages(ctx context.Context) ([]string, error) {
+	var languages []string
+	err := d.db.QueryRowsPartial(ctx, &languages, `SELECT DISTINCT language_code FROM emoji_keywords ORDER BY language_code`)
+	return languages, err
+}
+
 func (d *Dao) UpsertUserStickerSet(ctx context.Context, in *dataobject.UserStickerSetDO) error {
 	const query = `INSERT INTO user_sticker_sets
 		(user_id, sticker_set_id, category, archived, order2, installed_at)
