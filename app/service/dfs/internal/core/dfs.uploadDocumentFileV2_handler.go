@@ -2,13 +2,12 @@ package core
 
 import (
 	"bytes"
-	"context"
+	"crypto/md5"
 	"fmt"
 	"image"
 	"math/rand"
 
 	"github.com/teamgram/marmota/pkg/bytes2"
-	"github.com/teamgram/marmota/pkg/threading2"
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/service/dfs/dfs"
 	"pwm-server/app/service/dfs/internal/imaging"
@@ -18,10 +17,14 @@ import (
 // DfsUploadDocumentFileV2
 // dfs.uploadDocumentFileV2 creator:long media:InputMedia = Document;
 func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*mtproto.Document, error) {
+	media := in.GetMedia()
+	if media == nil || media.GetFile() == nil {
+		return nil, mtproto.ErrMediaInvalid
+	}
 	var (
 		documentId = c.svcCtx.Dao.IDGenClient2.NextId(c.ctx)
 		//idgen.GetUUID()
-		file      = in.GetMedia().GetFile()
+		file      = media.GetFile()
 		cacheData []byte
 	)
 
@@ -53,10 +56,13 @@ func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*m
 	//	}
 	//}()
 
-	attributes := make([]*mtproto.DocumentAttribute, 0, len(in.GetMedia().Attributes))
-	for _, attr := range in.GetMedia().GetAttributes() {
+	attributes := make([]*mtproto.DocumentAttribute, 0, len(media.Attributes)+1)
+	for _, attr := range media.GetAttributes() {
 		switch attr.GetPredicateName() {
 		case mtproto.Predicate_documentAttributeAnimated:
+			if media.GetMimeType() == "application/x-tgsticker" {
+				attributes = append(attributes, attr)
+			}
 		case mtproto.Predicate_documentAttributeFilename:
 			if attr.GetFileName() != "" {
 				attributes = append(attributes, attr)
@@ -90,7 +96,7 @@ func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*m
 		AccessHash:    accessHash,
 		FileReference: nil,
 		Date:          int32(r.DfsFileInfo.Mtime),
-		MimeType:      in.GetMedia().GetMimeType(),
+		MimeType:      media.GetMimeType(),
 		Size2:         r.DfsFileInfo.GetFileSize(),
 		Size2_INT32:   int32(r.DfsFileInfo.GetFileSize()),
 		Size2_INT64:   r.DfsFileInfo.GetFileSize(),
@@ -100,7 +106,18 @@ func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*m
 		Attributes:    attributes,
 	}).To_Document()
 
-	isThumb := mtproto.IsMimeAcceptedForPhotoVideoAlbum(document.MimeType) && model.IsFileExtImage(ext)
+	if media.GetThumb() != nil {
+		thumbs, width, height, thumbErr := c.uploadDocumentThumb(in.GetCreator(), documentId, media.GetThumb())
+		if thumbErr != nil {
+			return nil, thumbErr
+		}
+		document.Thumbs = thumbs
+		if !hasImageSizeAttribute(document.Attributes) {
+			document.Attributes = append(document.Attributes, mtproto.MakeTLDocumentAttributeImageSize(&mtproto.DocumentAttribute{W: width, H: height}).To_DocumentAttribute())
+		}
+	}
+
+	isThumb := media.GetThumb() == nil && mtproto.IsMimeAcceptedForPhotoVideoAlbum(document.MimeType) && model.IsFileExtImage(ext)
 	if isThumb {
 		var (
 			thumb image.Image
@@ -176,24 +193,85 @@ func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*m
 		}
 	}
 
-	return threading2.WrapperGoFunc(
-		c.ctx,
-		document,
-		func(ctx context.Context) {
-			if isThumb {
-				_, err2 := c.svcCtx.Dao.PutDocumentFile(ctx,
-					fmt.Sprintf("%d.dat", documentId),
-					bytes.NewReader(cacheData))
-				if err2 != nil {
-					c.Logger.Errorf("dfs.uploadDocumentFile - error: %v", err2)
-				}
-			} else {
-				_, err2 := c.svcCtx.Dao.PutDocumentFile(ctx,
-					fmt.Sprintf("%d.dat", documentId),
-					c.svcCtx.Dao.NewSSDBReader(r.DfsFileInfo))
-				if err2 != nil {
-					c.Logger.Errorf("dfs.uploadDocumentFile - error: %v", err2)
-				}
-			}
-		}).(*mtproto.Document), nil
+	if isThumb {
+		_, err = c.svcCtx.Dao.PutDocumentFile(c.ctx, fmt.Sprintf("%d.dat", documentId), bytes.NewReader(cacheData))
+	} else {
+		_, err = c.svcCtx.Dao.PutDocumentFile(c.ctx, fmt.Sprintf("%d.dat", documentId), c.svcCtx.Dao.NewSSDBReader(r.DfsFileInfo))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return document, nil
+}
+
+func hasImageSizeAttribute(attributes []*mtproto.DocumentAttribute) bool {
+	for _, attribute := range attributes {
+		if attribute.GetPredicateName() == mtproto.Predicate_documentAttributeImageSize {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *DfsCore) uploadDocumentThumb(creatorId, documentId int64, thumbFile *mtproto.InputFile) ([]*mtproto.PhotoSize, int32, int32, error) {
+	if err := model.CheckFileParts(thumbFile.Parts); err != nil {
+		return nil, 0, 0, err
+	}
+	r, err := c.svcCtx.Dao.OpenFile(c.ctx, creatorId, thumbFile.Id_INT64, thumbFile.Parts)
+	if err != nil {
+		return nil, 0, 0, mtproto.ErrMediaInvalid
+	}
+	data, err := r.ReadAll(c.ctx)
+	if err != nil {
+		return nil, 0, 0, mtproto.ErrMediaInvalid
+	}
+	if thumbFile.Md5Checksum != "" && fmt.Sprintf("%x", md5.Sum(data)) != thumbFile.Md5Checksum {
+		return nil, 0, 0, mtproto.ErrCheckSumInvalid
+	}
+	thumbs, width, height, mediumBytes, err := makeDocumentThumb(data)
+	if err != nil {
+		return nil, 0, 0, mtproto.ErrMediaInvalid
+	}
+	stored, err := c.svcCtx.Dao.PutPhotoFile(c.ctx, fmt.Sprintf("%s/%d.dat", mtproto.PhotoSZMediumType, documentId), mediumBytes)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+	thumbs[len(thumbs)-1].Size2 = int32(stored.Size)
+	return thumbs, width, height, nil
+}
+
+func makeDocumentThumb(data []byte) ([]*mtproto.PhotoSize, int32, int32, []byte, error) {
+	preview, err := imaging.Decode(bytes.NewReader(data))
+	if err != nil {
+		preview, err = imaging.DecodeWebp(bytes.NewReader(data))
+	}
+	if err != nil {
+		return nil, 0, 0, nil, err
+	}
+	width, height := int32(preview.Bounds().Dx()), int32(preview.Bounds().Dy())
+	stripped := bytes2.NewBuffer(make([]byte, 0, 4096))
+	if width >= height {
+		err = imaging.EncodeStripped(stripped, imaging.Resize(preview, 40, 0), 30)
+	} else {
+		err = imaging.EncodeStripped(stripped, imaging.Resize(preview, 0, 40), 30)
+	}
+	if err != nil {
+		return nil, 0, 0, nil, err
+	}
+	medium := preview
+	if width > mtproto.PhotoSZMediumSize || height > mtproto.PhotoSZMediumSize {
+		if width >= height {
+			medium = imaging.Resize(preview, mtproto.PhotoSZMediumSize, 0)
+		} else {
+			medium = imaging.Resize(preview, 0, mtproto.PhotoSZMediumSize)
+		}
+	}
+	encoded := bytes2.NewBuffer(make([]byte, 0, len(data)))
+	if err = imaging.EncodeJpeg(encoded, medium); err != nil {
+		return nil, 0, 0, nil, err
+	}
+	return []*mtproto.PhotoSize{
+		mtproto.MakeTLPhotoStrippedSize(&mtproto.PhotoSize{Type: mtproto.PhotoSZStrippedType, Bytes: stripped.Bytes()}).To_PhotoSize(),
+		mtproto.MakeTLPhotoSize(&mtproto.PhotoSize{Type: mtproto.PhotoSZMediumType, W: int32(medium.Bounds().Dx()), H: int32(medium.Bounds().Dy()), Size2: int32(len(encoded.Bytes()))}).To_PhotoSize(),
+	}, width, height, encoded.Bytes(), nil
 }
