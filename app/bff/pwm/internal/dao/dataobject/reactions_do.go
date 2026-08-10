@@ -14,6 +14,40 @@ type ReactionsDO struct {
 	UpdatedAt int64  `db:"updated_at"` // Timestamp when the reaction was last updated
 }
 
+type MessageReactionDO struct {
+	Id              int64  `db:"id"`
+	UserId          int64  `db:"user_id"`
+	AuthorUserId    int64  `db:"author_user_id"`
+	PeerType        int32  `db:"peer_type"`
+	PeerId          int64  `db:"peer_id"`
+	MessageId       int32  `db:"message_id"`
+	DialogMessageId int64  `db:"dialog_message_id"`
+	ReactionType    uint8  `db:"reaction_type"`
+	ReactionValue   string `db:"reaction_value"`
+	Big             bool   `db:"big"`
+	Unread          bool   `db:"unread"`
+	Date            int32  `db:"date2"`
+}
+
+type MessageReactionPageDO struct {
+	Count      int32
+	Reactions  []MessageReactionDO
+	NextOffset string
+}
+
+type UnreadReactionMessagePageDO struct {
+	Count      int32
+	MessageIds []int32
+}
+
+type ChatReactionSettingsDO struct {
+	PeerType       int32
+	PeerId         int64
+	PolicyType     int32
+	ReactionsLimit *int32
+	Reactions      []UserReactionDO
+}
+
 // ReactionCountDO represents a reaction and the count of times it has been used.
 type ReactionCountDO struct {
 	Reaction string // The emoji or reaction identifier

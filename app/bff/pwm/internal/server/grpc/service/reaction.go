@@ -2,508 +2,592 @@ package service
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"github.com/teamgram/proto/mtproto"
-	"pwm-server/app/bff/pwm/internal/core"
-	"pwm-server/app/bff/pwm/internal/dao/dataobject"
-	"pwm-server/app/service/biz/message/message"
+	"strconv"
 	"time"
+
+	"github.com/teamgram/proto/mtproto"
+	rpcmetadata "github.com/teamgram/proto/mtproto/rpc/metadata"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/wrapperspb"
+	"pwm-server/app/bff/pwm/internal/dao/dataobject"
+	msgpb "pwm-server/app/messenger/msg/msg/msg"
+	chatpb "pwm-server/app/service/biz/chat/chat"
+	"pwm-server/app/service/biz/message/message"
+	userpb "pwm-server/app/service/biz/user/user"
 )
 
-// MessagesSendReaction allows users to send reactions to messages.
-func (s *Service) MessagesSendReaction(ctx context.Context, reaction *mtproto.TLMessagesSendReaction) (
-	*mtproto.Updates, error,
-) {
-	fmt.Printf(
-		"MessagesSendReaction called with: Peer: %+v, MsgId: %d, Reactions: %+v\n", reaction.Peer, reaction.MsgId,
-		reaction.Reaction_FLAGVECTORREACTION,
-	)
-
-	// Validate input
-	if reaction.Peer == nil || len(reaction.Reaction_FLAGVECTORREACTION) == 0 || reaction.MsgId == 0 {
-		fmt.Printf(
-			"Invalid input: Peer: %+v, MsgId: %d, Reactions: %+v\n", reaction.Peer, reaction.MsgId,
-			reaction.Reaction_FLAGVECTORREACTION,
-		)
-		return nil, errors.New("invalid input")
-	}
-
-	// Initialize PeerId and PeerType
-	var peerId int64
-	var peerType int32
-
-	// Handle different peer types from InputPeer
-	p := mtproto.FromInputPeer(reaction.Peer)
-	peerId = p.PeerId
-	peerType = p.PeerType
-	fmt.Printf("Resolved PeerId: %d, PeerType: %d\n", peerId, peerType)
-
-	// Extract current user from the context (core)
-	c := core.New(ctx, s.svcCtx)
-	fmt.Printf("Current UserId: %d\n", c.MD.UserId)
-
-	// Get the message details using the MessageClient
-	fmt.Printf("Fetching message with MsgId: %d for UserId: %d\n", reaction.MsgId, c.MD.UserId)
-	box, err := s.svcCtx.MessageClient.MessageGetUserMessage(
-		ctx, &message.TLMessageGetUserMessage{
-			UserId: c.MD.UserId,
-			Id:     reaction.MsgId, // The ID of the message to which a reaction will be added
-		},
-	)
+func (s *Service) MessagesSendReaction(ctx context.Context, in *mtproto.TLMessagesSendReaction) (*mtproto.Updates, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), true)
 	if err != nil {
-		fmt.Printf("Error: Message not found for MsgId: %d, UserId: %d\n", reaction.MsgId, c.MD.UserId)
-		return nil, errors.New("message not found")
+		return nil, err
 	}
-	fmt.Printf("Message fetched: %+v\n", box)
+	refs, err := reactionsFromSendRequest(in)
+	if err != nil {
+		return nil, err
+	}
+	for _, ref := range refs {
+		valid, validateErr := s.svcCtx.Dao.ValidateReaction(ctx, ref.ReactionType, ref.ReactionValue)
+		if validateErr != nil {
+			return nil, validateErr
+		}
+		if !valid {
+			return nil, mtproto.ErrReactionInvalid
+		}
+	}
+	box, err := s.loadReactionMessage(ctx, md.GetUserId(), peer, in.GetMsgId())
+	if err != nil {
+		return nil, err
+	}
+	dst := proto.Clone(box).(*mtproto.MessageBox)
+	out := proto.Clone(dst.GetMessage()).(*mtproto.Message)
+	out.Reactions = reactionCarrier(md.GetUserId(), refs, in.GetBig())
+	updates, err := s.svcCtx.MsgEditMessageV2(ctx, &msgpb.TLMsgEditMessageV2{
+		UserId: md.GetUserId(), AuthKeyId: md.GetPermAuthKeyId(), PeerType: peer.PeerType, PeerId: peer.PeerId,
+		EditType: msgpb.EditTypeReaction, NewMessage: msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{Message: out}).To_OutboxMessage(), DstMessage: dst,
+	})
+	if err != nil {
+		return nil, err
+	}
+	now := int32(time.Now().Unix())
+	rows := make([]dataobject.MessageReactionDO, len(refs))
+	for i := range refs {
+		rows[i] = dataobject.MessageReactionDO{UserId: md.GetUserId(), AuthorUserId: box.GetSenderUserId(), PeerType: peer.PeerType,
+			PeerId: reactionScopePeerId(box), MessageId: box.GetMessageId(), DialogMessageId: box.GetDialogMessageId(),
+			ReactionType: refs[i].ReactionType, ReactionValue: refs[i].ReactionValue, Big: in.GetBig(), Date: now}
+	}
+	if err = s.svcCtx.Dao.ReplaceMessageReactions(ctx, rows, md.GetUserId(), peer.PeerType, reactionScopePeerId(box), box.GetDialogMessageId()); err != nil {
+		return nil, err
+	}
+	if in.GetAddToRecent() {
+		for i := range refs {
+			refs[i].UserId = md.GetUserId()
+			refs[i].LastUsedAt = now
+			if err = s.svcCtx.Dao.RecordRecentReaction(ctx, &refs[i]); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return updates, nil
+}
 
-	// Loop through all reactions in Reaction_FLAGVECTORREACTION
-	for _, reactionItem := range reaction.Reaction_FLAGVECTORREACTION {
-		// Extract the actual reaction value from the Reaction structure
-		reactionValue := reactionItem.Emoticon
-		fmt.Printf("Processing reaction: %s for MsgId: %d\n", reactionValue, reaction.MsgId)
+func (s *Service) MessagesGetMessagesReactions(ctx context.Context, in *mtproto.TLMessagesGetMessagesReactions) (*mtproto.Updates, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	if len(in.GetId()) == 0 {
+		return mtproto.MakeUpdatesByUpdatesUsersChats(nil, nil), nil
+	}
+	if len(in.GetId()) > 100 {
+		return nil, mtproto.ErrInputRequestInvalid
+	}
+	boxes, err := s.svcCtx.MessageGetUserMessageList(ctx, &message.TLMessageGetUserMessageList{UserId: md.GetUserId(), IdList: in.GetId()})
+	if err != nil {
+		return nil, err
+	}
+	if len(boxes.GetDatas()) != len(in.GetId()) {
+		return nil, mtproto.ErrMessageIdInvalid
+	}
+	updates := make([]*mtproto.Update, 0, len(boxes.GetDatas()))
+	for _, box := range boxes.GetDatas() {
+		if !messageBoxMatchesPeer(box, md.GetUserId(), peer) || box.GetMessage() == nil {
+			return nil, mtproto.ErrMessageIdInvalid
+		}
+		updates = append(updates, mtproto.MakeTLUpdateMessageReactions(&mtproto.Update{Peer_PEER: mtproto.MakePeer(peer.PeerType, peer.PeerId), MsgId_INT32: box.GetMessageId(), Reactions_MESSAGEREACTIONS: box.GetMessage().GetReactions()}).To_Update())
+	}
+	return mtproto.MakeUpdatesByUpdatesUsersChats(nil, nil, updates...), nil
+}
 
-		// Insert the reaction into the database
-		_, err = s.svcCtx.Dao.InsertReaction(
-			ctx, &dataobject.ReactionsDO{
-				UserId:    c.MD.UserId,
-				MessageId: int64(reaction.MsgId), // Convert int32 to int64
-				Reaction:  reactionValue,
-				PeerId:    peerId,
-				PeerType:  peerType,
-				CreatedAt: time.Now().Unix(),
-				UpdatedAt: time.Now().Unix(),
-			},
-		)
+func (s *Service) MessagesGetMessageReactionsList(ctx context.Context, in *mtproto.TLMessagesGetMessageReactionsList) (*mtproto.Messages_MessageReactionsList, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	if in.GetLimit() <= 0 || in.GetLimit() > 100 {
+		return nil, mtproto.ErrLimitInvalid
+	}
+	box, err := s.loadReactionMessage(ctx, md.GetUserId(), peer, in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	var filter *dataobject.UserReactionDO
+	if in.GetReaction_FLAGREACTION() != nil {
+		value, ok := reactionFromMTProto(in.GetReaction_FLAGREACTION())
+		if !ok {
+			return nil, mtproto.ErrReactionInvalid
+		}
+		filter = &value
+	} else if in.GetReaction_FLAGSTRING() != nil && in.GetReaction_FLAGSTRING().GetValue() != "" {
+		filter = &dataobject.UserReactionDO{ReactionType: 1, ReactionValue: in.GetReaction_FLAGSTRING().GetValue()}
+	}
+	page, err := s.svcCtx.Dao.ListMessageReactions(ctx, peer.PeerType, reactionScopePeerId(box), box.GetDialogMessageId(), filter, in.GetOffset().GetValue(), int(in.GetLimit()))
+	if err != nil {
+		return nil, err
+	}
+	result := &mtproto.Messages_MessageReactionsList{Count: page.Count, Reactions: make([]*mtproto.MessagePeerReaction, 0, len(page.Reactions)), Users: []*mtproto.User{}, Chats: []*mtproto.Chat{}}
+	ids := []int64{md.GetUserId()}
+	seen := map[int64]struct{}{md.GetUserId(): {}}
+	for _, row := range page.Reactions {
+		result.Reactions = append(result.Reactions, mtproto.MakeTLMessagePeerReaction(&mtproto.MessagePeerReaction{Big: row.Big, My: row.UserId == md.GetUserId(), Unread: row.Unread && row.AuthorUserId == md.GetUserId(), PeerId: mtproto.MakePeerUser(row.UserId), Date: row.Date, Reaction_REACTION: reactionToMTProto(dataobject.UserReactionDO{ReactionType: row.ReactionType, ReactionValue: row.ReactionValue})}).To_MessagePeerReaction())
+		if _, ok := seen[row.UserId]; !ok {
+			seen[row.UserId] = struct{}{}
+			ids = append(ids, row.UserId)
+		}
+	}
+	users, err := s.svcCtx.UserGetMutableUsers(ctx, &userpb.TLUserGetMutableUsers{Id: ids})
+	if err != nil {
+		return nil, err
+	}
+	result.Users = users.GetUserListByIdList(md.GetUserId(), ids...)
+	if page.NextOffset != "" {
+		result.NextOffset = wrapperspb.String(page.NextOffset)
+	}
+	return mtproto.MakeTLMessagesMessageReactionsList(result).To_Messages_MessageReactionsList(), nil
+}
+
+func (s *Service) MessagesSetChatAvailableReactions(ctx context.Context, in *mtproto.TLMessagesSetChatAvailableReactions) (*mtproto.Updates, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	if peer.PeerType != mtproto.PEER_CHAT {
+		return nil, mtproto.ErrPeerIdInvalid
+	}
+	if in.GetPaidEnabled() != nil && mtproto.FromBool(in.GetPaidEnabled()) {
+		return nil, mtproto.ErrReactionInvalid
+	}
+	if in.GetReactionsLimit() != nil && (in.GetReactionsLimit().GetValue() < 1 || in.GetReactionsLimit().GetValue() > 11) {
+		return nil, mtproto.ErrLimitInvalid
+	}
+	chat, err := s.svcCtx.ChatClient.Client().ChatGetMutableChat(ctx, &chatpb.TLChatGetMutableChat{ChatId: peer.PeerId})
+	if err != nil {
+		return nil, err
+	}
+	participant, ok := chat.GetImmutableChatParticipant(md.GetUserId())
+	if !ok || !participant.IsChatMemberStateNormal() {
+		return nil, mtproto.ErrParticipantIdInvalid
+	}
+	if !participant.CanAdminChangeInfo() {
+		return nil, mtproto.ErrChatAdminRequired
+	}
+	policy, refs, err := s.chatReactionPolicy(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	settings := dataobject.ChatReactionSettingsDO{PeerType: peer.PeerType, PeerId: peer.PeerId, PolicyType: policy, ReactionsLimit: nil, Reactions: refs}
+	if in.GetReactionsLimit() != nil {
+		value := in.GetReactionsLimit().GetValue()
+		settings.ReactionsLimit = &value
+	}
+	if err = s.svcCtx.Dao.SetChatReactionSettings(ctx, md.GetUserId(), settings); err != nil {
+		return nil, err
+	}
+	return mtproto.MakeUpdatesByUpdatesUsersChats(nil, []*mtproto.Chat{chat.ToUnsafeChat(md.GetUserId())}, mtproto.MakeUpdateChat(peer.PeerId)), nil
+}
+
+func (s *Service) MessagesGetAvailableReactions(ctx context.Context, in *mtproto.TLMessagesGetAvailableReactions) (*mtproto.Messages_AvailableReactions, error) {
+	rows, err := s.svcCtx.Dao.SelectAvailableReactionCatalog(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	hash := availableReactionsHash(rows)
+	if in.GetHash() != 0 && in.GetHash() == hash {
+		return mtproto.MakeTLMessagesAvailableReactionsNotModified(&mtproto.Messages_AvailableReactions{}).To_Messages_AvailableReactions(), nil
+	}
+	result := make([]*mtproto.AvailableReaction, 0, len(rows))
+	for i := range rows {
+		docRows, loadErr := s.svcCtx.Dao.SelectAvailableReactionDocuments(ctx, rows[i].Id)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		ids := make([]int64, len(docRows))
+		for j := range docRows {
+			ids[j] = docRows[j].NativeDocumentId
+		}
+		docs, loadErr := s.loadStickerDocuments(ctx, ids)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		byId := make(map[int64]*mtproto.Document, len(docs))
+		for _, doc := range docs {
+			byId[doc.GetId()] = doc
+		}
+		available := &mtproto.AvailableReaction{Inactive: rows[i].Inactive, Premium: rows[i].Premium, Reaction: rows[i].Emoticon, Title: rows[i].Title}
+		for _, row := range docRows {
+			switch row.Role {
+			case 1:
+				available.StaticIcon = byId[row.NativeDocumentId]
+			case 2:
+				available.AppearAnimation = byId[row.NativeDocumentId]
+			case 3:
+				available.SelectAnimation = byId[row.NativeDocumentId]
+			case 4:
+				available.ActivateAnimation = byId[row.NativeDocumentId]
+			case 5:
+				available.EffectAnimation = byId[row.NativeDocumentId]
+			case 6:
+				available.AroundAnimation = byId[row.NativeDocumentId]
+			case 7:
+				available.CenterIcon = byId[row.NativeDocumentId]
+			}
+		}
+		if available.StaticIcon == nil || available.AppearAnimation == nil || available.SelectAnimation == nil || available.ActivateAnimation == nil || available.EffectAnimation == nil {
+			return nil, mtproto.ErrInternalServerError
+		}
+		result = append(result, mtproto.MakeTLAvailableReaction(available).To_AvailableReaction())
+	}
+	return mtproto.MakeTLMessagesAvailableReactions(&mtproto.Messages_AvailableReactions{Hash: hash, Reactions: result}).To_Messages_AvailableReactions(), nil
+}
+
+func (s *Service) MessagesSetDefaultReaction(ctx context.Context, in *mtproto.TLMessagesSetDefaultReaction) (*mtproto.Bool, error) {
+	userId, err := reactionUserId(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ref, ok := reactionFromDefaultRequest(in)
+	if !ok {
+		return nil, mtproto.ErrReactionInvalid
+	}
+	valid, err := s.svcCtx.Dao.ValidateReaction(ctx, ref.ReactionType, ref.ReactionValue)
+	if err != nil {
+		return nil, err
+	}
+	if !valid {
+		return nil, mtproto.ErrReactionInvalid
+	}
+	ref.UserId = userId
+	if err = s.svcCtx.Dao.SetDefaultReaction(ctx, &ref); err != nil {
+		return nil, err
+	}
+	return mtproto.BoolTrue, nil
+}
+
+func (s *Service) MessagesGetTopReactions(ctx context.Context, in *mtproto.TLMessagesGetTopReactions) (*mtproto.Messages_Reactions, error) {
+	return s.listUserReactions(ctx, in.GetLimit(), in.GetHash(), true)
+}
+func (s *Service) MessagesGetRecentReactions(ctx context.Context, in *mtproto.TLMessagesGetRecentReactions) (*mtproto.Messages_Reactions, error) {
+	return s.listUserReactions(ctx, in.GetLimit(), in.GetHash(), false)
+}
+func (s *Service) MessagesClearRecentReactions(ctx context.Context, _ *mtproto.TLMessagesClearRecentReactions) (*mtproto.Bool, error) {
+	userId, err := reactionUserId(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err = s.svcCtx.Dao.ClearUserRecentReactions(ctx, userId); err != nil {
+		return nil, err
+	}
+	return mtproto.BoolTrue, nil
+}
+
+func (s *Service) MessagesGetUnreadReactions(ctx context.Context, in *mtproto.TLMessagesGetUnreadReactions) (*mtproto.Messages_Messages, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	if in.GetTopMsgId() != nil {
+		return nil, mtproto.ErrInputRequestInvalid
+	}
+	if in.GetLimit() <= 0 || in.GetLimit() > 100 {
+		return nil, mtproto.ErrLimitInvalid
+	}
+	page, err := s.svcCtx.Dao.ListUnreadReactionMessages(ctx, md.GetUserId(), peer.PeerType, peer.PeerId, in.GetOffsetId(), in.GetAddOffset(), in.GetLimit(), in.GetMinId(), in.GetMaxId())
+	if err != nil {
+		return nil, err
+	}
+	boxes, err := s.svcCtx.MessageGetUserMessageList(ctx, &message.TLMessageGetUserMessageList{UserId: md.GetUserId(), IdList: page.MessageIds})
+	if err != nil {
+		return nil, err
+	}
+	messages := make([]*mtproto.Message, 0, len(boxes.GetDatas()))
+	for _, box := range boxes.GetDatas() {
+		if !messageBoxMatchesPeer(box, md.GetUserId(), peer) {
+			return nil, mtproto.ErrMessageIdInvalid
+		}
+		messages = append(messages, box.ToMessage(md.GetUserId()))
+	}
+	return mtproto.MakeTLMessagesMessagesSlice(&mtproto.Messages_Messages{Count: page.Count, Messages: messages, Users: []*mtproto.User{}, Chats: []*mtproto.Chat{}}).To_Messages_Messages(), nil
+}
+
+func (s *Service) MessagesReadReactions(ctx context.Context, in *mtproto.TLMessagesReadReactions) (*mtproto.Messages_AffectedHistory, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	if in.GetTopMsgId() != nil {
+		return nil, mtproto.ErrInputRequestInvalid
+	}
+	count, err := s.svcCtx.Dao.ClearUnreadReactionMessages(ctx, md.GetUserId(), peer.PeerType, peer.PeerId)
+	if err != nil {
+		return nil, err
+	}
+	return mtproto.MakeTLMessagesAffectedHistory(&mtproto.Messages_AffectedHistory{PtsCount: int32(count)}).To_Messages_AffectedHistory(), nil
+}
+
+func (s *Service) MessagesReportReaction(ctx context.Context, in *mtproto.TLMessagesReportReaction) (*mtproto.Bool, error) {
+	md, peer, err := s.reactionRequest(ctx, in.GetPeer(), false)
+	if err != nil {
+		return nil, err
+	}
+	actor, err := reactionPeer(md.GetUserId(), in.GetReactionPeer())
+	if err != nil || actor.PeerType != mtproto.PEER_USER || actor.PeerId == md.GetUserId() {
+		return nil, mtproto.ErrReactionInvalid
+	}
+	box, err := s.loadReactionMessage(ctx, md.GetUserId(), peer, in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	ok, err := s.svcCtx.Dao.ReportMessageReaction(ctx, md.GetUserId(), reactionScopePeerId(box), box.GetDialogMessageId(), actor.PeerId, peer.PeerType)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, mtproto.ErrReactionInvalid
+	}
+	return mtproto.BoolTrue, nil
+}
+
+func (s *Service) listUserReactions(ctx context.Context, limit int32, requestHash int64, top bool) (*mtproto.Messages_Reactions, error) {
+	userId, err := reactionUserId(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if limit <= 0 || limit > 100 {
+		limit = 100
+	}
+	var refs []dataobject.UserReactionDO
+	if top {
+		refs, err = s.svcCtx.Dao.SelectUserTopReactions(ctx, userId, limit)
+	} else {
+		refs, err = s.svcCtx.Dao.SelectUserRecentReactions(ctx, userId, limit)
+	}
+	if err != nil {
+		return nil, err
+	}
+	hash := reactionRefsHash(refs)
+	if requestHash != 0 && requestHash == hash {
+		return mtproto.MakeTLMessagesReactionsNotModified(nil).To_Messages_Reactions(), nil
+	}
+	values := make([]*mtproto.Reaction, len(refs))
+	for i := range refs {
+		values[i] = reactionToMTProto(refs[i])
+	}
+	return mtproto.MakeTLMessagesReactions(&mtproto.Messages_Reactions{Hash: hash, Reactions: values}).To_Messages_Reactions(), nil
+}
+
+func (s *Service) reactionRequest(ctx context.Context, input *mtproto.InputPeer, write bool) (*rpcmetadata.RpcMetadata, *mtproto.PeerUtil, error) {
+	md := rpcmetadata.RpcMetadataFromIncoming(ctx)
+	if md == nil || md.GetUserId() <= 0 {
+		return nil, nil, mtproto.ErrAuthKeyUnregistered
+	}
+	peer, err := reactionPeer(md.GetUserId(), input)
+	if err != nil {
+		return nil, nil, err
+	}
+	if peer.PeerType == mtproto.PEER_CHANNEL {
+		return nil, nil, mtproto.ErrEnterpriseIsBlocked
+	}
+	if peer.PeerType == mtproto.PEER_CHAT && !s.svcCtx.ChatClient.CheckParticipantIsExist(ctx, md.GetUserId(), []int64{peer.PeerId}) {
+		return nil, nil, mtproto.ErrPeerIdInvalid
+	}
+	_ = write
+	return md, peer, nil
+}
+
+func reactionUserId(ctx context.Context) (int64, error) {
+	md := rpcmetadata.RpcMetadataFromIncoming(ctx)
+	if md == nil || md.GetUserId() <= 0 {
+		return 0, mtproto.ErrAuthKeyUnregistered
+	}
+	return md.GetUserId(), nil
+}
+func reactionPeer(userId int64, input *mtproto.InputPeer) (*mtproto.PeerUtil, error) {
+	if input == nil {
+		return nil, mtproto.ErrPeerIdInvalid
+	}
+	peer := mtproto.FromInputPeer2(userId, input)
+	if peer.PeerType == mtproto.PEER_SELF {
+		peer.PeerType, peer.PeerId = mtproto.PEER_USER, userId
+	}
+	if peer.PeerId <= 0 || (peer.PeerType != mtproto.PEER_USER && peer.PeerType != mtproto.PEER_CHAT && peer.PeerType != mtproto.PEER_CHANNEL) {
+		return nil, mtproto.ErrPeerIdInvalid
+	}
+	return peer, nil
+}
+func messageBoxMatchesPeer(box *mtproto.MessageBox, userId int64, peer *mtproto.PeerUtil) bool {
+	if box == nil || peer == nil || box.GetUserId() != userId || box.GetPeerType() != peer.PeerType {
+		return false
+	}
+	if peer.PeerType != mtproto.PEER_USER {
+		return box.GetPeerId() == peer.PeerId
+	}
+	dialog := mtproto.MakeDialogId(userId, mtproto.PEER_USER, peer.PeerId)
+	return box.GetDialogId1() == dialog.A && box.GetDialogId2() == dialog.B
+}
+func reactionScopePeerId(box *mtproto.MessageBox) int64 {
+	if box.GetPeerType() == mtproto.PEER_USER {
+		return box.GetDialogId1()
+	}
+	return box.GetPeerId()
+}
+func (s *Service) loadReactionMessage(ctx context.Context, userId int64, peer *mtproto.PeerUtil, id int32) (*mtproto.MessageBox, error) {
+	boxes, err := s.svcCtx.MessageGetUserMessageList(ctx, &message.TLMessageGetUserMessageList{UserId: userId, IdList: []int32{id}})
+	if err != nil {
+		return nil, err
+	}
+	if len(boxes.GetDatas()) != 1 || boxes.GetDatas()[0].GetMessage() == nil || !messageBoxMatchesPeer(boxes.GetDatas()[0], userId, peer) {
+		return nil, mtproto.ErrMessageIdInvalid
+	}
+	return boxes.GetDatas()[0], nil
+}
+
+func reactionFromMTProto(value *mtproto.Reaction) (dataobject.UserReactionDO, bool) {
+	if value == nil {
+		return dataobject.UserReactionDO{}, false
+	}
+	switch value.GetPredicateName() {
+	case mtproto.Predicate_reactionEmoji:
+		if value.GetEmoticon() == "" {
+			return dataobject.UserReactionDO{}, false
+		}
+		return dataobject.UserReactionDO{ReactionType: 1, ReactionValue: value.GetEmoticon()}, true
+	case mtproto.Predicate_reactionCustomEmoji:
+		if value.GetDocumentId() <= 0 {
+			return dataobject.UserReactionDO{}, false
+		}
+		return dataobject.UserReactionDO{ReactionType: 2, ReactionValue: strconv.FormatInt(value.GetDocumentId(), 10)}, true
+	default:
+		return dataobject.UserReactionDO{}, false
+	}
+}
+func reactionToMTProto(value dataobject.UserReactionDO) *mtproto.Reaction {
+	if value.ReactionType == 2 {
+		id, _ := strconv.ParseInt(value.ReactionValue, 10, 64)
+		return mtproto.MakeTLReactionCustomEmoji(&mtproto.Reaction{DocumentId: id}).To_Reaction()
+	}
+	return mtproto.MakeTLReactionEmoji(&mtproto.Reaction{Emoticon: value.ReactionValue}).To_Reaction()
+}
+func reactionFromDefaultRequest(in *mtproto.TLMessagesSetDefaultReaction) (dataobject.UserReactionDO, bool) {
+	if in == nil {
+		return dataobject.UserReactionDO{}, false
+	}
+	if in.GetReaction_REACTION() != nil {
+		return reactionFromMTProto(in.GetReaction_REACTION())
+	}
+	if in.GetReaction_STRING() != "" {
+		return dataobject.UserReactionDO{ReactionType: 1, ReactionValue: in.GetReaction_STRING()}, true
+	}
+	return dataobject.UserReactionDO{}, false
+}
+func reactionsFromSendRequest(in *mtproto.TLMessagesSendReaction) ([]dataobject.UserReactionDO, error) {
+	if in == nil {
+		return nil, mtproto.ErrInputRequestInvalid
+	}
+	input := in.GetReaction_FLAGVECTORREACTION()
+	if len(input) > 3 {
+		return nil, mtproto.ErrReactionsTooMany
+	}
+	refs := make([]dataobject.UserReactionDO, 0, len(input))
+	seen := map[string]struct{}{}
+	for _, value := range input {
+		ref, ok := reactionFromMTProto(value)
+		if !ok {
+			return nil, mtproto.ErrReactionInvalid
+		}
+		key := strconv.Itoa(int(ref.ReactionType)) + ":" + ref.ReactionValue
+		if _, ok = seen[key]; ok {
+			return nil, mtproto.ErrReactionInvalid
+		}
+		seen[key] = struct{}{}
+		refs = append(refs, ref)
+	}
+	if len(refs) == 0 && in.GetReaction_FLAGSTRING() != nil && in.GetReaction_FLAGSTRING().GetValue() != "" {
+		refs = append(refs, dataobject.UserReactionDO{ReactionType: 1, ReactionValue: in.GetReaction_FLAGSTRING().GetValue()})
+	}
+	return refs, nil
+}
+func reactionCarrier(userId int64, refs []dataobject.UserReactionDO, big bool) *mtproto.MessageReactions {
+	results := make([]*mtproto.ReactionCount, len(refs))
+	for i := range refs {
+		results[i] = mtproto.MakeTLReactionCount(&mtproto.ReactionCount{Chosen: true, ChosenOrder: wrapperspb.Int32(int32(i)), Reaction_REACTION: reactionToMTProto(refs[i]), Count: 1}).To_ReactionCount()
+	}
+	carrier := &mtproto.MessageReactions{Results: results}
+	if len(refs) > 0 {
+		carrier.RecentReactions = []*mtproto.MessagePeerReaction{mtproto.MakeTLMessagePeerReaction(&mtproto.MessagePeerReaction{My: true, Big: big, PeerId: mtproto.MakePeerUser(userId)}).To_MessagePeerReaction()}
+	}
+	return mtproto.MakeTLMessageReactions(carrier).To_MessageReactions()
+}
+func reactionRefsHash(refs []dataobject.UserReactionDO) int64 {
+	var hash int64
+	for _, ref := range refs {
+		hash = hash*20261 + int64(ref.ReactionType)
+		for _, r := range ref.ReactionValue {
+			hash = hash*20261 + int64(r)
+		}
+	}
+	return hash
+}
+func availableReactionsHash(rows []dataobject.AvailableReactionDO) int32 {
+	var hash int64
+	for _, row := range rows {
+		hash = hash*20261 + row.ReactionHash
+		for _, r := range row.Emoticon {
+			hash = hash*20261 + int64(r)
+		}
+	}
+	return int32(hash)
+}
+func (s *Service) chatReactionPolicy(ctx context.Context, in *mtproto.TLMessagesSetChatAvailableReactions) (int32, []dataobject.UserReactionDO, error) {
+	policy := in.GetAvailableReactions_CHATREACTIONS()
+	if policy == nil {
+		legacy := in.GetAvailableReactions_VECTORSTRING()
+		if len(legacy) == 0 {
+			return 0, nil, mtproto.ErrReactionEmpty
+		}
+		refs := make([]dataobject.UserReactionDO, len(legacy))
+		for i, value := range legacy {
+			refs[i] = dataobject.UserReactionDO{ReactionType: 1, ReactionValue: value}
+		}
+		policy = mtproto.MakeTLChatReactionsSome(&mtproto.ChatReactions{Reactions: func() []*mtproto.Reaction {
+			result := make([]*mtproto.Reaction, len(refs))
+			for i := range refs {
+				result[i] = reactionToMTProto(refs[i])
+			}
+			return result
+		}()}).To_ChatReactions()
+	}
+	policyType, _ := policy.ToChatReactions()
+	if policyType != mtproto.ChatReactionsTypeSome {
+		if policyType == mtproto.ChatReactionsTypeNone || policyType == mtproto.ChatReactionsTypeAllNoAllowCustom || policyType == mtproto.ChatReactionsTypeAllAllowCustom {
+			return policyType, nil, nil
+		}
+		return 0, nil, mtproto.ErrReactionInvalid
+	}
+	if len(policy.GetReactions()) == 0 {
+		return 0, nil, mtproto.ErrReactionEmpty
+	}
+	if len(policy.GetReactions()) > 100 {
+		return 0, nil, mtproto.ErrReactionsTooMany
+	}
+	refs := make([]dataobject.UserReactionDO, 0, len(policy.GetReactions()))
+	seen := map[string]struct{}{}
+	for _, value := range policy.GetReactions() {
+		ref, ok := reactionFromMTProto(value)
+		if !ok {
+			return 0, nil, mtproto.ErrReactionInvalid
+		}
+		key := strconv.Itoa(int(ref.ReactionType)) + ":" + ref.ReactionValue
+		if _, ok = seen[key]; ok {
+			return 0, nil, mtproto.ErrReactionInvalid
+		}
+		valid, err := s.svcCtx.Dao.ValidateReaction(ctx, ref.ReactionType, ref.ReactionValue)
 		if err != nil {
-			fmt.Printf("Error: Failed to save reaction: %s for MsgId: %d\n", reactionValue, reaction.MsgId)
-			return nil, errors.New("failed to save reaction")
+			return 0, nil, err
 		}
-		fmt.Printf("Reaction %s saved successfully for MsgId: %d\n", reactionValue, reaction.MsgId)
-	}
-
-	// Retrieve the updated list of reactions for the message
-	fmt.Printf("Retrieving updated reactions for MsgId: %d\n", reaction.MsgId)
-	reactionsList, err := s.svcCtx.Dao.SelectReactionsByMessageId(ctx, int64(reaction.MsgId))
-	if err != nil {
-		fmt.Printf("Error: Failed to retrieve updated reactions for MsgId: %d\n", reaction.MsgId)
-		return nil, errors.New("failed to retrieve updated reactions")
-	}
-	fmt.Printf("Updated reactions list: %+v\n", reactionsList)
-
-	// Convert the reactions to proto format
-	reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
-	box.Message.Reactions = reactionProto
-	updates := mtproto.MakeUpdatesByUpdates(
-		mtproto.MakeTLUpdateEditMessage(
-			&mtproto.Update{
-				Pts_INT32:       box.Pts,
-				PtsCount:        box.PtsCount,
-				Message_MESSAGE: box.Message,
-			},
-		).To_Update(),
-	)
-	if err != nil {
-		c.Logger.Errorf("inbox.editMessageToInboxV2 - error: %v", err)
-		return nil, err
-	}
-	fmt.Printf("Updates created: %+v\n", updates)
-
-	// _, err = s.svcCtx.Dao.SyncClient.SyncUpdatesNotMe(
-	//	ctx, &sync.TLSyncUpdatesNotMe{
-	//		UserId:        peerId,
-	//		PermAuthKeyId: c.MD.PermAuthKeyId,
-	//		Updates:       updates,
-	//	},
-	// )
-	// if err != nil {
-	// 	fmt.Printf("Error: Failed to push update to peer\n")
-	// 	return nil, errors.New("failed to push update to peer")
-	// }
-
-	fmt.Printf("Updates successfully generated for MsgId: %d\n", reaction.MsgId)
-	return updates, nil
-}
-
-// MessagesGetMessagesReactions retrieves reactions for a list of message IDs.
-func (s Service) MessagesGetMessagesReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesGetMessagesReactions,
-) (*mtproto.Updates, error) {
-	// Validate input
-	if reactions.Peer == nil || len(reactions.Id) == 0 {
-		return nil, errors.New("invalid input")
-	}
-
-	// Convert the list of int32 message IDs to int64
-	msgIds := make([]int32, len(reactions.Id))
-	for i, id := range reactions.Id {
-		msgIds[i] = int32(id)
-	}
-
-	// Extract current user from the context (core)
-	c := core.New(ctx, s.svcCtx)
-	// Get the message list details using the MessageClient
-	messageBoxes, err := s.svcCtx.MessageClient.MessageGetUserMessageList(
-		ctx, &message.TLMessageGetUserMessageList{
-			UserId: c.MD.UserId,
-			IdList: msgIds, // The ID of the message to which a reaction will be added
-		},
-	)
-	if err != nil {
-		return nil, errors.New("message not found")
-	}
-
-	var messageUpdates []*mtproto.Update
-	for _, box := range messageBoxes.GetDatas() {
-		// Retrieve the updated list of reactions for the message
-		reactionsList, err2 := s.svcCtx.Dao.SelectReactionsByMessageId(ctx, int64(box.MessageId))
-		if err2 != nil {
-			return nil, errors.New("failed to retrieve message reactions")
+		if !valid {
+			return 0, nil, mtproto.ErrReactionInvalid
 		}
-
-		// Convert the reactions to proto format
-		reactionProto := convertReactionsToMessageReactionsProto(reactionsList)
-
-		messageUpdates = append(
-			messageUpdates, mtproto.MakeTLUpdateMessageReactions(
-				&mtproto.Update{
-					UserId:                     c.MD.UserId,
-					Pts_INT32:                  box.Pts,
-					PtsCount:                   box.PtsCount,
-					RandomId:                   box.RandomId,
-					Message_MESSAGE:            box.Message,
-					Reactions_MESSAGEREACTIONS: reactionProto,
-				},
-			).To_Update(),
-		)
+		seen[key] = struct{}{}
+		refs = append(refs, ref)
 	}
-
-	return mtproto.MakeTLUpdates(
-		&mtproto.Updates{
-			Updates: messageUpdates,
-			Users:   []*mtproto.User{},
-			Chats:   []*mtproto.Chat{},
-			Date:    int32(time.Now().Unix()),
-			Seq:     0,
-		},
-	).To_Updates(), nil
-}
-
-// convertReactionsToMessageReactionsProto converts the list of ReactionsDO into proto format (MessageReactions).
-func convertReactionsToMessageReactionsProto(reactions []*dataobject.ReactionsDO) *mtproto.MessageReactions {
-	var protoReactions []*mtproto.MessagePeerReaction
-	reactionCountMap := make(map[string]int32) // Map to store the count of each reaction type
-	uniqueReactionSet := make(map[string]bool) // Set to track if a reaction type has been added to protoReactions
-
-	for _, reaction := range reactions {
-		// Count the reactions for each type
-		reactionCountMap[reaction.Reaction]++
-
-		// Skip adding to protoReactions if the reaction has already been added
-		if uniqueReactionSet[reaction.Reaction] {
-			continue
-		}
-
-		// Create each proto reaction object
-		protoReaction := mtproto.MakeTLMessagePeerReaction(
-			&mtproto.MessagePeerReaction{
-				Reaction: reaction.Reaction,                     // The reaction (e.g., emoji)
-				PeerId:   mtproto.MakePeerUser(reaction.UserId), // User who made the reaction
-				Date:     int32(reaction.CreatedAt),             // The date of the reaction (convert timestamp to int32)
-				Unread:   !reaction.Read,                        // Whether the reaction is unread
-			},
-		).To_MessagePeerReaction()
-
-		// Append to the list of proto reactions
-		protoReactions = append(protoReactions, protoReaction)
-
-		// Mark the reaction type as already added
-		uniqueReactionSet[reaction.Reaction] = true
-	}
-
-	// Create the Results list of ReactionCount from the reactionCountMap
-	var reactionCounts []*mtproto.ReactionCount
-	for reaction, count := range reactionCountMap {
-		reactionCounts = append(
-			reactionCounts, mtproto.MakeTLReactionCount(
-				&mtproto.ReactionCount{
-					Reaction: reaction,
-					Count:    count,
-				},
-			).To_ReactionCount(),
-		)
-	}
-
-	// Return the MessageReactions object with both the proto reactions list and the reaction counts
-	return mtproto.MakeTLMessageReactions(
-		&mtproto.MessageReactions{
-			Results:         reactionCounts, // Populated with aggregated reaction counts
-			RecentReactions: protoReactions, // The individual reactions we just converted
-			CanSeeList:      true,           // Can customize this depending on the use case
-		},
-	).To_MessageReactions()
-}
-
-// MessagesGetMessageReactionsList retrieves the list of reactions for a specific message.
-func (s *Service) MessagesGetMessageReactionsList(
-	ctx context.Context, list *mtproto.TLMessagesGetMessageReactionsList,
-) (*mtproto.Messages_MessageReactionsList, error) {
-	// Validate input
-	if list.Peer == nil || list.Id == 0 {
-		return nil, errors.New("invalid input")
-	}
-
-	// Retrieve reactions for the specified message ID
-	reactions, err := s.svcCtx.Dao.SelectReactionsByMessageId(ctx, int64(list.Id))
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert reactions to proto format and aggregate reaction counts
-	var protoReactions []*mtproto.MessagePeerReaction
-	uniqueReactionSet := make(map[string]bool) // Set to track if a reaction type has been added to protoReactions
-
-	for _, reaction := range reactions {
-		// Skip adding to protoReactions if the reaction has already been added
-		if uniqueReactionSet[reaction.Reaction] {
-			continue
-		}
-
-		// Create each proto reaction object
-		protoReaction := mtproto.MakeTLMessagePeerReaction(
-			&mtproto.MessagePeerReaction{
-				Reaction: reaction.Reaction,                     // The reaction (e.g., emoji)
-				PeerId:   mtproto.MakePeerUser(reaction.UserId), // User who made the reaction
-				Date:     int32(reaction.CreatedAt),             // The date of the reaction (convert timestamp to int32)
-				Unread:   !reaction.Read,                        // Whether the reaction is unread
-			},
-		).To_MessagePeerReaction()
-
-		// Append to the list of proto reactions
-		protoReactions = append(protoReactions, protoReaction)
-
-		// Mark the reaction type as already added
-		uniqueReactionSet[reaction.Reaction] = true
-	}
-
-	// Limit the number of reactions returned
-	if list.Limit > 0 && len(protoReactions) > int(list.Limit) {
-		protoReactions = protoReactions[:list.Limit]
-	}
-
-	// Build the response with both individual reactions and reaction counts
-	reactionsList := mtproto.MakeTLMessagesMessageReactionsList(
-		&mtproto.Messages_MessageReactionsList{
-			Reactions: protoReactions,             // Individual reactions in proto format
-			Count:     int32(len(protoReactions)), // Number of individual reactions returned
-		},
-	).To_Messages_MessageReactionsList()
-
-	return reactionsList, nil
-}
-
-// MessagesSetChatAvailableReactions sets available reactions for a chat.
-func (s Service) MessagesSetChatAvailableReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesSetChatAvailableReactions,
-) (*mtproto.Updates, error) {
-	// Prepare Updates object
-	updates := &mtproto.Updates{
-		// Return updated reactions
-	}
-	return updates, nil
-}
-
-// MessagesGetAvailableReactions fetches available reactions for a chat.
-func (s Service) MessagesGetAvailableReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesGetAvailableReactions,
-) (*mtproto.Messages_AvailableReactions, error) {
-	return &mtproto.Messages_AvailableReactions{}, nil
-}
-
-// MessagesSetDefaultReaction sets a default reaction for a user.
-func (s Service) MessagesSetDefaultReaction(
-	ctx context.Context, reaction *mtproto.TLMessagesSetDefaultReaction,
-) (*mtproto.Bool, error) {
-	// Update the user's default reaction
-	//err := s.svcCtx.Dao.UpdateDefaultReaction(ctx, reaction.UserId, reaction.Reaction)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	return mtproto.BoolTrue, nil
-}
-
-// MessagesGetUnreadReactions gets unread reactions for the user.
-func (s Service) MessagesGetUnreadReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesGetUnreadReactions,
-) (*mtproto.Messages_Messages, error) {
-	// Extract peerId and construct Peer object
-	var peerId int64
-
-	// Handle different peer types from InputPeer
-	peer := mtproto.FromInputPeer(reactions.Peer)
-	peerId = peer.PeerId
-
-	// Fetch unread reactions for the user using pagination parameters
-	unreadReactions, err := s.svcCtx.Dao.SelectUnreadReactionsByUserId(
-		ctx, peerId, reactions.OffsetId, reactions.Limit,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert unread reactions into proto format
-	protoMessages := make([]*mtproto.Message, len(unreadReactions))
-	for i, reaction := range unreadReactions {
-		protoMessages[i] = &mtproto.Message{
-			Id:        int32(reaction.MessageId),
-			PeerId:    peer.ToPeer(),
-			Reactions: convertReactionsToMessageReactionsProto([]*dataobject.ReactionsDO{reaction}),
-		}
-	}
-
-	// Return unread messages
-	return mtproto.MakeTLMessagesMessages(
-		&mtproto.Messages_Messages{
-			Messages: protoMessages,
-		},
-	).To_Messages_Messages(), nil
-}
-
-// MessagesReadReactions marks reactions as read.
-func (s Service) MessagesReadReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesReadReactions,
-) (*mtproto.Messages_AffectedHistory, error) {
-	// Extract peerId based on Peer type
-	var peerId int64
-
-	peer := mtproto.FromInputPeer(reactions.Peer)
-	peerId = peer.PeerId
-
-	// Convert TopMsgId to int32 if it exists
-	var topMsgId int32
-	if reactions.TopMsgId != nil {
-		topMsgId = reactions.TopMsgId.GetValue()
-	}
-
-	// Get the current Unix timestamp for updating the 'read' status
-	updatedAt := time.Now().Unix()
-
-	// Mark reactions as read for the given peer and top message ID
-	err := s.svcCtx.Dao.MarkReactionsAsRead(ctx, peerId, int64(topMsgId), updatedAt)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare the affected history response
-	affectedHistory := &mtproto.Messages_AffectedHistory{
-		Pts:      0, // These values can be populated based on your app's logic
-		PtsCount: 1, // Count of updates made, like the number of read reactions
-		Offset:   0, // Offset if needed for pagination
-	}
-
-	return mtproto.MakeTLMessagesAffectedHistory(
-		affectedHistory,
-	).To_Messages_AffectedHistory(), nil
-}
-
-// MessagesReportReaction reports a reaction.
-func (s Service) MessagesReportReaction(
-	ctx context.Context, reaction *mtproto.TLMessagesReportReaction,
-) (*mtproto.Bool, error) {
-
-	// Validate input
-	if reaction == nil || reaction.Id == 0 || reaction.ReactionPeer == nil {
-		return nil, errors.New("invalid input")
-	}
-
-	// Report the reaction in the database
-	err := s.svcCtx.Dao.ReportReaction(ctx, int64(reaction.Id), reaction.ReactionPeer.String())
-	if err != nil {
-		return nil, err
-	}
-
-	// Return success response
-	return mtproto.BoolTrue, nil
-}
-
-// MessagesGetTopReactions retrieves the top reactions.
-func (s Service) MessagesGetTopReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesGetTopReactions,
-) (*mtproto.Messages_Reactions, error) {
-	// Fetch top reactions from the database
-	topReactions, err := s.svcCtx.Dao.SelectTopReactions(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert the top reactions into the proto format using Reaction instead of ReactionCount
-	var protoReactions []*mtproto.Reaction
-	for _, reaction := range topReactions {
-		protoReactions = append(
-			protoReactions, mtproto.MakeTLReactionEmoji(
-				&mtproto.Reaction{
-					Emoticon: reaction.Reaction, // Emoji or reaction identifier
-					//DocumentId: reaction.Reaction
-					//Count:    int32(reaction.Count), // The number of times this reaction was used
-				},
-			).To_Reaction(),
-		)
-	}
-
-	// Create the Messages_Reactions object to return
-	reactionList := mtproto.MakeTLMessagesReactions(
-		&mtproto.Messages_Reactions{
-			Reactions: protoReactions, // Use the list of Reaction
-		},
-	).To_Messages_Reactions()
-
-	return reactionList, nil
-}
-
-// MessagesGetRecentReactions retrieves recent reactions.
-func (s Service) MessagesGetRecentReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesGetRecentReactions,
-) (*mtproto.Messages_Reactions, error) {
-	// Fetch recent reactions for the user
-	c := core.New(ctx, s.svcCtx)
-	recentReactions, err := s.svcCtx.Dao.SelectRecentReactions(ctx, c.MD.UserId, reactions.Limit)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert the recent reactions into the proto format
-	var protoReactions []*mtproto.Reaction
-	for _, reaction := range recentReactions {
-		protoReactions = append(
-			protoReactions, mtproto.MakeTLReactionEmoji(
-				&mtproto.Reaction{
-					Emoticon: reaction.Reaction, // The emoji or reaction identifier
-				},
-			).To_Reaction(),
-		)
-	}
-
-	// Create and return the Messages_Reactions object
-	reactionList := mtproto.MakeTLMessagesReactions(
-		&mtproto.Messages_Reactions{
-			Reactions: protoReactions, // Populate recent reactions
-		},
-	).To_Messages_Reactions()
-
-	return reactionList, nil
-}
-
-// MessagesClearRecentReactions clears recent reactions for the user.
-func (s Service) MessagesClearRecentReactions(
-	ctx context.Context, reactions *mtproto.TLMessagesClearRecentReactions,
-) (*mtproto.Bool, error) {
-	c := core.New(ctx, s.svcCtx)
-	// Clear recent reactions for the user in the database
-	err := s.svcCtx.Dao.ClearRecentReactions(ctx, c.MD.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	return mtproto.BoolTrue, nil
+	return policyType, refs, nil
 }
