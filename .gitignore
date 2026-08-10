@@ -40,6 +40,7 @@ pwm/bin/*
 
 pwm/logs/*
 !pwm/logs/.gitkeep
+pwm/etc2/
 
 /app/messenger/biz_server
 /app/bff/account/cmd/account/account

@@ -18,6 +18,9 @@ func NewVerifyCode(c *conf.SmsVerifyCodeConfig) VerifyCodeInterface {
 	if c == nil {
 		c = new(conf.SmsVerifyCodeConfig)
 	}
+	if err := c.Validate(); err != nil {
+		panic(err)
+	}
 
 	switch c.Name {
 	// case "predefined":

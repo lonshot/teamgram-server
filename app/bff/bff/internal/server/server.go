@@ -49,8 +49,10 @@ func New() *Server {
 func (s *Server) Initialize() error {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-
-	logx.Infov(c)
+	if err := c.Code.Validate(); err != nil {
+		return err
+	}
+	logx.Infof("loaded BFF configuration for environment %s with verification provider %s", c.Code.Environment, c.Code.Name)
 	// ctx := svc.NewServiceContext(c)
 	// s.grpcSrv = grpc.New(ctx, c.RpcServerConf)
 

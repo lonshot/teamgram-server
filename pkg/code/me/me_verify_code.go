@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"pwm-server/pkg/code/dataobject"
@@ -16,18 +17,19 @@ import (
 
 func New(c *conf.SmsVerifyCodeConfig) *meVerifyCode {
 	return &meVerifyCode{
-		code: c,
+		code:   c,
+		client: &http.Client{Timeout: c.RequestTimeout},
 	}
 }
 
 type meVerifyCode struct {
-	code *conf.SmsVerifyCodeConfig
+	code   *conf.SmsVerifyCodeConfig
+	client *http.Client
 }
 
 // Shared function to send JSON POST request
-func (m *meVerifyCode) postJson(url string, requestData map[string]string) ([]byte, error) {
+func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map[string]string) ([]byte, error) {
 	logx.Infof("Preparing to send POST request to URL: %s", url)
-	logx.Infof("Request payload: %+v", requestData)
 
 	// Convert map to JSON
 	jsonData, err := jsonx.Marshal(requestData)
@@ -37,7 +39,7 @@ func (m *meVerifyCode) postJson(url string, requestData map[string]string) ([]by
 	}
 
 	// Create a new HTTP request
-	req, err := http.NewRequest("POST", url, bytes.NewReader(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(jsonData))
 	if err != nil {
 		logx.Errorf("Error creating HTTP request: %v", err)
 		return nil, err
@@ -50,8 +52,7 @@ func (m *meVerifyCode) postJson(url string, requestData map[string]string) ([]by
 	logx.Infof("Headers set: Content-Type=application/json, Accept=application/json, X-Pwm-Key=******")
 
 	// Send the request using the HTTP client
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := m.client.Do(req)
 	if err != nil {
 		logx.Errorf("Error sending request: %v", err)
 		return nil, err
@@ -67,7 +68,9 @@ func (m *meVerifyCode) postJson(url string, requestData map[string]string) ([]by
 		return nil, err
 	}
 
-	logx.Infof("Response body received: %s", string(body))
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("verification service returned HTTP %d", resp.StatusCode)
+	}
 	return body, nil
 }
 
@@ -89,7 +92,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 
 	// Send JSON request
 	urlV := m.code.SendCodeUrl
-	body, err := m.postJson(urlV, requestData)
+	body, err := m.postJson(ctx, urlV, requestData)
 	if err != nil {
 		logx.Errorf("Failed to send SMS verification request: %v", err)
 		return nil, err
@@ -116,8 +119,12 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extraData string) error {
 	logx.Infof("Verifying SMS code for codeHash: %s", codeHash)
 
-	if extraData == "__auto__" || len(m.code.DummyCode) == 5 && code_ == m.code.DummyCode {
-		logx.Infof("Auto-verification or dummy code detected, skipping server verification.")
+	if extraData == "__auto__" && m.code.AutoVerifyEnabled {
+		logx.Infof("Provider auto-verification accepted by server configuration.")
+		return nil
+	}
+	if m.code.BypassEnabled && conf.SecureCodeEqual(code_, m.code.BypassCode) {
+		logx.Infof("Operational verification bypass accepted.")
 		return nil
 	}
 
@@ -134,7 +141,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 
 	// Send JSON request
 	urlV := m.code.VerifyCodeUrl
-	body, err := m.postJson(urlV, requestData)
+	body, err := m.postJson(ctx, urlV, requestData)
 	if err != nil {
 		logx.Errorf("Failed to verify SMS code: %v", err)
 		return err

@@ -25,7 +25,7 @@ func (m *noneVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, cod
 }
 
 func (m *noneVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code, extraData string) error {
-	if code != "12345" {
+	if !m.code.BypassEnabled || !conf.SecureCodeEqual(code, m.code.BypassCode) {
 		return mtproto.ErrPhoneCodeInvalid
 	}
 	return nil
