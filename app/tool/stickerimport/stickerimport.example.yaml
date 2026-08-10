@@ -1,0 +1,34 @@
+OwnerID: 1
+PartSize: 524288
+VerifyTimeout: 30s
+
+Mysql:
+  DSN: ${PWM_STICKERIMPORT_MYSQL_DSN}
+  Active: 16
+  Idle: 8
+  IdleTimeout: 4h
+
+DfsClient:
+  Etcd:
+    Hosts:
+      - ${PWM_ETCD_HOST}
+    Key: service.dfs
+  Timeout: 0
+  Middlewares:
+    Duration: false
+
+MediaClient:
+  Etcd:
+    Hosts:
+      - ${PWM_ETCD_HOST}
+    Key: service.media
+  Timeout: 0
+  Middlewares:
+    Duration: false
+
+IdgenClient:
+  Etcd:
+    Hosts:
+      - ${PWM_ETCD_HOST}
+    Key: service.idgen
+  Timeout: 0

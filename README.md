@@ -106,6 +106,35 @@ cd pwm/bin
 ./runall2.sh
 ```
 
+#### Import native stickers
+
+The layer-186 sticker catalog can be populated from a PWM raw dataset containing
+`version.txt`, `json_data/`, `tgs/`, and `preview/`. Validate the entire source
+and calculate its deterministic checksum without connecting to MySQL, DFS,
+MinIO, media, or idgen:
+
+```bash
+go run ./app/tool/stickerimport -source /path/to/data/stickers -dry-run
+```
+
+For a native import, copy `app/tool/stickerimport/stickerimport.example.yaml` to
+a private runtime location and provide these environment variables (the go-zero
+config loader expands `${NAME}` values):
+
+```bash
+export PWM_STICKER_DATA=/path/to/data/stickers
+export PWM_STICKERIMPORT_MYSQL_DSN='user:password@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4&parseTime=true'
+export PWM_ETCD_HOST=127.0.0.1:2379
+go run ./app/tool/stickerimport -source "$PWM_STICKER_DATA" -config /private/path/stickerimport.yaml -resume -verify -workers 8
+```
+
+Use `-set-id SOURCE_ID` to select one set or `-limit N` to select the first N
+sets after full-dataset validation. Reruns retain source-to-native mappings;
+`-verify` rechecks persisted media and DFS ranges. The source root and every
+referenced file must be canonical and contained below the root; symlink escapes
+are rejected. Apply `pwm/sql-input/migrate-20260810-layer186-stickers-reactions.sql`
+before a non-dry-run import and run DFS, media, idgen, MySQL, etcd, and MinIO.
+
 ### Docker deployment
 #### Install [Docker](https://docs.docker.com/get-docker/)
 

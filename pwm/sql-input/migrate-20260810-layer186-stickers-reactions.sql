@@ -82,6 +82,9 @@ CREATE TABLE IF NOT EXISTS `sticker_documents` (
   `preview_source_path` VARCHAR(768) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   `preview_source_size` BIGINT UNSIGNED NOT NULL DEFAULT 0,
   `preview_source_checksum` BINARY(32) NULL,
+  `path_thumbnail_bytes` BLOB NULL,
+  `native_thumb_size_type` CHAR(1) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+  `preview_import_state` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `mime_type` VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
   `file_name` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `width` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -179,6 +182,23 @@ CREATE TABLE IF NOT EXISTS `available_reaction_documents` (
   KEY `idx_available_reaction_document` (`sticker_document_id`),
   CONSTRAINT `fk_available_reaction_document_reaction` FOREIGN KEY (`available_reaction_id`) REFERENCES `available_reactions` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_available_reaction_document_asset` FOREIGN KEY (`sticker_document_id`) REFERENCES `sticker_documents` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `emoji_keywords` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `import_id` BIGINT UNSIGNED NOT NULL,
+  `language_code` VARCHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `version` INT UNSIGNED NOT NULL,
+  `keyword` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `keyword_normalized` VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,
+  `emoticon` VARCHAR(64) COLLATE utf8mb4_bin NOT NULL,
+  `order2` INT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_emoji_keyword_mapping` (`language_code`, `version`, `keyword_normalized`, `emoticon`),
+  KEY `idx_emoji_keyword_lookup` (`language_code`, `keyword_normalized`, `order2`),
+  KEY `idx_emoji_keyword_version` (`language_code`, `version`, `id`),
+  CONSTRAINT `fk_emoji_keywords_import` FOREIGN KEY (`import_id`) REFERENCES `sticker_imports` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `user_sticker_sets` (
