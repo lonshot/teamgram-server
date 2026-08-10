@@ -14,7 +14,7 @@ gitTreeState=$(shell if git status|grep -q 'clean';then echo clean; else echo di
 ldflags="-s -w -X ${versionDir}.gitTag=${gitTag} -X ${versionDir}.buildDate=${buildDate} -X ${versionDir}.gitCommit=${gitCommit} -X ${versionDir}.gitTreeState=${gitTreeState} -X ${versionDir}.version=${VERSION} -X ${versionDir}.gitBranch=${gitBranch}"
 
 # Main entry point for building services
-all: idgen status dfs media authsession biz msg sync bff session gateway gnetway httpserver
+all: idgen status dfs media authsession biz msg sync bff session gateway gnetway httpserver stickerimport
 
 idgen:
 	@echo "Building idgen..."
@@ -68,6 +68,10 @@ httpserver:
 	@echo "Building httpserver..."
 	@go build -ldflags ${ldflags} -o pwm/bin/httpserver -tags=jsoniter app/interface/httpserver/cmd/httpserver/*.go
 
+stickerimport:
+	@echo "Building sticker importer..."
+	@go build -ldflags ${ldflags} -o pwm/bin/stickerimport -tags=jsoniter ./app/tool/stickerimport
+
 # Clean binary files
 clean:
 	rm -rf pwm/bin/idgen
@@ -83,6 +87,7 @@ clean:
 	rm -rf pwm/bin/gateway
 	rm -rf pwm/bin/gnetway
 	rm -rf pwm/bin/httpserver
+	rm -rf pwm/bin/stickerimport
 
 # Clean logs directory 
 clean-logs:

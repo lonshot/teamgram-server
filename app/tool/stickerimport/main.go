@@ -128,8 +128,13 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return encodeJSON(stdout, result)
 	}
 
+	configBytes, err := os.ReadFile(opts.Config)
+	if err != nil {
+		return fmt.Errorf("load native importer config %q: %w", opts.Config, err)
+	}
+	expandedConfig := os.ExpandEnv(string(configBytes))
 	var cfg config
-	if err = conf.Load(opts.Config, &cfg); err != nil {
+	if err = conf.LoadFromYamlBytes([]byte(expandedConfig), &cfg); err != nil {
 		return fmt.Errorf("load native importer config %q: %w", opts.Config, err)
 	}
 	verifyTimeout, err := time.ParseDuration(cfg.VerifyTimeout)

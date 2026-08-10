@@ -5,4 +5,5 @@ nginx
 pwm/etc2
 pwm/logs
 pwm/sql copy
+app/tool/stickerimport/stickerimport.yaml
 *.log
