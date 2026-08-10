@@ -113,8 +113,8 @@ func (d *Dao) SelectStickerSetByShortName(ctx context.Context, normalized string
 func (d *Dao) selectStickerSet(ctx context.Context, predicate string, arg interface{}) (*dataobject.StickerSetDO, error) {
 	query := `SELECT id, import_id, source_set_id, source_access_hash, native_set_id, native_access_hash,
 		owner_user_id, short_name, short_name_normalized, title, set_hash, document_count, display_order,
-		archived, official, masks, emojis, animated, videos, text_color, thumb_document_id,
-		thumb_access_hash, thumb_dc_id, thumb_version, import_state, last_error FROM sticker_sets WHERE ` + predicate
+		archived, official, masks, emojis, animated, videos, text_color, COALESCE(thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(thumb_access_hash, 0) AS thumb_access_hash, thumb_dc_id, thumb_version, import_state, last_error FROM sticker_sets WHERE ` + predicate
 	row := new(dataobject.StickerSetDO)
 	if err := d.db.QueryRowPartial(ctx, row, query, arg); err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) || errors.Is(err, sql.ErrNoRows) {
@@ -128,8 +128,8 @@ func (d *Dao) selectStickerSet(ctx context.Context, predicate string, arg interf
 func (d *Dao) SelectStickerSets(ctx context.Context, emojis, archived bool, offset, limit int32) ([]dataobject.StickerSetDO, error) {
 	const query = `SELECT id, import_id, source_set_id, source_access_hash, native_set_id, native_access_hash,
 		owner_user_id, short_name, short_name_normalized, title, set_hash, document_count, display_order,
-		archived, official, masks, emojis, animated, videos, text_color, thumb_document_id,
-		thumb_access_hash, thumb_dc_id, thumb_version, import_state, last_error
+		archived, official, masks, emojis, animated, videos, text_color, COALESCE(thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(thumb_access_hash, 0) AS thumb_access_hash, thumb_dc_id, thumb_version, import_state, last_error
 		FROM sticker_sets WHERE emojis = ? AND archived = ? ORDER BY display_order, id LIMIT ? OFFSET ?`
 	rows := make([]dataobject.StickerSetDO, 0)
 	err := d.db.QueryRowsPartial(ctx, &rows, query, emojis, archived, limit, offset)
@@ -340,8 +340,8 @@ func (d *Dao) SelectUserStickerSets(ctx context.Context, userId int64, category 
 func (d *Dao) SelectInstalledStickerSets(ctx context.Context, userId int64, category uint8) ([]dataobject.StickerSetDO, error) {
 	const query = `SELECT s.id, s.import_id, s.source_set_id, s.source_access_hash, s.native_set_id, s.native_access_hash,
 		s.owner_user_id, s.short_name, s.short_name_normalized, s.title, s.set_hash, s.document_count, s.display_order,
-		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, s.thumb_document_id,
-		s.thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error
+		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(s.thumb_access_hash, 0) AS thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error
 		FROM user_sticker_sets u JOIN sticker_sets s ON s.id = u.sticker_set_id
 		WHERE u.user_id = ? AND u.category = ? AND u.archived = 0 AND s.import_state = 2 ORDER BY u.order2, u.id`
 	rows := make([]dataobject.StickerSetDO, 0)
@@ -492,8 +492,8 @@ func (d *Dao) SelectFavedStickerDocuments(ctx context.Context, userId int64, lim
 func (d *Dao) SelectFeaturedStickerSets(ctx context.Context, userId int64, category uint8) ([]dataobject.FeaturedStickerSetDO, error) {
 	const query = `SELECT s.id, s.import_id, s.source_set_id, s.source_access_hash, s.native_set_id, s.native_access_hash,
 		s.owner_user_id, s.short_name, s.short_name_normalized, s.title, s.set_hash, s.document_count, s.display_order,
-		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, s.thumb_document_id,
-		s.thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error, (r.id IS NULL) unread
+		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(s.thumb_access_hash, 0) AS thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error, (r.id IS NULL) unread
 		FROM featured_sticker_sets f JOIN sticker_sets s ON s.id = f.sticker_set_id
 		LEFT JOIN user_featured_sticker_reads r ON r.sticker_set_id = s.id AND r.user_id = ?
 		WHERE f.category = ? AND s.import_state = 2 ORDER BY f.display_order, f.id`
@@ -512,8 +512,8 @@ func (d *Dao) SelectArchivedStickerSets(ctx context.Context, userId int64, categ
 	}
 	const query = `SELECT s.id, s.import_id, s.source_set_id, s.source_access_hash, s.native_set_id, s.native_access_hash,
 		s.owner_user_id, s.short_name, s.short_name_normalized, s.title, s.set_hash, s.document_count, s.display_order,
-		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, s.thumb_document_id,
-		s.thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error,
+		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(s.thumb_access_hash, 0) AS thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error,
 		COALESCE((SELECT d.native_document_id FROM sticker_packs p JOIN sticker_documents d ON d.id = p.sticker_document_id
 		 WHERE p.sticker_set_id = s.id AND d.import_state = 3 ORDER BY p.order2, p.id LIMIT 1), 0) cover_document_id
 		FROM user_sticker_sets u JOIN sticker_sets s ON s.id = u.sticker_set_id
@@ -535,8 +535,8 @@ func (d *Dao) SearchStickerSets(ctx context.Context, query string, excludeFeatur
 	like := "%" + query + "%"
 	const sqlQuery = `SELECT s.id, s.import_id, s.source_set_id, s.source_access_hash, s.native_set_id, s.native_access_hash,
 		s.owner_user_id, s.short_name, s.short_name_normalized, s.title, s.set_hash, s.document_count, s.display_order,
-		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, s.thumb_document_id,
-		s.thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error,
+		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
+		COALESCE(s.thumb_access_hash, 0) AS thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error,
 		COALESCE((SELECT d.native_document_id FROM sticker_packs p JOIN sticker_documents d ON d.id = p.sticker_document_id
 		 WHERE p.sticker_set_id = s.id AND d.import_state = 3 ORDER BY p.order2, p.id LIMIT 1), 0) cover_document_id
 		FROM sticker_sets s WHERE s.import_state = 2 AND s.archived = 0 AND s.masks = 0 AND s.emojis = 0
