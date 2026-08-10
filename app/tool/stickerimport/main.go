@@ -33,6 +33,7 @@ type options struct {
 	Verify  bool
 	Workers int
 	SetID   string
+	Offset  int
 	Limit   int
 }
 
@@ -45,6 +46,7 @@ type dryRunResult struct {
 	Verify       bool       `json:"verify"`
 	Workers      int        `json:"workers"`
 	SetID        string     `json:"set_id,omitempty"`
+	Offset       int        `json:"offset,omitempty"`
 	Limit        int        `json:"limit,omitempty"`
 	SelectedSets int        `json:"selected_sets"`
 	Report       pwm.Report `json:"report"`
@@ -85,6 +87,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 	flags.BoolVar(&opts.Verify, "verify", false, "verify persisted documents and downloadable object ranges")
 	flags.IntVar(&opts.Workers, "workers", runtime.NumCPU(), "maximum concurrent document workers")
 	flags.StringVar(&opts.SetID, "set-id", "", "import one source sticker-set ID after validating the complete dataset")
+	flags.IntVar(&opts.Offset, "offset", 0, "skip source sticker sets before applying limit")
 	flags.IntVar(&opts.Limit, "limit", 0, "limit selected sets after validating the complete dataset")
 	if err := flags.Parse(args); err != nil {
 		return err
@@ -98,12 +101,15 @@ func run(args []string, stdout, stderr io.Writer) error {
 	if opts.Limit < 0 {
 		return errors.New("-limit must be zero or greater")
 	}
+	if opts.Offset < 0 {
+		return errors.New("-offset must be zero or greater")
+	}
 
 	dataset, err := pwm.Load(opts.Source)
 	if err != nil {
 		return fmt.Errorf("PWM preflight failed: %w", err)
 	}
-	selected, err := selectedSetIndices(dataset, opts.SetID, opts.Limit)
+	selected, err := selectedSetIndices(dataset, opts.SetID, opts.Offset, opts.Limit)
 	if err != nil {
 		return err
 	}
@@ -121,6 +127,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 			Verify:       opts.Verify,
 			Workers:      opts.Workers,
 			SetID:        opts.SetID,
+			Offset:       opts.Offset,
 			Limit:        opts.Limit,
 			SelectedSets: len(selected),
 			Report:       dataset.Report,
@@ -192,12 +199,12 @@ func run(args []string, stdout, stderr io.Writer) error {
 	})
 }
 
-func selectedSetCount(dataset *pwm.Dataset, setID string, limit int) (int, error) {
-	selected, err := selectedSetIndices(dataset, setID, limit)
+func selectedSetCount(dataset *pwm.Dataset, setID string, offset, limit int) (int, error) {
+	selected, err := selectedSetIndices(dataset, setID, offset, limit)
 	return len(selected), err
 }
 
-func selectedSetIndices(dataset *pwm.Dataset, setID string, limit int) ([]int, error) {
+func selectedSetIndices(dataset *pwm.Dataset, setID string, offset, limit int) ([]int, error) {
 	selected := make([]int, 0, len(dataset.Sets))
 	if setID != "" {
 		for index := range dataset.Sets {
@@ -210,7 +217,10 @@ func selectedSetIndices(dataset *pwm.Dataset, setID string, limit int) ([]int, e
 			return nil, fmt.Errorf("source sticker set %q was not found", setID)
 		}
 	} else {
-		for index := range dataset.Sets {
+		if offset > len(dataset.Sets) {
+			offset = len(dataset.Sets)
+		}
+		for index := offset; index < len(dataset.Sets); index++ {
 			selected = append(selected, index)
 		}
 	}
