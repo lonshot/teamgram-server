@@ -122,12 +122,12 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 		logx.Infof("Provider passwordless verification accepted.")
 		return nil
 	}
-	// Apple and Facebook use the explicit __auto__ path above. Google must
-	// always prove possession of the user-entered email, even if an operational
-	// bypass remains configured for an older deployment.
+	// Apple and Facebook use the explicit __auto__ path above. Google uses an
+	// email OTP, with an optional exact-match operational bypass configured in
+	// the environment. Every other value is verified by the email service.
 	if m.code.BypassEnabled && providerAllowsOperationalBypass(verificationProvider(extraData)) &&
 		conf.SecureCodeEqual(code_, m.code.BypassCode) {
-		logx.Infof("Operational verification bypass accepted for a non-Google flow.")
+		logx.Infof("Operational verification bypass accepted for the Google email OTP flow.")
 		return nil
 	}
 
@@ -183,5 +183,5 @@ func verificationProvider(extraData string) string {
 }
 
 func providerAllowsOperationalBypass(provider string) bool {
-	return provider == "apple" || provider == "facebook"
+	return provider == "google"
 }

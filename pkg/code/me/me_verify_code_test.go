@@ -29,11 +29,43 @@ func TestVerificationProvider(t *testing.T) {
 	if provider := verificationProvider("legacy-extra-data"); provider != "unknown" {
 		t.Fatalf("legacy data must not be treated as Google: %q", provider)
 	}
-	if providerAllowsOperationalBypass("google") || providerAllowsOperationalBypass("unknown") {
-		t.Fatal("Google and untagged flows must never use the operational bypass")
+	if !providerAllowsOperationalBypass("google") {
+		t.Fatal("Google email OTP must allow the explicitly configured operational bypass")
 	}
-	if !providerAllowsOperationalBypass("apple") || !providerAllowsOperationalBypass("facebook") {
-		t.Fatal("Apple and Facebook are the only allowed passwordless providers")
+	if providerAllowsOperationalBypass("unknown") || providerAllowsOperationalBypass("apple") ||
+		providerAllowsOperationalBypass("facebook") {
+		t.Fatal("Only the Google email OTP flow may use the operational bypass")
+	}
+}
+
+func TestGoogleOperationalBypassRequiresExactConfiguredCode(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		requests++
+		_, _ = w.Write([]byte(`{"valid":false}`))
+	}))
+	defer server.Close()
+
+	client := New(&conf.SmsVerifyCodeConfig{
+		BypassEnabled:  true,
+		BypassCode:     "12345",
+		VerifyCodeUrl:  server.URL,
+		RequestTimeout: time.Second,
+	})
+	extraData := "confirmation@@user@example.com@@provider=google@@registration_id=GOOGLE123"
+
+	if err := client.VerifySmsCode(context.Background(), "GOOGLE123", "12345", extraData); err != nil {
+		t.Fatalf("exact configured bypass code must be accepted: %v", err)
+	}
+	if requests != 0 {
+		t.Fatalf("exact bypass should not call the email verifier; got %d requests", requests)
+	}
+
+	if err := client.VerifySmsCode(context.Background(), "GOOGLE123", "54321", extraData); err == nil {
+		t.Fatal("an arbitrary code must be rejected when the email verifier rejects it")
+	}
+	if requests != 1 {
+		t.Fatalf("non-bypass code must be verified by email service; got %d requests", requests)
 	}
 }
 
