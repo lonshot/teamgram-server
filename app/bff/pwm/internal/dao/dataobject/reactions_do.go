@@ -35,6 +35,21 @@ type MessageReactionPageDO struct {
 	NextOffset string
 }
 
+type MessageReactionCommandDO struct {
+	Id                  uint64 `db:"id"`
+	CommandKey          string `db:"command_key"`
+	UserId              int64  `db:"user_id"`
+	AuthKeyId           int64  `db:"auth_key_id"`
+	PeerType            int32  `db:"peer_type"`
+	RequestPeerId       int64  `db:"request_peer_id"`
+	PeerId              int64  `db:"peer_id"`
+	MessageId           int32  `db:"message_id"`
+	DialogMessageId     int64  `db:"dialog_message_id"`
+	Generation          uint64 `db:"generation"`
+	DeliveredGeneration uint64 `db:"delivered_generation"`
+	AttemptCount        uint32 `db:"attempt_count"`
+}
+
 type UnreadReactionMessagePageDO struct {
 	Count      int32
 	MessageIds []int32

@@ -4,7 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/teamgram/proto/mtproto"
+	"pwm-server/app/bff/pwm/internal/dao/dataobject"
 )
 
 func TestReactionConversion(t *testing.T) {
@@ -24,6 +26,27 @@ func TestReactionConversion(t *testing.T) {
 	if _, ok := reactionFromMTProto(mtproto.MakeTLReactionPaid(nil).To_Reaction()); ok {
 		t.Fatal("paid reaction accepted")
 	}
+}
+
+func TestAggregateReactionCarrierPreservesActorsAndCounts(t *testing.T) {
+	rows := []dataobject.MessageReactionDO{
+		{UserId: 2, ReactionType: 1, ReactionValue: "👍", Big: true, Date: 3},
+		{UserId: 1, ReactionType: 1, ReactionValue: "👍", Date: 2},
+		{UserId: 3, ReactionType: 1, ReactionValue: "❤️", Date: 1},
+	}
+	carrier := aggregateReactionCarrier(1, rows)
+	require.Len(t, carrier.GetResults(), 2)
+	require.Equal(t, int32(2), carrier.GetResults()[0].GetCount())
+	require.True(t, carrier.GetResults()[0].GetChosen())
+	require.Equal(t, int32(0), carrier.GetResults()[0].GetChosenOrder().GetValue())
+	require.Equal(t, int32(1), carrier.GetResults()[1].GetCount())
+	require.False(t, carrier.GetResults()[1].GetChosen())
+	require.Len(t, carrier.GetRecentReactions(), 3)
+	require.True(t, carrier.GetRecentReactions()[1].GetMy())
+}
+
+func TestAggregateReactionCarrierReturnsNilForEmptyState(t *testing.T) {
+	require.Nil(t, aggregateReactionCarrier(1, nil))
 }
 
 func TestReactionAuthRejected(t *testing.T) {

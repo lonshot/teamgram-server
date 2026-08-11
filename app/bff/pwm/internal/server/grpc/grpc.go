@@ -11,7 +11,7 @@ import (
 )
 
 // New new a grpc server.
-func New(ctx *svc.ServiceContext, c zrpc.RpcServerConf) *zrpc.RpcServer {
+func New(ctx *svc.ServiceContext, c zrpc.RpcServerConf, reactions *service.Service) *zrpc.RpcServer {
 	s, err := zrpc.NewServer(
 		c, func(grpcServer *grpc.Server) {
 			mtproto.RegisterRPCCustomEmojisServer(grpcServer, service.New(ctx))
@@ -22,7 +22,7 @@ func New(ctx *svc.ServiceContext, c zrpc.RpcServerConf) *zrpc.RpcServer {
 			mtproto.RegisterRPCLangpackServer(grpcServer, service.New(ctx))
 
 			mtproto.RegisterRPCGifsServer(grpcServer, service.New(ctx))
-			mtproto.RegisterRPCReactionsServer(grpcServer, service.New(ctx))
+			mtproto.RegisterRPCReactionsServer(grpcServer, reactions)
 			mtproto.RegisterRPCFoldersServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCThemesServer(grpcServer, service.New(ctx))
 		},

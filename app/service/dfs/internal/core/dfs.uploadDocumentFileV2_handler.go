@@ -201,6 +201,16 @@ func (c *DfsCore) DfsUploadDocumentFileV2(in *dfs.TLDfsUploadDocumentFileV2) (*m
 	if err != nil {
 		return nil, err
 	}
+	if err = c.svcCtx.Dao.DeleteStagedFile(c.ctx, r.DfsFileInfo.Creator, r.DfsFileInfo.FileId); err != nil {
+		// The object is durable. Cleanup failure must not make the client retry
+		// the upload and create a duplicate document.
+		c.Logger.Errorf("dfs.uploadDocumentFile - staged source cleanup: %v", err)
+	}
+	if media.GetThumb() != nil && (media.GetThumb().Id_INT64 != file.Id_INT64 || in.GetCreator() != r.DfsFileInfo.Creator) {
+		if err = c.svcCtx.Dao.DeleteStagedFile(c.ctx, in.GetCreator(), media.GetThumb().Id_INT64); err != nil {
+			c.Logger.Errorf("dfs.uploadDocumentFile - staged thumbnail cleanup: %v", err)
+		}
+	}
 	return document, nil
 }
 
@@ -266,7 +276,7 @@ func makeDocumentThumb(data []byte) ([]*mtproto.PhotoSize, int32, int32, []byte,
 			medium = imaging.Resize(preview, 0, mtproto.PhotoSZMediumSize)
 		}
 	}
-	encoded := bytes2.NewBuffer(make([]byte, 0, len(data)))
+	encoded := bytes2.NewBuffer(make([]byte, 0, 64*1024))
 	if err = imaging.EncodeJpeg(encoded, medium); err != nil {
 		return nil, 0, 0, nil, err
 	}

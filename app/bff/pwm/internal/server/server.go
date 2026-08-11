@@ -5,6 +5,7 @@ import (
 
 	"pwm-server/app/bff/pwm/internal/config"
 	"pwm-server/app/bff/pwm/internal/server/grpc"
+	grpcservice "pwm-server/app/bff/pwm/internal/server/grpc/service"
 	"pwm-server/app/bff/pwm/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
@@ -16,6 +17,7 @@ var configFile = flag.String("f", "etc/pwm.yaml", "the config file")
 
 type Server struct {
 	grpcSrv *zrpc.RpcServer
+	worker  *grpcservice.ReactionCommandWorker
 }
 
 func New() *Server {
@@ -28,7 +30,10 @@ func (s *Server) Initialize() error {
 
 	logx.Infov(c)
 	ctx := svc.NewServiceContext(c)
-	s.grpcSrv = grpc.New(ctx, c.RpcServerConf)
+	reactions := grpcservice.New(ctx)
+	s.worker = grpcservice.NewReactionCommandWorker(reactions)
+	s.worker.Start()
+	s.grpcSrv = grpc.New(ctx, c.RpcServerConf, reactions)
 
 	go func() {
 		go s.grpcSrv.Start()
@@ -41,4 +46,5 @@ func (s *Server) RunLoop() {
 
 func (s *Server) Destroy() {
 	s.grpcSrv.Stop()
+	s.worker.Stop()
 }

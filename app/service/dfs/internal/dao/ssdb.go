@@ -158,3 +158,14 @@ func (d *Dao) OpenFile(ctx context.Context, ownerId, fileId int64, parts int32) 
 	}
 	return d.NewSSDBReader(fileInfo), nil
 }
+
+// DeleteStagedFile removes multipart data only after its durable object has
+// been persisted. The document cache mapping remains available for downloads,
+// which then fall through to MinIO when the staging metadata is absent.
+func (d *Dao) DeleteStagedFile(ctx context.Context, ownerId, fileId int64) error {
+	_, err := d.ssdb.DelCtx(ctx, getFileKey(ownerId, fileId), getFileInfoKey(ownerId, fileId))
+	if err != nil {
+		logx.WithContext(ctx).Errorf("delete staged file (%d, %d) error(%v)", ownerId, fileId, err)
+	}
+	return err
+}

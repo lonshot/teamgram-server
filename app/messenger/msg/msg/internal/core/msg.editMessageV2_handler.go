@@ -1,6 +1,8 @@
 package core
 
 import (
+	"context"
+
 	"pwm-server/app/messenger/msg/inbox/inbox"
 	"pwm-server/app/messenger/msg/msg/msg"
 	"pwm-server/app/messenger/msg/msg/plugin"
@@ -27,18 +29,23 @@ func (c *MsgCore) MsgEditMessageV2(in *msg.TLMsgEditMessageV2) (*mtproto.Updates
 		return nil, err
 	}
 
-	switch in.PeerType {
-	case mtproto.PEER_USER:
-		rUpdates, err = c.editUserOutgoingMessageV2(in.UserId, in.AuthKeyId, in.PeerId, newMessage, dstMessage)
-	case mtproto.PEER_CHAT:
-		rUpdates, err = c.editChatOutgoingMessageV2(in.UserId, in.AuthKeyId, in.PeerId, newMessage, dstMessage)
-	case mtproto.PEER_CHANNEL:
-		c.Logger.Errorf("msg.sendMessageV2 blocked, License key from https://wb.playwith-me.com required to unlock enterprise features.")
-		return nil, mtproto.ErrEnterpriseIsBlocked
-	default:
-		err = mtproto.ErrPeerIdInvalid
-		c.Logger.Errorf("msg.editMessage - error: %v", err)
-		return nil, err
+	deliver := func(_ context.Context, _ any) error {
+		switch in.PeerType {
+		case mtproto.PEER_USER:
+			rUpdates, err = c.editUserOutgoingMessageV2(in.UserId, in.AuthKeyId, in.PeerId, newMessage, dstMessage)
+		case mtproto.PEER_CHAT:
+			rUpdates, err = c.editChatOutgoingMessageV2(in.UserId, in.AuthKeyId, in.PeerId, newMessage, dstMessage)
+		case mtproto.PEER_CHANNEL:
+			err = mtproto.ErrEnterpriseIsBlocked
+		default:
+			err = mtproto.ErrPeerIdInvalid
+		}
+		return err
+	}
+	if in.CommandKey != "" {
+		_, err = c.svcCtx.Dao.DoIdempotent(c.ctx, in.UserId, in.CommandKey, &rUpdates, deliver)
+	} else {
+		err = deliver(c.ctx, &rUpdates)
 	}
 
 	if err != nil {
@@ -242,9 +249,9 @@ func (c *MsgCore) editChatOutgoingMessageV2(fromUserId, fromAuthKeyId, peerChatI
 		})
 
 	outBox, err2 := c.svcCtx.Dao.EditChatOutboxMessageV2(c.ctx, fromUserId, peerChatId, editBox, dstMessage)
-	if err != nil {
-		c.Logger.Errorf("msg.editMessage - error: %v", err)
-		return nil, err
+	if err2 != nil {
+		c.Logger.Errorf("msg.editMessage - error: %v", err2)
+		return nil, err2
 	}
 
 	chat.Walk(func(userId int64, participant *mtproto.ImmutableChatParticipant) error {
@@ -296,7 +303,7 @@ func (c *MsgCore) editChatOutgoingMessageV2(fromUserId, fromAuthKeyId, peerChatI
 
 	if err2 != nil {
 		c.Logger.Error(err2.Error())
-		return nil, err
+		return nil, err2
 	}
 
 	return mtproto.MakeReplyUpdates(

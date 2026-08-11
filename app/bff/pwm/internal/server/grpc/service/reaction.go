@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -40,14 +41,6 @@ func (s *Service) MessagesSendReaction(ctx context.Context, in *mtproto.TLMessag
 	}
 	dst := proto.Clone(box).(*mtproto.MessageBox)
 	out := proto.Clone(dst.GetMessage()).(*mtproto.Message)
-	out.Reactions = reactionCarrier(md.GetUserId(), refs, in.GetBig())
-	updates, err := s.svcCtx.MsgEditMessageV2(ctx, &msgpb.TLMsgEditMessageV2{
-		UserId: md.GetUserId(), AuthKeyId: md.GetPermAuthKeyId(), PeerType: peer.PeerType, PeerId: peer.PeerId,
-		EditType: msgpb.EditTypeReaction, NewMessage: msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{Message: out}).To_OutboxMessage(), DstMessage: dst,
-	})
-	if err != nil {
-		return nil, err
-	}
 	now := int32(time.Now().Unix())
 	rows := make([]dataobject.MessageReactionDO, len(refs))
 	for i := range refs {
@@ -55,7 +48,30 @@ func (s *Service) MessagesSendReaction(ctx context.Context, in *mtproto.TLMessag
 			PeerId: reactionScopePeerId(box), MessageId: box.GetMessageId(), DialogMessageId: box.GetDialogMessageId(),
 			ReactionType: refs[i].ReactionType, ReactionValue: refs[i].ReactionValue, Big: in.GetBig(), Date: now}
 	}
-	if err = s.svcCtx.Dao.ReplaceMessageReactions(ctx, rows, md.GetUserId(), peer.PeerType, reactionScopePeerId(box), box.GetDialogMessageId()); err != nil {
+	commandKey := fmt.Sprintf("reaction:%d:%d:%d", md.GetSessionId(), md.GetClientMsgId(), box.GetDialogMessageId())
+	command := &dataobject.MessageReactionCommandDO{
+		CommandKey: commandKey, UserId: md.GetUserId(), AuthKeyId: md.GetPermAuthKeyId(), PeerType: peer.PeerType,
+		RequestPeerId: peer.PeerId, PeerId: reactionScopePeerId(box), MessageId: box.GetMessageId(), DialogMessageId: box.GetDialogMessageId(),
+	}
+	generation, err := s.svcCtx.Dao.PersistMessageReactionCommand(ctx, command, rows)
+	if err != nil {
+		return nil, err
+	}
+	allRows, err := s.svcCtx.Dao.SelectMessageReactions(ctx, peer.PeerType, reactionScopePeerId(box), box.GetDialogMessageId())
+	if err != nil {
+		return nil, err
+	}
+	out.Reactions = aggregateReactionCarrier(md.GetUserId(), allRows)
+	updates, err := s.svcCtx.MsgEditMessageV2(ctx, &msgpb.TLMsgEditMessageV2{
+		UserId: md.GetUserId(), AuthKeyId: md.GetPermAuthKeyId(), PeerType: peer.PeerType, PeerId: peer.PeerId,
+		EditType: msgpb.EditTypeReaction, NewMessage: msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{Message: out}).To_OutboxMessage(), DstMessage: dst,
+		CommandKey: commandKey,
+	})
+	if err != nil {
+		_ = s.svcCtx.Dao.MarkMessageReactionCommandFailed(context.Background(), commandKey, generation, err.Error())
+		return nil, err
+	}
+	if _, err = s.svcCtx.Dao.MarkMessageReactionCommandDelivered(ctx, commandKey, generation); err != nil {
 		return nil, err
 	}
 	if in.GetAddToRecent() {
@@ -195,40 +211,44 @@ func (s *Service) MessagesGetAvailableReactions(ctx context.Context, in *mtproto
 		return mtproto.MakeTLMessagesAvailableReactionsNotModified(&mtproto.Messages_AvailableReactions{}).To_Messages_AvailableReactions(), nil
 	}
 	result := make([]*mtproto.AvailableReaction, 0, len(rows))
+	docRows, err := s.svcCtx.Dao.SelectAllAvailableReactionDocuments(ctx)
+	if err != nil {
+		return nil, err
+	}
+	documentIds := make([]int64, 0, len(docRows))
+	for i := range docRows {
+		documentIds = append(documentIds, docRows[i].NativeDocumentId)
+	}
+	documents, err := s.loadStickerDocuments(ctx, documentIds)
+	if err != nil {
+		return nil, err
+	}
+	documentsById := make(map[int64]*mtproto.Document, len(documents))
+	for _, document := range documents {
+		documentsById[document.GetId()] = document
+	}
+	documentsByReaction := make(map[uint64][]dataobject.AvailableReactionDocumentDO, len(rows))
+	for i := range docRows {
+		documentsByReaction[docRows[i].AvailableReactionId] = append(documentsByReaction[docRows[i].AvailableReactionId], docRows[i])
+	}
 	for i := range rows {
-		docRows, loadErr := s.svcCtx.Dao.SelectAvailableReactionDocuments(ctx, rows[i].Id)
-		if loadErr != nil {
-			return nil, loadErr
-		}
-		ids := make([]int64, len(docRows))
-		for j := range docRows {
-			ids[j] = docRows[j].NativeDocumentId
-		}
-		docs, loadErr := s.loadStickerDocuments(ctx, ids)
-		if loadErr != nil {
-			return nil, loadErr
-		}
-		byId := make(map[int64]*mtproto.Document, len(docs))
-		for _, doc := range docs {
-			byId[doc.GetId()] = doc
-		}
 		available := &mtproto.AvailableReaction{Inactive: rows[i].Inactive, Premium: rows[i].Premium, Reaction: rows[i].Emoticon, Title: rows[i].Title}
-		for _, row := range docRows {
+		for _, row := range documentsByReaction[rows[i].Id] {
 			switch row.Role {
 			case 1:
-				available.StaticIcon = byId[row.NativeDocumentId]
+				available.StaticIcon = documentsById[row.NativeDocumentId]
 			case 2:
-				available.AppearAnimation = byId[row.NativeDocumentId]
+				available.AppearAnimation = documentsById[row.NativeDocumentId]
 			case 3:
-				available.SelectAnimation = byId[row.NativeDocumentId]
+				available.SelectAnimation = documentsById[row.NativeDocumentId]
 			case 4:
-				available.ActivateAnimation = byId[row.NativeDocumentId]
+				available.ActivateAnimation = documentsById[row.NativeDocumentId]
 			case 5:
-				available.EffectAnimation = byId[row.NativeDocumentId]
+				available.EffectAnimation = documentsById[row.NativeDocumentId]
 			case 6:
-				available.AroundAnimation = byId[row.NativeDocumentId]
+				available.AroundAnimation = documentsById[row.NativeDocumentId]
 			case 7:
-				available.CenterIcon = byId[row.NativeDocumentId]
+				available.CenterIcon = documentsById[row.NativeDocumentId]
 			}
 		}
 		if available.StaticIcon == nil || available.AppearAnimation == nil || available.SelectAnimation == nil || available.ActivateAnimation == nil || available.EffectAnimation == nil {
@@ -515,6 +535,50 @@ func reactionCarrier(userId int64, refs []dataobject.UserReactionDO, big bool) *
 		carrier.RecentReactions = []*mtproto.MessagePeerReaction{mtproto.MakeTLMessagePeerReaction(&mtproto.MessagePeerReaction{My: true, Big: big, PeerId: mtproto.MakePeerUser(userId)}).To_MessagePeerReaction()}
 	}
 	return mtproto.MakeTLMessageReactions(carrier).To_MessageReactions()
+}
+
+func aggregateReactionCarrier(userId int64, rows []dataobject.MessageReactionDO) *mtproto.MessageReactions {
+	type aggregate struct {
+		ref         dataobject.UserReactionDO
+		count       int32
+		chosenOrder int32
+		chosen      bool
+	}
+	aggregates := make([]aggregate, 0)
+	byReaction := make(map[string]int)
+	recent := make([]*mtproto.MessagePeerReaction, 0, len(rows))
+	chosenOrder := int32(0)
+	for _, row := range rows {
+		key := strconv.Itoa(int(row.ReactionType)) + ":" + row.ReactionValue
+		index, ok := byReaction[key]
+		if !ok {
+			index = len(aggregates)
+			byReaction[key] = index
+			aggregates = append(aggregates, aggregate{ref: dataobject.UserReactionDO{ReactionType: row.ReactionType, ReactionValue: row.ReactionValue}})
+		}
+		aggregates[index].count++
+		if row.UserId == userId && !aggregates[index].chosen {
+			aggregates[index].chosen = true
+			aggregates[index].chosenOrder = chosenOrder
+			chosenOrder++
+		}
+		recent = append(recent, mtproto.MakeTLMessagePeerReaction(&mtproto.MessagePeerReaction{
+			My: row.UserId == userId, Big: row.Big, Unread: row.Unread, PeerId: mtproto.MakePeerUser(row.UserId), Date: row.Date,
+			Reaction_REACTION: reactionToMTProto(dataobject.UserReactionDO{ReactionType: row.ReactionType, ReactionValue: row.ReactionValue}),
+		}).To_MessagePeerReaction())
+	}
+	results := make([]*mtproto.ReactionCount, len(aggregates))
+	for i := range aggregates {
+		count := &mtproto.ReactionCount{Chosen: aggregates[i].chosen, Reaction_REACTION: reactionToMTProto(aggregates[i].ref), Count: aggregates[i].count}
+		if aggregates[i].chosen {
+			count.ChosenOrder = wrapperspb.Int32(aggregates[i].chosenOrder)
+		}
+		results[i] = mtproto.MakeTLReactionCount(count).To_ReactionCount()
+	}
+	if len(results) == 0 {
+		return nil
+	}
+	return mtproto.MakeTLMessageReactions(&mtproto.MessageReactions{Results: results, RecentReactions: recent}).To_MessageReactions()
 }
 func reactionRefsHash(refs []dataobject.UserReactionDO) int64 {
 	var hash int64

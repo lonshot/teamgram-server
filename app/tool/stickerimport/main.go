@@ -36,6 +36,7 @@ type options struct {
 	Offset      int
 	Limit       int
 	CatalogOnly bool
+	ReadyCheck  bool
 }
 
 type dryRunResult struct {
@@ -91,6 +92,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 	flags.IntVar(&opts.Offset, "offset", 0, "skip source sticker sets before applying limit")
 	flags.IntVar(&opts.Limit, "limit", 0, "limit selected sets after validating the complete dataset")
 	flags.BoolVar(&opts.CatalogOnly, "catalog-only", false, "publish global reactions, featured sets, and keywords after sticker sets are imported")
+	flags.BoolVar(&opts.ReadyCheck, "ready-check", false, "verify importer MySQL and service discovery dependencies")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -105,6 +107,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 	}
 	if opts.Offset < 0 {
 		return errors.New("-offset must be zero or greater")
+	}
+
+	if opts.ReadyCheck {
+		return checkReady(opts.Config)
 	}
 
 	dataset, err := pwm.Load(opts.Source)
@@ -200,6 +206,35 @@ func run(args []string, stdout, stderr io.Writer) error {
 		Fingerprint: fmt.Sprintf("%x", fingerprint.Dataset),
 		Report:      *report,
 	})
+}
+
+func checkReady(configPath string) error {
+	configBytes, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("load native importer config %q: %w", configPath, err)
+	}
+	var cfg config
+	if err = conf.LoadFromYamlBytes([]byte(os.ExpandEnv(string(configBytes))), &cfg); err != nil {
+		return fmt.Errorf("load native importer config %q: %w", configPath, err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	store, err := catalog.Open(cfg.Mysql.DSN, catalog.DBOptions{MaxOpenConns: 1, MaxIdleConns: 1})
+	if err != nil {
+		return fmt.Errorf("open importer catalog: %w", err)
+	}
+	defer store.Close()
+	if err = store.Ping(ctx); err != nil {
+		return fmt.Errorf("ping importer MySQL: %w", err)
+	}
+	idgenRPC, err := zrpc.NewClient(cfg.IdgenClient)
+	if err != nil {
+		return fmt.Errorf("create idgen client: %w", err)
+	}
+	if _, err = (&idGenerator{client: idgenclient.NewIdgenClient(idgenRPC)}).NextID(ctx); err != nil {
+		return fmt.Errorf("probe idgen service: %w", err)
+	}
+	return nil
 }
 
 func selectedSetCount(dataset *pwm.Dataset, setID string, offset, limit int) (int, error) {

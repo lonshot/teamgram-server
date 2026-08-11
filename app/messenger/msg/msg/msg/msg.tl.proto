@@ -148,6 +148,7 @@ message TL_msg_editMessageV2 {
     int32 edit_type = 7;
     OutboxMessage new_message = 8;
     mtproto.MessageBox dst_message = 9;
+    string command_key = 10;
 }
 
 //--------------------------------------------------------------------------------------------
