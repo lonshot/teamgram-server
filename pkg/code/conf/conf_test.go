@@ -34,9 +34,19 @@ func TestSmsVerifyCodeConfigAllowsExplicitProductionBypass(t *testing.T) {
 	c := validConfig()
 	c.BypassEnabled = true
 	c.BypassAllowInProduction = true
-	c.BypassCode = "high-entropy-code"
+	c.BypassCode = "12345"
 	if err := c.Validate(); err != nil {
 		t.Fatalf("expected explicit production bypass to validate: %v", err)
+	}
+}
+
+func TestSmsVerifyCodeConfigRejectsTooShortBypass(t *testing.T) {
+	c := validConfig()
+	c.BypassEnabled = true
+	c.BypassAllowInProduction = true
+	c.BypassCode = "1234"
+	if err := c.Validate(); err == nil {
+		t.Fatal("expected bypass shorter than five characters to fail")
 	}
 }
 

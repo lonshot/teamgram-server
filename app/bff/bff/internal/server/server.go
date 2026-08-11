@@ -39,7 +39,8 @@ import (
 var configFile = flag.String("f", "etc/bff.yaml", "the config file")
 
 type Server struct {
-	grpcSrv *zrpc.RpcServer
+	grpcSrv    *zrpc.RpcServer
+	pwmWorkers *pwm_helper.Workers
 }
 
 func New() *Server {
@@ -401,47 +402,53 @@ func (s *Server) Initialize() error {
 				IdgenClient:       c.IdgenClient,
 				MessageClient:     c.BizServiceClient,
 			}
+			pwmService := pwm_helper.New(pwmConfig)
+			s.pwmWorkers = pwm_helper.StartWorkers(pwmService)
 
 			mtproto.RegisterRPCCustomEmojisServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCWallpapersServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCStickersServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCWebPageServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCEmojiServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCLangpackServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 
 			mtproto.RegisterRPCGifsServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCReactionsServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
+			)
+			mtproto.RegisterRPCPwmServer(
+				grpcServer,
+				pwmService,
 			)
 			mtproto.RegisterRPCFoldersServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 			mtproto.RegisterRPCThemesServer(
 				grpcServer,
-				pwm_helper.New(pwmConfig),
+				pwmService,
 			)
 		},
 	)
@@ -459,4 +466,5 @@ func (s *Server) RunLoop() {
 
 func (s *Server) Destroy() {
 	s.grpcSrv.Stop()
+	s.pwmWorkers.Stop()
 }

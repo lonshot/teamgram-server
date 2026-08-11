@@ -23,6 +23,7 @@ func New(ctx *svc.ServiceContext, c zrpc.RpcServerConf, reactions *service.Servi
 
 			mtproto.RegisterRPCGifsServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCReactionsServer(grpcServer, reactions)
+			mtproto.RegisterRPCPwmServer(grpcServer, reactions)
 			mtproto.RegisterRPCFoldersServer(grpcServer, service.New(ctx))
 			mtproto.RegisterRPCThemesServer(grpcServer, service.New(ctx))
 		},

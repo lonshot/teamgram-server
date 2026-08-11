@@ -16,8 +16,9 @@ import (
 var configFile = flag.String("f", "etc/pwm.yaml", "the config file")
 
 type Server struct {
-	grpcSrv *zrpc.RpcServer
-	worker  *grpcservice.ReactionCommandWorker
+	grpcSrv    *zrpc.RpcServer
+	worker     *grpcservice.ReactionCommandWorker
+	gameWorker *grpcservice.GameOutboxWorker
 }
 
 func New() *Server {
@@ -33,6 +34,8 @@ func (s *Server) Initialize() error {
 	reactions := grpcservice.New(ctx)
 	s.worker = grpcservice.NewReactionCommandWorker(reactions)
 	s.worker.Start()
+	s.gameWorker = grpcservice.NewGameOutboxWorker(reactions)
+	s.gameWorker.Start()
 	s.grpcSrv = grpc.New(ctx, c.RpcServerConf, reactions)
 
 	go func() {
@@ -46,5 +49,6 @@ func (s *Server) RunLoop() {
 
 func (s *Server) Destroy() {
 	s.grpcSrv.Stop()
+	s.gameWorker.Stop()
 	s.worker.Stop()
 }

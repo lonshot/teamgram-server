@@ -6,9 +6,12 @@ require (
 	github.com/bwmarrin/snowflake v0.3.1-0.20221123153919-bc74ab286f15
 	github.com/chai2010/webp v1.1.2-0.20240612091223-aa1b379218b7
 	github.com/disintegration/imaging v1.6.2
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gobwas/httphead v0.1.0
 	github.com/gobwas/ws v1.4.0
+	github.com/google/uuid v1.6.0
 	github.com/minio/minio-go/v7 v7.0.49
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/oschwald/geoip2-golang v1.8.0
 	github.com/panjf2000/gnet/v2 v2.5.1
 	github.com/stretchr/testify v1.9.0
@@ -16,6 +19,7 @@ require (
 	github.com/teamgram/proto v0.186.1
 	github.com/zeromicro/go-zero v1.6.3
 	golang.org/x/net v0.29.0
+	golang.org/x/oauth2 v0.16.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
@@ -23,6 +27,8 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute v1.23.3 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/IBM/sarama v1.43.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -42,7 +48,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.4 // indirect
-	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
@@ -52,7 +57,6 @@ require (
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -74,7 +78,6 @@ require (
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -116,7 +119,6 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/term v0.24.0 // indirect
@@ -146,6 +148,6 @@ replace (
 	// github.com/panjf2000/gnet/v2 => ../gnet
 	github.com/panjf2000/gnet/v2 v2.5.1 => github.com/teamgram/gnet/v2 v2.5.1-teamgram.0.20240601150126-77149bca641b
 	// github.com/teamgram/marmota => ../marmota
-	// github.com/teamgram/proto => ../proto
+	github.com/teamgram/proto => ../pwm-teamgram-proto
 	github.com/zeromicro/go-zero v1.6.3 => github.com/teamgram/go-zero v1.6.3-teamgram.0.20240501021520-e02614df0dd3
 )

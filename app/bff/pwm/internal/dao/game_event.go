@@ -2,9 +2,33 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"pwm-server/app/bff/pwm/internal/dao/dataobject"
 )
+
+func (d *Dao) SelectGamePushDevices(ctx context.Context, userIds []int64) ([]dataobject.GamePushDeviceDO, error) {
+	if len(userIds) == 0 {
+		return nil, nil
+	}
+	placeholders := strings.TrimRight(strings.Repeat("?,", len(userIds)), ",")
+	args := make([]any, 0, len(userIds)+1)
+	args = append(args, int32(2)) // Telegram token type 2 is FCM (Android and APNS through Firebase).
+	for _, userId := range userIds {
+		args = append(args, userId)
+	}
+	rows := make([]dataobject.GamePushDeviceDO, 0)
+	err := d.db.QueryRowsPartial(ctx, &rows, `SELECT MIN(id) AS id, user_id, token FROM devices
+		WHERE token_type = ? AND state = 0 AND token <> '' AND user_id IN (`+placeholders+`)
+		GROUP BY user_id, token ORDER BY user_id, id`, args...)
+	return rows, err
+}
+
+func (d *Dao) DisableGamePushDevice(ctx context.Context, userId int64, token string) error {
+	_, err := d.db.Exec(ctx, `UPDATE devices SET state = 1
+		WHERE user_id = ? AND token = ? AND token_type = 2 AND state = 0`, userId, token)
+	return err
+}
 
 func (d *Dao) SelectGameEvents(ctx context.Context, userId int64, afterId uint64, limit int) ([]dataobject.GameEventDO, error) {
 	if limit <= 0 || limit > 500 {

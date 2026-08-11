@@ -89,6 +89,7 @@ BFFProxyClients:
     "/mtproto.RPCFolders": "bff.bff"
     "/mtproto.RPCGifs": "bff.bff"
     "/mtproto.RPCReactions": "bff.bff"
+    "/mtproto.RPCPwm": "bff.bff"
 #    "/mtproto.RPCImportedChats": "bff.bff"
     "/mtproto.RPCThemes": "bff.bff"
     "/mtproto.RPCLangpack": "bff.bff"

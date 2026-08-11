@@ -22,3 +22,9 @@ type GameOutboxDO struct {
 	Payload      string `db:"payload"`
 	AttemptCount uint32 `db:"attempt_count"`
 }
+
+type GamePushDeviceDO struct {
+	Id     int64  `db:"id"`
+	UserId int64  `db:"user_id"`
+	Token  string `db:"token"`
+}

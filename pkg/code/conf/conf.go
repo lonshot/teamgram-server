@@ -31,6 +31,8 @@ type SmsVerifyCodeConfig struct {
 	BypassCode              string        `json:",optional"`
 }
 
+const minBypassCodeLength = 5
+
 func (c *SmsVerifyCodeConfig) Validate() error {
 	if c == nil {
 		return errors.New("verification code configuration is required")
@@ -44,8 +46,8 @@ func (c *SmsVerifyCodeConfig) Validate() error {
 		return errors.New("verification request timeout must be positive")
 	}
 	if c.BypassEnabled {
-		if len(c.BypassCode) < 8 {
-			return errors.New("verification bypass code must contain at least 8 characters")
+		if len(c.BypassCode) < minBypassCodeLength {
+			return fmt.Errorf("verification bypass code must contain at least %d characters", minBypassCodeLength)
 		}
 		if isProduction && !c.BypassAllowInProduction {
 			return errors.New("production verification bypass requires explicit production opt-in")
