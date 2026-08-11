@@ -1,0 +1,8 @@
+ARG BASE_IMAGE=pwm-push-server:production
+FROM ${BASE_IMAGE}
+
+COPY bff /app/bin/bff
+COPY etc /app/etc
+COPY entrypoint.sh /app/docker/entrypoint.sh
+
+RUN chmod 0755 /app/bin/bff /app/docker/entrypoint.sh
