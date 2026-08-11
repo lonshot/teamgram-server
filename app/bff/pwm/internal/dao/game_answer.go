@@ -177,27 +177,27 @@ func insertLegacyAnswer(tx *sqlx.Tx, actorId int64, locked *gameLockedPairState,
 	return completedTaskId, taskAnswerId, nil
 }
 
-func selectGameProgress(tx *sqlx.Tx, locked *gameLockedPairState) (GameProgressDO, error) {
+func selectGameProgress(q gameQuery, pairGameId, gameId, player1Id, player2Id int64) (GameProgressDO, error) {
 	progress := GameProgressDO{
-		Player1Id: locked.Player1,
-		Player2Id: locked.Player2,
+		Player1Id: player1Id,
+		Player2Id: player2Id,
 	}
-	if err := tx.QueryRow(&progress.TotalConfigs, `SELECT COUNT(*)
-		FROM net_gameconfig WHERE GameId = ?`, locked.GameId); err != nil {
+	if err := q.QueryRow(&progress.TotalConfigs, `SELECT COUNT(*)
+        FROM net_gameconfig WHERE GameId = ?`, gameId); err != nil {
 		return progress, err
 	}
-	if err := tx.QueryRow(&progress.Player1Completed, `SELECT COUNT(*)
-		FROM game_config_completions gcc
-		JOIN net_gameconfig gc ON gc.Id = gcc.game_config_id
-		WHERE gcc.pair_game_id = ? AND gcc.player_id = ? AND gc.GameId = ?`,
-		locked.PairGameId, locked.Player1, locked.GameId); err != nil {
+	if err := q.QueryRow(&progress.Player1Completed, `SELECT COUNT(*)
+        FROM game_config_completions gcc
+        JOIN net_gameconfig gc ON gc.Id = gcc.game_config_id
+        WHERE gcc.pair_game_id = ? AND gcc.player_id = ? AND gc.GameId = ?`,
+		pairGameId, player1Id, gameId); err != nil {
 		return progress, err
 	}
-	if err := tx.QueryRow(&progress.Player2Completed, `SELECT COUNT(*)
-		FROM game_config_completions gcc
-		JOIN net_gameconfig gc ON gc.Id = gcc.game_config_id
-		WHERE gcc.pair_game_id = ? AND gcc.player_id = ? AND gc.GameId = ?`,
-		locked.PairGameId, locked.Player2, locked.GameId); err != nil {
+	if err := q.QueryRow(&progress.Player2Completed, `SELECT COUNT(*)
+        FROM game_config_completions gcc
+        JOIN net_gameconfig gc ON gc.Id = gcc.game_config_id
+        WHERE gcc.pair_game_id = ? AND gcc.player_id = ? AND gc.GameId = ?`,
+		pairGameId, player2Id, gameId); err != nil {
 		return progress, err
 	}
 	return progress, nil
@@ -210,7 +210,7 @@ type gameEventRecipient struct {
 
 func insertGameEvents(tx *sqlx.Tx, commandId uint64, actorId int64,
 	locked *gameLockedPairState, in GameAnswerCommandDO, completedTaskId,
-	taskAnswerId int64, gameFinished bool) (uint64, error) {
+	taskAnswerId int64, gameFinished bool, progress GameProgressDO) (uint64, error) {
 	eventId := uuid.NewString()
 	eventType := "pwm.game.answer_submitted"
 	if gameFinished {
@@ -219,11 +219,13 @@ func insertGameEvents(tx *sqlx.Tx, commandId uint64, actorId int64,
 	eventPayload, err := json.Marshal(map[string]interface{}{
 		"version":         1,
 		"actorUserId":     actorId,
+		"playerPairId":    locked.PlayerPairId,
 		"pairGameId":      locked.PairGameId,
 		"gameConfigId":    in.GameConfigId,
 		"completedTaskId": completedTaskId,
 		"taskAnswerId":    taskAnswerId,
 		"gameFinished":    gameFinished,
+		"progress":        progress,
 	})
 	if err != nil {
 		return 0, err
@@ -434,7 +436,7 @@ func (d *Dao) SubmitGameAnswer(ctx context.Context, actorId int64, in GameAnswer
 			}
 		}
 
-		progress, err := selectGameProgress(tx, locked)
+		progress, err := selectGameProgress(tx, locked.PairGameId, locked.GameId, locked.Player1, locked.Player2)
 		if err != nil {
 			return err
 		}
@@ -471,7 +473,7 @@ func (d *Dao) SubmitGameAnswer(ctx context.Context, actorId int64, in GameAnswer
 			waitingFor = nextAfter.WaitingForPlayerId
 		}
 		cursor, err := insertGameEvents(tx, command.Id, actorId, locked, in,
-			completedTaskId, taskAnswerId, gameFinished)
+			completedTaskId, taskAnswerId, gameFinished, progress)
 		if err != nil {
 			return err
 		}

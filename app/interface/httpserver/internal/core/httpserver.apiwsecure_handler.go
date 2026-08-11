@@ -1,8 +1,10 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
-	"math/rand"
+	"hash/fnv"
+	"strconv"
 	"time"
 
 	msgpb "pwm-server/app/messenger/msg/msg/msg"
@@ -13,6 +15,26 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+func durablePushRandomID(userID int64, message string) int64 {
+	messageKey := message
+	var envelope struct {
+		MessageID string `json:"messageId"`
+	}
+	if err := json.Unmarshal([]byte(message), &envelope); err == nil && envelope.MessageID != "" {
+		messageKey = envelope.MessageID
+	}
+	h := fnv.New64a()
+	_, _ = h.Write([]byte(strconv.FormatInt(int64(env2.ServiceUserId), 10)))
+	_, _ = h.Write([]byte(":"))
+	_, _ = h.Write([]byte(strconv.FormatInt(userID, 10)))
+	_, _ = h.Write([]byte(":" + messageKey))
+	value := int64(h.Sum64() & uint64(^uint64(0)>>1))
+	if value == 0 {
+		return 1
+	}
+	return value
+}
 
 type ApiUserContactsDO struct {
 	Id               int64  `json:"id" mapstructure:"id"`
@@ -63,7 +85,7 @@ func (c *HttpserverCore) PushMessage(userIds []int64, message string) (bool, int
 				Message: msgpb.MakeTLOutboxMessage(&msgpb.OutboxMessage{
 					NoWebpage:    false,
 					Background:   false,
-					RandomId:     rand.Int63(),
+					RandomId:     durablePushRandomID(userId, message),
 					Message:      msg,
 					ScheduleDate: nil,
 				}).To_OutboxMessage(),

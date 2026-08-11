@@ -43,11 +43,14 @@ type GameTaskDO struct {
 }
 
 type GameTaskResultDO struct {
-	Version            int         `json:"version"`
-	HasTask            bool        `json:"hasTask"`
-	Reason             string      `json:"reason,omitempty"`
-	WaitingForPlayerId *int64      `json:"waitingForPlayerId,omitempty"`
-	Task               *GameTaskDO `json:"task"`
+	Version            int             `json:"version"`
+	HasTask            bool            `json:"hasTask"`
+	Reason             string          `json:"reason,omitempty"`
+	WaitingForPlayerId *int64          `json:"waitingForPlayerId,omitempty"`
+	PlayerPairId       int64           `json:"playerPairId,omitempty"`
+	PairGameId         int64           `json:"pairGameId,omitempty"`
+	Progress           *GameProgressDO `json:"progress,omitempty"`
+	Task               *GameTaskDO     `json:"task"`
 }
 
 type gameQuery interface {
@@ -384,6 +387,22 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 	if pairGame == nil {
 		return &GameTaskResultDO{Version: 1, Reason: "no_active_game"}, nil
 	}
+	progress, err := selectGameProgress(q, pairGame.PairGameId, pairGame.GameId, pair.Player1, pair.Player2)
+	if err != nil {
+		return nil, err
+	}
+	result := func(reason string, waitingFor *int64, task *GameTaskDO) *GameTaskResultDO {
+		return &GameTaskResultDO{
+			Version:            1,
+			HasTask:            task != nil,
+			Reason:             reason,
+			WaitingForPlayerId: waitingFor,
+			PlayerPairId:       pair.PlayerPairId,
+			PairGameId:         pairGame.PairGameId,
+			Progress:           &progress,
+			Task:               task,
+		}
+	}
 	configs := make([]gameConfigState, 0)
 	if err := q.QueryRowsPartial(&configs, `SELECT Id AS id, GameId AS game_id,
 		COALESCE(TaskForM, '') AS task_for_m, COALESCE(TaskForF, '') AS task_for_f
@@ -419,7 +438,7 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 			}
 			if len(actorDone) == len(children) {
 				waiting := partnerId
-				return &GameTaskResultDO{Version: 1, Reason: "waiting_for_partner", WaitingForPlayerId: &waiting}, nil
+				return result("waiting_for_partner", &waiting, nil), nil
 			}
 			var childId string
 			for _, child := range children {
@@ -440,7 +459,7 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 			if err != nil {
 				return nil, err
 			}
-			return &GameTaskResultDO{Version: 1, HasTask: true, Task: detail}, nil
+			return result("", nil, detail), nil
 		}
 		done, err := selectConfigCompletionPlayers(q, pairGame.PairGameId, config.Id)
 		if err != nil {
@@ -451,16 +470,16 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 		}
 		if done[actorId] {
 			waiting := partnerId
-			return &GameTaskResultDO{Version: 1, Reason: "waiting_for_partner", WaitingForPlayerId: &waiting}, nil
+			return result("waiting_for_partner", &waiting, nil), nil
 		}
 		detail, err := buildGameTaskDetail(q, actor, pair, pairGame, config,
 			parentTask, "", "", done[partnerId])
 		if err != nil {
 			return nil, err
 		}
-		return &GameTaskResultDO{Version: 1, HasTask: true, Task: detail}, nil
+		return result("", nil, detail), nil
 	}
-	return &GameTaskResultDO{Version: 1, Reason: "game_complete"}, nil
+	return result("game_complete", nil, nil), nil
 }
 
 func (d *Dao) SelectNextGameTask(ctx context.Context, actorId, partnerId, requestedPairId int64) (*GameTaskResultDO, error) {

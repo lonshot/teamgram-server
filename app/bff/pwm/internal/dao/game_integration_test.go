@@ -175,6 +175,12 @@ func TestNativeGameTaskAndAnswerIntegration(t *testing.T) {
 	require.Equal(t, f.ordinaryTask, next.Task.TaskId)
 	require.Empty(t, next.Task.ChainTaskId)
 	require.NotEmpty(t, next.Task.Title)
+	require.Equal(t, f.pairId, next.PlayerPairId)
+	require.Equal(t, f.pairGameId, next.PairGameId)
+	require.NotNil(t, next.Progress)
+	require.Equal(t, 2, next.Progress.TotalConfigs)
+	require.Zero(t, next.Progress.Player1Completed)
+	require.Zero(t, next.Progress.Player2Completed)
 
 	_, err = d.SelectNextGameTask(ctx, f.actorId, f.outsiderId, f.pairId)
 	require.ErrorIs(t, err, ErrGamePairInvalid)
@@ -194,6 +200,10 @@ func TestNativeGameTaskAndAnswerIntegration(t *testing.T) {
 	require.False(t, first.GameFinished)
 	require.NotNil(t, first.WaitingForPlayerId)
 	require.Equal(t, f.partnerId, *first.WaitingForPlayerId)
+	require.Equal(t, 1, first.Progress.Player1Completed)
+	require.Zero(t, first.Progress.Player2Completed)
+	require.NotNil(t, first.NextTask.Progress)
+	require.Equal(t, first.Progress, *first.NextTask.Progress)
 
 	replay, err := d.SubmitGameAnswer(ctx, f.actorId, ordinaryActor)
 	require.NoError(t, err)
