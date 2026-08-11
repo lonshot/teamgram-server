@@ -1,13 +1,15 @@
-FROM golang:1.21-bookworm AS build
+FROM --platform=$BUILDPLATFORM golang:1.21-bookworm AS build
 ARG BUILD_COMMIT=unknown
 ARG BUILD_BRANCH=unknown
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /src/pwm-server
 
 COPY go.mod go.sum ./
 COPY --from=proto . /src/pwm-teamgram-proto
 RUN go mod download
 COPY . .
-RUN make all \
+RUN GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" CGO_ENABLED=0 make all \
     gitCommit="${BUILD_COMMIT}" \
     gitTag="${BUILD_COMMIT}" \
     gitBranch="${BUILD_BRANCH}" \
