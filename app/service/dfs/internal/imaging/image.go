@@ -121,3 +121,7 @@ func Resize(img image.Image, width, height int) *image.NRGBA {
 func EncodeJpeg(w io.Writer, img image.Image) error {
 	return imaging.Encode(w, img, imaging.JPEG)
 }
+
+func EncodePng(w io.Writer, img image.Image) error {
+	return imaging.Encode(w, img, imaging.PNG)
+}

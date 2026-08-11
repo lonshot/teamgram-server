@@ -277,7 +277,9 @@ func makeDocumentThumb(data []byte) ([]*mtproto.PhotoSize, int32, int32, []byte,
 		}
 	}
 	encoded := bytes2.NewBuffer(make([]byte, 0, 64*1024))
-	if err = imaging.EncodeJpeg(encoded, medium); err != nil {
+	// Sticker previews must retain transparency. JPEG turns transparent pixels
+	// into a black matte, which is especially visible while the full WebP loads.
+	if err = imaging.EncodePng(encoded, medium); err != nil {
 		return nil, 0, 0, nil, err
 	}
 	return []*mtproto.PhotoSize{

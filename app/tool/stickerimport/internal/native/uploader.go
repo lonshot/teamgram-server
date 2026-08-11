@@ -9,7 +9,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"image/jpeg"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"os"
 	"path/filepath"
@@ -284,12 +286,12 @@ func (u *Uploader) verifyPreviewDownload(ctx context.Context, document *mtproto.
 	if err != nil {
 		return fmt.Errorf("verify preview download: %w", err)
 	}
-	image, err := jpeg.Decode(bytes.NewReader(data))
+	decoded, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
-		return fmt.Errorf("%w: preview is not a valid native JPEG: %v", ErrNativeIntegrity, err)
+		return fmt.Errorf("%w: preview is not a valid native image: %v", ErrNativeIntegrity, err)
 	}
-	if int32(image.Bounds().Dx()) != thumb.GetW() || int32(image.Bounds().Dy()) != thumb.GetH() {
-		return fmt.Errorf("%w: preview dimensions are %dx%d, metadata is %dx%d", ErrNativeIntegrity, image.Bounds().Dx(), image.Bounds().Dy(), thumb.GetW(), thumb.GetH())
+	if int32(decoded.Bounds().Dx()) != thumb.GetW() || int32(decoded.Bounds().Dy()) != thumb.GetH() {
+		return fmt.Errorf("%w: preview dimensions are %dx%d, metadata is %dx%d", ErrNativeIntegrity, decoded.Bounds().Dx(), decoded.Bounds().Dy(), thumb.GetW(), thumb.GetH())
 	}
 	return nil
 }
