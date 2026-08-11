@@ -6,6 +6,7 @@ type GamePartnerDO struct {
 	Id             int64  `db:"Id" json:"Id"`
 	FirstName      string `db:"FirstName" json:"FirstName"`
 	LastName       string `db:"LastName" json:"LastName"`
+	RegistrationId string `db:"RegistrationId" json:"RegistrationId"`
 	Gender         int64  `db:"Gender" json:"Gender"`
 	Female         bool   `db:"Female" json:"Female"`
 	PlayerPairId   int64  `db:"PlayerPairId" json:"PlayerPairId"`
@@ -18,7 +19,9 @@ type GamePartnerDO struct {
 
 func (d *Dao) SelectGamePartners(ctx context.Context, userId, partnerId int64) ([]GamePartnerDO, error) {
 	const query = `SELECT u.id AS Id, COALESCE(u.first_name, '') AS FirstName,
-		COALESCE(u.last_name, '') AS LastName, COALESCE(u.Gender, 0) AS Gender,
+		COALESCE(u.last_name, '') AS LastName,
+		COALESCE(NULLIF(u.RegistrationId, ''), CAST(u.id AS CHAR)) AS RegistrationId,
+		COALESCE(u.Gender, 0) AS Gender,
 		IF(u.Gender = 2, 1, 0) AS Female, pp.PlayerPairId,
 		COALESCE(pp.CurrentPairGameId, 0) AS LastPairGameId,
 		(SELECT COUNT(*) FROM game_config_completions gcc
