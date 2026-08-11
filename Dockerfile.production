@@ -1,10 +1,10 @@
 FROM golang:1.21-bookworm AS build
 WORKDIR /src/pwm-server
 
-COPY pwm-server/go.mod pwm-server/go.sum ./
-COPY pwm-teamgram-proto /src/pwm-teamgram-proto
+COPY go.mod go.sum ./
+COPY --from=proto . /src/pwm-teamgram-proto
 RUN go mod download
-COPY pwm-server .
+COPY . .
 RUN make all
 
 FROM debian:bookworm-slim
