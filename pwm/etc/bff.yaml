@@ -21,7 +21,7 @@ Code:
   Key: "pwm-server"
   Secret: "cde23a1529ca4534bec2c78aa3642e6944cb2748337c4226998c79d3a678cddb"
   RegionId: ""
-  RequestTimeout: 5s
+  RequestTimeout: 20s
   AutoVerifyEnabled: false
   BypassEnabled: false
   BypassAllowInProduction: false

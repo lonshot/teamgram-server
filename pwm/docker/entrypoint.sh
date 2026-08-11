@@ -15,7 +15,7 @@ export MINIO_SECRET=${MINIO_SECRET:-"pwm@dotnet2025!secure"}
 export MINIO_SSL=${MINIO_SSL:-"false"}
 export PWM_ENVIRONMENT=${PWM_ENVIRONMENT:-"Development"}
 export PWM_VERIFY_PROVIDER=${PWM_VERIFY_PROVIDER:-"me"}
-export PWM_VERIFY_TIMEOUT=${PWM_VERIFY_TIMEOUT:-"5s"}
+export PWM_VERIFY_TIMEOUT=${PWM_VERIFY_TIMEOUT:-"20s"}
 export PWM_AUTO_VERIFY_ENABLED=${PWM_AUTO_VERIFY_ENABLED:-"false"}
 export PWM_OTP_BYPASS_ENABLED=${PWM_OTP_BYPASS_ENABLED:-"false"}
 export PWM_OTP_BYPASS_ALLOW_PRODUCTION=${PWM_OTP_BYPASS_ALLOW_PRODUCTION:-"false"}
@@ -58,7 +58,7 @@ createConfigs() {
       | sed "s|http://pwm_web_server:8080|$PWM_WEB_URL_ESCAPED|g" \
       | sed "s|Name: \"me\"|Name: \"$PWM_VERIFY_PROVIDER_ESCAPED\"|g" \
       | sed "s|Environment: \"Development\"|Environment: \"$PWM_ENVIRONMENT_ESCAPED\"|g" \
-      | sed "s|RequestTimeout: 5s|RequestTimeout: $PWM_VERIFY_TIMEOUT_ESCAPED|g" \
+      | sed "s|RequestTimeout: [^ ]*|RequestTimeout: $PWM_VERIFY_TIMEOUT_ESCAPED|g" \
       | sed "s|AutoVerifyEnabled: false|AutoVerifyEnabled: $PWM_AUTO_VERIFY_ENABLED|g" \
       | sed "s|BypassEnabled: false|BypassEnabled: $PWM_OTP_BYPASS_ENABLED|g" \
       | sed "s|BypassAllowInProduction: false|BypassAllowInProduction: $PWM_OTP_BYPASS_ALLOW_PRODUCTION|g" \

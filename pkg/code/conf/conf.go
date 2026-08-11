@@ -24,7 +24,7 @@ type SmsVerifyCodeConfig struct {
 	Key                     string
 	Secret                  string
 	RegionId                string
-	RequestTimeout          time.Duration `json:",default=5s"`
+	RequestTimeout          time.Duration `json:",default=20s"`
 	AutoVerifyEnabled       bool          `json:",default=false"`
 	BypassEnabled           bool          `json:",default=false"`
 	BypassAllowInProduction bool          `json:",default=false"`

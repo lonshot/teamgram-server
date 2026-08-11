@@ -141,7 +141,7 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 
 			if err2 != nil {
 				c.Logger.Errorf("send verify code error: %v", err2)
-				return err2
+				return verificationDeliveryError()
 			} else if extraData == nil {
 				return error_types.ErrPhoneCodeNotFound
 			} else if !extraData.Valid {

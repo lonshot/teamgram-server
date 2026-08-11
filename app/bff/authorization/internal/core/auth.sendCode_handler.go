@@ -363,7 +363,7 @@ func (c *AuthorizationCore) authSendCode(
 				)
 				if err2 != nil {
 					c.Logger.Errorf("send verify code error: %v", err2)
-					return err2
+					return verificationDeliveryError()
 				} else if extraData == nil {
 					return errors.New("verification service returned no response")
 				} else if !extraData.Valid {

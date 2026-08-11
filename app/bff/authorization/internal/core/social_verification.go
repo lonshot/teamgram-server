@@ -1,6 +1,11 @@
 package core
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/teamgram/proto/mtproto"
+	"google.golang.org/grpc/status"
+)
 
 func socialProviderFromPhoneNumber(phoneNumber string) string {
 	normalized := strings.ToUpper(strings.TrimSpace(phoneNumber))
@@ -20,4 +25,8 @@ func verificationExtraData(confirmationID, email, phoneNumber string) string {
 	return confirmationID + "@@" + email +
 		"@@provider=" + socialProviderFromPhoneNumber(phoneNumber) +
 		"@@registration_id=" + strings.TrimSpace(phoneNumber)
+}
+
+func verificationDeliveryError() error {
+	return status.Error(mtproto.ErrInternal, "EMAIL_DELIVERY_FAILED")
 }
