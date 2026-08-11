@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"pwm-server/pkg/code/dataobject"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -88,7 +89,7 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 		"data":        data,
 	}
 
-	logx.Infof("Sending SMS verification request for phoneNumber: %s", phoneNumber)
+	logx.Infof("Sending social verification request")
 
 	// Send JSON request
 	urlV := m.code.SendCodeUrl
@@ -106,25 +107,27 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 		return nil, err
 	}
 
-	// Log the response details
-	logx.Infof(
-		"Verification response - Valid: %v, Auto: %v, ConfirmationId: %s",
-		verifyResp.Valid, verifyResp.Auto, verifyResp.ConfirmationId,
-	)
+	logx.Infof("Verification response - Valid: %v, Auto: %v", verifyResp.Valid, verifyResp.Auto)
 
 	return &verifyResp, nil
 }
 
 // Verify SMS Code using the shared function
 func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extraData string) error {
-	logx.Infof("Verifying SMS code for codeHash: %s", codeHash)
+	logx.Infof("Verifying social email code")
 
-	if extraData == "__auto__" && m.code.AutoVerifyEnabled {
-		logx.Infof("Provider auto-verification accepted by server configuration.")
+	if extraData == "__auto__" {
+		// This marker is written only after pwm-dotnet validates the Apple or
+		// Facebook provider token. It is the provider policy, not an OTP bypass.
+		logx.Infof("Provider passwordless verification accepted.")
 		return nil
 	}
-	if m.code.BypassEnabled && conf.SecureCodeEqual(code_, m.code.BypassCode) {
-		logx.Infof("Operational verification bypass accepted.")
+	// Apple and Facebook use the explicit __auto__ path above. Google must
+	// always prove possession of the user-entered email, even if an operational
+	// bypass remains configured for an older deployment.
+	if m.code.BypassEnabled && providerAllowsOperationalBypass(verificationProvider(extraData)) &&
+		conf.SecureCodeEqual(code_, m.code.BypassCode) {
+		logx.Infof("Operational verification bypass accepted for a non-Google flow.")
 		return nil
 	}
 
@@ -137,7 +140,7 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 		"regionId":    m.code.RegionId,
 	}
 
-	logx.Infof("Sending verification request for codeHash: %s", codeHash)
+	logx.Infof("Sending social email verification request")
 
 	// Send JSON request
 	urlV := m.code.VerifyCodeUrl
@@ -162,6 +165,23 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 		return errors.New("verification code invalid")
 	}
 
-	logx.Infof("Verification succeeded for codeHash: %s", codeHash)
+	logx.Infof("Social email verification succeeded")
 	return nil
+}
+
+func verificationProvider(extraData string) string {
+	const marker = "provider="
+	index := strings.Index(extraData, marker)
+	if index < 0 {
+		return "unknown"
+	}
+	value := extraData[index+len(marker):]
+	if end := strings.Index(value, "@@"); end >= 0 {
+		value = value[:end]
+	}
+	return strings.ToLower(strings.TrimSpace(value))
+}
+
+func providerAllowsOperationalBypass(provider string) bool {
+	return provider == "apple" || provider == "facebook"
 }

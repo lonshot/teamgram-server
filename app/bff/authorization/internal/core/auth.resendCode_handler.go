@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"pwm-server/app/bff/authorization/internal/logic"
 	"pwm-server/app/bff/authorization/internal/model"
 	"pwm-server/pkg/error_types"
@@ -138,16 +139,25 @@ func (c *AuthorizationCore) AuthResendCode(in *mtproto.TLAuthResendCode) (*mtpro
 				c.ctx, phoneNumber, codeData2.PhoneCode, phoneCodeHash, apiHash,
 			)
 
-			if err2 != nil || extraData == nil || !extraData.Valid {
+			if err2 != nil {
 				c.Logger.Errorf("send verify code error: %v", err2)
 				return err2
+			} else if extraData == nil {
+				return error_types.ErrPhoneCodeNotFound
+			} else if !extraData.Valid {
+				if extraData.Error != "" {
+					return errors.New(extraData.Error)
+				}
+				return error_types.ErrPhoneCodeNotFound
 			} else {
 				// codeData2.SentCodeType = model.CodeTypeSms
 				codeData2.SentCodeType = model.SentCodeTypeSms
 				if !extraData.Auto {
-					codeData2.PhoneCodeExtraData = extraData.ConfirmationId + "@@" + email
+					codeData2.PhoneCodeExtraData = verificationExtraData(
+						extraData.ConfirmationId, email, phoneNumber,
+					)
 				} else {
-					codeData2.PhoneCodeHash = codeData2.PhoneCodeHash + codeData2.PhoneCode
+					codeData2.PhoneCodeExtraData = "__auto__"
 				}
 			}
 			codeData2.NextCodeType = model.CodeTypeSms

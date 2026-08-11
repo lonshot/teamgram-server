@@ -361,15 +361,23 @@ func (c *AuthorizationCore) authSendCode(
 					codeData2.PhoneCodeHash,
 					request.ApiHash,
 				)
-				if err2 != nil || extraData == nil || !extraData.Valid {
+				if err2 != nil {
 					c.Logger.Errorf("send verify code error: %v", err2)
-					err2 = errors.New("send verify code error")
 					return err2
+				} else if extraData == nil {
+					return errors.New("verification service returned no response")
+				} else if !extraData.Valid {
+					if extraData.Error != "" {
+						return errors.New(extraData.Error)
+					}
+					return errors.New("send verify code error")
 				} else {
 					// codeData2.SentCodeType = model.CodeTypeSms
 					codeData2.SentCodeType = model.SentCodeTypeSms
 					if !extraData.Auto {
-						codeData2.PhoneCodeExtraData = extraData.ConfirmationId + "@@" + email
+						codeData2.PhoneCodeExtraData = verificationExtraData(
+							extraData.ConfirmationId, email, phoneNumber,
+						)
 					} else {
 						codeData2.PhoneCodeExtraData = "__auto__"
 					}
