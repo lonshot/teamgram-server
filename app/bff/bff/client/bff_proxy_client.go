@@ -21,6 +21,32 @@ type BFFProxyClient struct {
 	BFFClients map[string]zrpc.Client
 }
 
+const (
+	defaultRPCTimeout   = 5 * time.Second
+	authSendCodeTimeout = 30 * time.Second
+)
+
+func rpcTimeoutFor(object mtproto.TLObject) time.Duration {
+	if _, ok := object.(*mtproto.TLAuthSendCode); ok {
+		// Social email verification is delivered by the PWM SMTP service and
+		// can legitimately take longer than the generic RPC budget. The
+		// downstream service is bounded at 20s; keep the proxy alive long
+		// enough to return its authoritative phone-code hash/error instead of
+		// timing out while the email is still being sent.
+		return authSendCodeTimeout
+	}
+
+	switch object.(type) {
+	case *mtproto.TLMessagesSendMedia,
+		*mtproto.TLMessagesSendMultiMedia,
+		*mtproto.TLMessagesUploadMedia,
+		*mtproto.TLMessagesEditMessage:
+		return 60 * time.Second
+	default:
+		return defaultRPCTimeout
+	}
+}
+
 func NewBFFProxyClients(cList []zrpc.RpcClientConf, idMap map[string]string) *BFFProxyClient {
 	var (
 		clients   = make(map[string]zrpc.Client)
@@ -109,25 +135,9 @@ func (c *BFFProxyClient) InvokeContext(ctx context.Context, rpcMetaData *metadat
 	r := t.NewReplyFunc()
 	// logx.Infof("Invoke - NewReplyFunc: {%#v}, t: {%v}", r, reflect.TypeOf(r))
 
-	var (
-		header, trailer metadata.MD
-		ctxWithTimeout  context.Context
-	)
-
-	// Fixed @LionPuChiPuChi, 2018-12-19
-	// hack
-	switch object.(type) {
-	case *mtproto.TLMessagesSendMedia:
-		ctxWithTimeout, _ = context.WithTimeout(context.Background(), 60*time.Second)
-	case *mtproto.TLMessagesSendMultiMedia:
-		ctxWithTimeout, _ = context.WithTimeout(context.Background(), 60*time.Second)
-	case *mtproto.TLMessagesUploadMedia:
-		ctxWithTimeout, _ = context.WithTimeout(context.Background(), 60*time.Second)
-	case *mtproto.TLMessagesEditMessage:
-		ctxWithTimeout, _ = context.WithTimeout(context.Background(), 60*time.Second)
-	default:
-		ctxWithTimeout, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	}
+	var header, trailer metadata.MD
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, rpcTimeoutFor(object))
+	defer cancel()
 
 	ctx2, _ := metadata.RpcMetadataToOutgoing(ctxWithTimeout, rpcMetaData)
 	rt := time.Now()
