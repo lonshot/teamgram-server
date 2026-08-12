@@ -1,7 +1,6 @@
 package core
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -355,7 +354,7 @@ func (c *AuthorizationCore) authSendCode(
 			if needSendSms {
 				c.Logger.Infof("send code by sms")
 				extraData, err2 := c.svcCtx.AuthLogic.VerifyCodeInterface.SendSmsVerifyCode(
-					context.Background(),
+					c.ctx,
 					phoneNumber,
 					codeData2.PhoneCode,
 					codeData2.PhoneCodeHash,

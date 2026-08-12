@@ -30,7 +30,7 @@ type meVerifyCode struct {
 
 // Shared function to send JSON POST request
 func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map[string]string) ([]byte, error) {
-	logx.Infof("Preparing to send POST request to URL: %s", url)
+	logx.Infof("Preparing verification request")
 
 	// Convert map to JSON
 	jsonData, err := jsonx.Marshal(requestData)
@@ -60,7 +60,7 @@ func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map
 	}
 	defer resp.Body.Close()
 
-	logx.Infof("Response status code: %d", resp.StatusCode)
+	logx.Infof("Verification service response status code: %d", resp.StatusCode)
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
