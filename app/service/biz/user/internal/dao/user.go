@@ -99,6 +99,36 @@ func (d *Dao) CreateNewUserV2(
 					"premium":          true,
 					"deleted":          false,
 					"delete_reason":    "",
+					// pwm-dotnet and pwm-server intentionally share the users row.
+					// Reopening the native MTProto identity must not reopen the old
+					// PWM account: admin deletion owns a fresh onboarding boundary.
+					"Active":                       0,
+					"RegistrationValidated":        0,
+					"Email":                        "",
+					"RegistrationEmail":            "",
+					"RegistrationPhone":            "",
+					"Gender":                       nil,
+					"PartnersGender":               nil,
+					"YearOfBirth":                  nil,
+					"RegistrationBirthday":         nil,
+					"Passions":                     nil,
+					"Religion":                     "",
+					"PartnerReligions":             "",
+					"Regions":                      "",
+					"PartnerRegions":               "",
+					"PartnersFromAge":              nil,
+					"PartnersToAge":                nil,
+					"Area":                         nil,
+					"PlayWith":                     0,
+					"LastSuggestedPartners":        nil,
+					"LastFetchSuggestionTimestamp": nil,
+					"IOSPushToken":                 "",
+					"AndroidPushToken":             "",
+					"OnlineStatus":                 "",
+					"LastAccessDate":               nil,
+					"LastLogin":                    nil,
+					"RegistrationTime":             nil,
+					"ActiveTimestamp":              nil,
 				}
 				if _, e2 = d.UsersDAO.UpdateUser(ctx, updateMap, oldUserDO.Id); e2 != nil {
 					return nil, e2
