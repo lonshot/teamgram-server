@@ -6,6 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"html"
+	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
@@ -29,19 +32,93 @@ type GameProgressDO struct {
 	Player2Completed int64 `json:"player2Completed"`
 }
 
+type GameTaskAnswerPresentationDO struct {
+	Version         int    `json:"version"`
+	TaskAnswerId    int64  `json:"taskAnswerId"`
+	CompletedTaskId int64  `json:"completedTaskId"`
+	ActorUserId     int64  `json:"actorUserId"`
+	PlayerPairId    int64  `json:"playerPairId"`
+	PairGameId      int64  `json:"pairGameId"`
+	GameConfigId    int64  `json:"gameConfigId"`
+	TaskId          string `json:"taskId"`
+	ChainTaskId     string `json:"chainTaskId,omitempty"`
+	TaskTypeName    string `json:"taskTypeName"`
+	Kind            string `json:"kind"`
+	Title           string `json:"title"`
+	MainTitle       string `json:"mainTitle,omitempty"`
+	Subtitle        string `json:"subtitle,omitempty"`
+	AnswerText      string `json:"answerText"`
+	MediaPath       string `json:"mediaPath,omitempty"`
+}
+
 type GameAnswerResultDO struct {
-	Version            int               `json:"version"`
-	Accepted           bool              `json:"accepted"`
-	NewlyRecorded      bool              `json:"newlyRecorded"`
-	ConfigComplete     bool              `json:"configComplete"`
-	GameFinished       bool              `json:"gameFinished"`
-	GameNewlyFinished  bool              `json:"gameNewlyFinished"`
-	WaitingForPlayerId *int64            `json:"waitingForPlayerId"`
-	CompletedTaskId    int64             `json:"completedTaskId"`
-	TaskAnswerId       int64             `json:"taskAnswerId"`
-	Progress           GameProgressDO    `json:"progress"`
-	NextTask           *GameTaskResultDO `json:"nextTask"`
-	Cursor             uint64            `json:"cursor"`
+	Version            int                           `json:"version"`
+	Accepted           bool                          `json:"accepted"`
+	NewlyRecorded      bool                          `json:"newlyRecorded"`
+	ConfigComplete     bool                          `json:"configComplete"`
+	GameFinished       bool                          `json:"gameFinished"`
+	GameNewlyFinished  bool                          `json:"gameNewlyFinished"`
+	WaitingForPlayerId *int64                        `json:"waitingForPlayerId"`
+	CompletedTaskId    int64                         `json:"completedTaskId"`
+	TaskAnswerId       int64                         `json:"taskAnswerId"`
+	Presentation       *GameTaskAnswerPresentationDO `json:"presentation"`
+	Progress           GameProgressDO                `json:"progress"`
+	NextTask           *GameTaskResultDO             `json:"nextTask"`
+	Cursor             uint64                        `json:"cursor"`
+}
+
+var (
+	taskAnswerBreakPattern = regexp.MustCompile(`(?i)<br\s*/?>`)
+	taskAnswerTagPattern   = regexp.MustCompile(`<[^>]*>`)
+)
+
+func taskAnswerKind(taskTypeName string) string {
+	switch strings.ToLower(strings.TrimSpace(taskTypeName)) {
+	case "q-2":
+		return "question_2"
+	case "q-3":
+		return "question_3"
+	case "q-4":
+		return "question_4"
+	case "fill text":
+		return "fill_text"
+	case "photo":
+		return "photo"
+	case "video":
+		return "video"
+	case "voice":
+		return "voice"
+	default:
+		return "unknown"
+	}
+}
+
+func plainTaskAnswerText(value string) string {
+	value = taskAnswerBreakPattern.ReplaceAllString(value, "\n")
+	value = taskAnswerTagPattern.ReplaceAllString(value, "")
+	return strings.TrimSpace(html.UnescapeString(value))
+}
+
+func buildTaskAnswerPresentation(actorId int64, locked *gameLockedPairState,
+	in GameAnswerCommandDO, task *GameTaskDO, completedTaskId, taskAnswerId int64) *GameTaskAnswerPresentationDO {
+	return &GameTaskAnswerPresentationDO{
+		Version:         1,
+		TaskAnswerId:    taskAnswerId,
+		CompletedTaskId: completedTaskId,
+		ActorUserId:     actorId,
+		PlayerPairId:    locked.PlayerPairId,
+		PairGameId:      locked.PairGameId,
+		GameConfigId:    in.GameConfigId,
+		TaskId:          task.TaskId,
+		ChainTaskId:     task.ChainTaskId,
+		TaskTypeName:    task.TaskTypeName,
+		Kind:            taskAnswerKind(task.TaskTypeName),
+		Title:           plainTaskAnswerText(task.Title),
+		MainTitle:       plainTaskAnswerText(task.MainTitle),
+		Subtitle:        plainTaskAnswerText(task.ChainCommonTitle),
+		AnswerText:      plainTaskAnswerText(in.Answer),
+		MediaPath:       in.MediaPath,
+	}
 }
 
 type gameCommandState struct {
@@ -210,20 +287,22 @@ type gameEventRecipient struct {
 
 func insertGameEvents(tx *sqlx.Tx, commandId uint64, actorId int64,
 	locked *gameLockedPairState, in GameAnswerCommandDO, completedTaskId,
-	taskAnswerId int64, gameFinished bool, progress GameProgressDO) (uint64, error) {
+	taskAnswerId int64, presentation *GameTaskAnswerPresentationDO,
+	gameFinished bool, progress GameProgressDO) (uint64, error) {
 	eventId := uuid.NewString()
 	eventType := "pwm.game.answer_submitted"
 	if gameFinished {
 		eventType = "pwm.game.finished"
 	}
 	eventPayload, err := json.Marshal(map[string]interface{}{
-		"version":         1,
+		"version":         2,
 		"actorUserId":     actorId,
 		"playerPairId":    locked.PlayerPairId,
 		"pairGameId":      locked.PairGameId,
 		"gameConfigId":    in.GameConfigId,
 		"completedTaskId": completedTaskId,
 		"taskAnswerId":    taskAnswerId,
+		"presentation":    presentation,
 		"gameFinished":    gameFinished,
 		"progress":        progress,
 	})
@@ -472,13 +551,16 @@ func (d *Dao) SubmitGameAnswer(ctx context.Context, actorId int64, in GameAnswer
 		if nextAfter != nil {
 			waitingFor = nextAfter.WaitingForPlayerId
 		}
+		presentation := buildTaskAnswerPresentation(
+			actorId, locked, in, next.Task, completedTaskId, taskAnswerId,
+		)
 		cursor, err := insertGameEvents(tx, command.Id, actorId, locked, in,
-			completedTaskId, taskAnswerId, gameFinished, progress)
+			completedTaskId, taskAnswerId, presentation, gameFinished, progress)
 		if err != nil {
 			return err
 		}
 		result = &GameAnswerResultDO{
-			Version:            1,
+			Version:            2,
 			Accepted:           true,
 			NewlyRecorded:      true,
 			ConfigComplete:     configComplete,
@@ -487,6 +569,7 @@ func (d *Dao) SubmitGameAnswer(ctx context.Context, actorId int64, in GameAnswer
 			WaitingForPlayerId: waitingFor,
 			CompletedTaskId:    completedTaskId,
 			TaskAnswerId:       taskAnswerId,
+			Presentation:       presentation,
 			Progress:           progress,
 			NextTask:           nextAfter,
 			Cursor:             cursor,
