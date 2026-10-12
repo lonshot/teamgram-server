@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+umask 077
 # if [ ! -n "$PWM_HOST" ]; then
 #   echo ">>> Plase set environment variable PWM_HOST to your own server IP. <<<"
 #   exit 1
@@ -28,6 +30,7 @@ export PWM_HTTP_PORT=${PWM_HTTP_PORT:-"8801"}
 createConfigs() {
   CONFIG_TARGET_DIR=/app/etc2
   CONFIG_TEMPLATES_DIR=/app/etc
+  mkdir -p "$CONFIG_TARGET_DIR"
   escapeSedReplacement() {
     printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
   }
@@ -71,8 +74,4 @@ createConfigs() {
 
 createConfigs
 
-cd /app/bin
-chmod +x ./runall.sh
-./runall.sh
-
-tail -f /dev/null
+exec /bin/bash /app/bin/runall.sh

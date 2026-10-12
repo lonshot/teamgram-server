@@ -9,7 +9,13 @@ services:
       - "8801:8801"
     volumes:
       - ./pwm:/app  # Mount the host 'pwm' directory to '/app' in the container
-    entrypoint: ["/bin/sh", "/app/docker/entrypoint.sh"]
+    entrypoint: ["/bin/bash", "/app/docker/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "/bin/bash", "/app/bin/runall.sh", "--health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 180s
+      retries: 3
     networks:
       - pwm_net
 

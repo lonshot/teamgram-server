@@ -110,10 +110,29 @@ func (s *fcmHTTPV1Sender) Send(ctx context.Context, token string, data map[strin
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
 	}
-	responseText := string(responseBody)
-	if (resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusNotFound) &&
-		(strings.Contains(responseText, "UNREGISTERED") || strings.Contains(responseText, "INVALID_ARGUMENT")) {
-		return errGamePushTokenInvalid
+	var providerError struct {
+		Error struct {
+			Details []struct {
+				Type      string `json:"@type"`
+				ErrorCode string `json:"errorCode"`
+			} `json:"details"`
+		} `json:"error"`
 	}
-	return fmt.Errorf("FCM send failed with status %d: %s", resp.StatusCode, responseText)
+	_ = json.Unmarshal(responseBody, &providerError)
+	// Tokens restored from another Firebase sender cannot become valid by
+	// retrying. Disable just that device and allow other recipients/outbox rows
+	// to proceed; a current client can register its own token again.
+	for _, detail := range providerError.Error.Details {
+		if detail.Type != "type.googleapis.com/google.firebase.fcm.v1.FcmError" {
+			continue
+		}
+		if (resp.StatusCode == http.StatusForbidden && detail.ErrorCode == "SENDER_ID_MISMATCH") ||
+			(resp.StatusCode == http.StatusNotFound && detail.ErrorCode == "UNREGISTERED") ||
+			(resp.StatusCode == http.StatusBadRequest && detail.ErrorCode == "INVALID_ARGUMENT") {
+			return errGamePushTokenInvalid
+		}
+	}
+	// Provider responses can echo registration tokens and request details.
+	// Keep retry diagnostics free of device credentials.
+	return fmt.Errorf("FCM send failed with status %d", resp.StatusCode)
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 	"unicode/utf8"
 
 	"github.com/teamgram/proto/mtproto"
@@ -74,6 +76,45 @@ func (s *Service) PwmGetTask(ctx context.Context, in *mtproto.TLPwmGetTask) (*mt
 	return dataJSON(result)
 }
 
+func gameAnswerHint(result *dao.GameAnswerResultDO) (gameOutboxPayload, bool) {
+	if result == nil || !result.Accepted || result.Cursor == 0 || result.Presentation == nil {
+		return gameOutboxPayload{}, false
+	}
+	eventType := "pwm.game.answer_submitted"
+	if result.GameFinished {
+		eventType = "pwm.game.finished"
+	}
+	return gameOutboxPayload{
+		Version:       1,
+		EventID:       fmt.Sprintf("pwm-answer:%d", result.Cursor),
+		EventType:     eventType,
+		AggregateType: "pair_game",
+		AggregateID:   fmt.Sprintf("%d", result.Presentation.PairGameId),
+		Recipients: []gameOutboxRecipient{
+			{UserID: result.Progress.Player1Id},
+			{UserID: result.Progress.Player2Id},
+		},
+	}, true
+}
+
+func (s *Service) notifyAcceptedGameAnswer(result *dao.GameAnswerResultDO) {
+	payload, valid := gameAnswerHint(result)
+	if !valid {
+		return
+	}
+	// The transaction already persisted the event and durable outbox. Wake
+	// connected players immediately; FCM retries must not delay foreground
+	// task state. A lost hint is still recovered by the durable outbox/replay.
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		worker := &GameOutboxWorker{service: s}
+		for _, recipient := range payload.Recipients {
+			_ = worker.sendHint(ctx, payload, recipient)
+		}
+	}()
+}
+
 func (s *Service) PwmSubmitAnswer(ctx context.Context, in *mtproto.TLPwmSubmitAnswer) (*mtproto.DataJSON, error) {
 	md := metadata.RpcMetadataFromIncoming(ctx)
 	if md.GetUserId() <= 0 {
@@ -98,12 +139,13 @@ func (s *Service) PwmSubmitAnswer(ctx context.Context, in *mtproto.TLPwmSubmitAn
 	if err != nil {
 		if errors.Is(err, dao.ErrGameTaskInvalid) {
 			return dataJSON(map[string]any{
-				"version": 1,
-				"accepted": false,
+				"version":   1,
+				"accepted":  false,
 				"errorCode": "task_stale",
 			})
 		}
 		return nil, gameRPCError(err)
 	}
+	s.notifyAcceptedGameAnswer(result)
 	return dataJSON(result)
 }
