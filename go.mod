@@ -148,6 +148,6 @@ replace (
 	// github.com/panjf2000/gnet/v2 => ../gnet
 	github.com/panjf2000/gnet/v2 v2.5.1 => github.com/teamgram/gnet/v2 v2.5.1-teamgram.0.20240601150126-77149bca641b
 	// github.com/teamgram/marmota => ../marmota
-	github.com/teamgram/proto => ../pwm-teamgram-proto
+	github.com/teamgram/proto => ./third_party/pwm-teamgram-proto
 	github.com/zeromicro/go-zero v1.6.3 => github.com/teamgram/go-zero v1.6.3-teamgram.0.20240501021520-e02614df0dd3
 )

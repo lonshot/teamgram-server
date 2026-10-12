@@ -1,0 +1,6 @@
+Recovered module github.com/teamgram/proto (Go 1.19)
+Imported from pwm-teamgram-proto on pwm-test-10ccu, 2026-10-12.
+The original Git metadata was absent. Keep this module with the recovered
+Go server; generated PWM constructors/codecs are part of the recovered source.
+License: Apache-2.0, see LICENSE and source copyright headers.
+Private-key fixtures are excluded; the RSA test creates its key at runtime.

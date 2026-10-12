@@ -202,6 +202,13 @@ func TestNativeGameTaskAndAnswerIntegration(t *testing.T) {
 	require.Equal(t, f.partnerId, *first.WaitingForPlayerId)
 	require.Equal(t, 1, first.Progress.Player1Completed)
 	require.Zero(t, first.Progress.Player2Completed)
+	require.Equal(t, 2, first.Version)
+	require.NotNil(t, first.Presentation)
+	require.Equal(t, first.TaskAnswerId, first.Presentation.TaskAnswerId)
+	require.Equal(t, f.actorId, first.Presentation.ActorUserId)
+	require.Equal(t, f.ordinaryTask, first.Presentation.TaskId)
+	require.Equal(t, "unknown", first.Presentation.Kind)
+	require.Equal(t, "actor ordinary", first.Presentation.AnswerText)
 	require.NotNil(t, first.NextTask.Progress)
 	require.Equal(t, first.Progress, *first.NextTask.Progress)
 

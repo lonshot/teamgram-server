@@ -10,6 +10,7 @@ import (
 )
 
 type VerifyCodeInterface interface {
+	OperationalBypassEnabled(phoneNumber string) bool
 	SendSmsVerifyCode(ctx context.Context, phoneNumber, code, codeHash, data string) (*dataobject.VerifyResponse, error)
 	VerifySmsCode(ctx context.Context, codeHash, code, extraData string) error
 }

@@ -1,10 +1,12 @@
 package svc
 
 import (
+	"context"
 	kafka "github.com/teamgram/marmota/pkg/mq"
 	"github.com/teamgram/marmota/pkg/net/rpcx"
 	"github.com/teamgram/marmota/pkg/stores/sqlx"
 	"pwm-server/app/messenger/msg/inbox/internal/config"
+	"pwm-server/app/messenger/msg/inbox/internal/push"
 	"pwm-server/app/messenger/msg/internal/dao"
 	sync_client "pwm-server/app/messenger/sync/client"
 	// channel_client "pwm-server/app/service/biz/channel/client"
@@ -17,6 +19,8 @@ import (
 type ServiceContext struct {
 	Config config.Config
 	*dao.Dao
+	ChatPush      *push.Sender
+	ChatPushError error
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -34,8 +38,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		dao.BotSyncClient = sync_client.NewSyncMqClient(kafka.GetCachedMQClient(c.BotSyncClient))
 	}
 
+	chatPush, chatPushError := push.New(context.Background())
 	return &ServiceContext{
-		Config: c,
-		Dao:    dao,
+		Config:        c,
+		Dao:           dao,
+		ChatPush:      chatPush,
+		ChatPushError: chatPushError,
 	}
 }

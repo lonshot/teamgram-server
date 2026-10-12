@@ -40,7 +40,7 @@ func (dao *DevicesDAO) InsertOrUpdate(ctx context.Context, do *dataobject.Device
 
 	r, err = dao.db.NamedExec(ctx, query, do)
 	if err != nil {
-		logx.WithContext(ctx).Errorf("namedExec in InsertOrUpdate(%v), error: %v", do, err)
+		logx.WithContext(ctx).Errorf("namedExec in InsertOrUpdate, error: %v", err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (dao *DevicesDAO) InsertOrUpdateTx(tx *sqlx.Tx, do *dataobject.DevicesDO) (
 
 	r, err = tx.NamedExec(query, do)
 	if err != nil {
-		logx.WithContext(tx.Context()).Errorf("namedExec in InsertOrUpdate(%v), error: %v", do, err)
+		logx.WithContext(tx.Context()).Errorf("namedExec in InsertOrUpdate, error: %v", err)
 		return
 	}
 

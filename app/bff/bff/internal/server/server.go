@@ -277,6 +277,7 @@ func (s *Server) Initialize() error {
 				notification_helper.New(
 					notification_helper.Config{
 						RpcServerConf: c.RpcServerConf,
+						Mysql:         c.Mysql,
 						UserClient:    c.BizServiceClient,
 						ChatClient:    c.BizServiceClient,
 						SyncClient:    c.SyncClient,

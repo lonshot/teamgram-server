@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/teamgram/proto/mtproto"
@@ -353,23 +352,29 @@ func (c *AuthorizationCore) authSendCode(
 
 			if needSendSms {
 				c.Logger.Infof("send code by sms")
+				verificationRequestData := request.ApiHash
+				if c.svcCtx.AuthLogic.VerifyCodeInterface.OperationalBypassEnabled(phoneNumber) {
+					// This marker is added only by the configured server. pwm-dotnet
+					// still validates the Google identity token and email ownership,
+					// but skips slow/unavailable email delivery and issues a checkpoint
+					// for the configured fallback code.
+					c.Logger.Infof("operational Google OTP bypass enabled; requesting a delivery-free checkpoint")
+					verificationRequestData += "~~!@!~~operational_bypass=1"
+				}
 				extraData, err2 := c.svcCtx.AuthLogic.VerifyCodeInterface.SendSmsVerifyCode(
 					c.ctx,
 					phoneNumber,
 					codeData2.PhoneCode,
 					codeData2.PhoneCodeHash,
-					request.ApiHash,
+					verificationRequestData,
 				)
 				if err2 != nil {
 					c.Logger.Errorf("send verify code error: %v", err2)
 					return verificationDeliveryError()
 				} else if extraData == nil {
-					return errors.New("verification service returned no response")
+					return verificationDeliveryError()
 				} else if !extraData.Valid {
-					if extraData.Error != "" {
-						return errors.New(extraData.Error)
-					}
-					return errors.New("send verify code error")
+					return verificationResponseError(extraData.Error)
 				} else {
 					// codeData2.SentCodeType = model.CodeTypeSms
 					codeData2.SentCodeType = model.SentCodeTypeSms

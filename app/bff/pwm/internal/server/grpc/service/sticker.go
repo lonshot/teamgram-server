@@ -91,6 +91,21 @@ func (s Service) MessagesGetStickerSet(ctx context.Context, in *mtproto.TLMessag
 	if err != nil {
 		return nil, err
 	}
+	userId, err := stickerUserId(ctx)
+	if err != nil {
+		return nil, err
+	}
+	installed, err := s.svcCtx.SelectUserStickerSets(ctx, userId, stickerSetCategory(set), false)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range installed {
+		if entry.StickerSetId == set.Id {
+			set.InstalledAt = entry.InstalledAt
+			set.Archived = entry.Archived
+			break
+		}
+	}
 	if in.GetHash() != 0 && in.GetHash() == int32(set.SetHash) {
 		return mtproto.MakeTLMessagesStickerSetNotModified(&mtproto.Messages_StickerSet{}).To_Messages_StickerSet(), nil
 	}
@@ -407,6 +422,9 @@ func buildStickerSet(set *dataobject.StickerSetDO) *mtproto.StickerSet {
 	value := &mtproto.StickerSet{Archived: set.Archived, Official: set.Official, Masks: set.Masks, Emojis: set.Emojis, TextColor: set.TextColor,
 		Animated: set.Animated, Videos: set.Videos, Id: set.NativeSetId, AccessHash: set.NativeAccessHash, Title: set.Title,
 		ShortName: set.ShortName, Count: int32(set.DocumentCount), Hash: int32(set.SetHash)}
+	if set.InstalledAt > 0 {
+		value.InstalledDate = wrapperspb.Int32(set.InstalledAt)
+	}
 	if set.ThumbDocumentId > 0 {
 		value.ThumbDocumentId = wrapperspb.Int64(set.ThumbDocumentId)
 		value.ThumbDcId = wrapperspb.Int32(set.ThumbDcId)

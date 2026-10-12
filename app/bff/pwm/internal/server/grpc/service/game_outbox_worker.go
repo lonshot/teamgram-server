@@ -22,6 +22,7 @@ type gameOutboxRecipient struct {
 
 type gameOutboxPayload struct {
 	Version       int                   `json:"version"`
+	ActorUserID   int64                 `json:"actorUserId"`
 	EventID       string                `json:"eventId"`
 	EventType     string                `json:"eventType"`
 	AggregateType string                `json:"aggregateType"`
@@ -124,6 +125,11 @@ func (w *GameOutboxWorker) deliver(ctx context.Context, row *dataobject.GameOutb
 		cursors[recipient.UserID] = recipient.Cursor
 	}
 	for _, device := range devices {
+		// The actor already sees the result synchronously. Notify the partner,
+		// while both players continue to receive the durable sync event.
+		if payload.ActorUserID > 0 && device.UserId == payload.ActorUserID {
+			continue
+		}
 		data := hintData(payload, gameOutboxRecipient{UserID: device.UserId, Cursor: cursors[device.UserId]})
 		if err := w.push.Send(ctx, device.Token, data); err != nil {
 			if errors.Is(err, errGamePushTokenInvalid) {
@@ -140,7 +146,7 @@ func (w *GameOutboxWorker) deliver(ctx context.Context, row *dataobject.GameOutb
 }
 
 func hintData(payload gameOutboxPayload, recipient gameOutboxRecipient) map[string]string {
-	return map[string]string{
+	data := map[string]string{
 		"type":          "pwm_game_event",
 		"eventId":       payload.EventID,
 		"eventType":     payload.EventType,
@@ -148,6 +154,15 @@ func hintData(payload gameOutboxPayload, recipient gameOutboxRecipient) map[stri
 		"aggregateType": payload.AggregateType,
 		"aggregateId":   payload.AggregateID,
 	}
+	switch payload.EventType {
+	case "pwm.game.answer_submitted":
+		data["title"] = "Play with Me"
+		data["body"] = "Your partner submitted an answer"
+	case "pwm.game.finished":
+		data["title"] = "Play with Me"
+		data["body"] = "Your game is complete"
+	}
+	return data
 }
 
 func (w *GameOutboxWorker) sendHint(ctx context.Context, payload gameOutboxPayload, recipient gameOutboxRecipient) error {

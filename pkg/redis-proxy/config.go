@@ -25,7 +25,7 @@ func LoadConfig() *Config {
 	config := &Config{
 		ProxyHost:      getEnvOrDefault("REDIS_PROXY_HOST", "0.0.0.0"),
 		ProxyPort:      getEnvIntOrDefault("REDIS_PROXY_PORT", 6380),
-		AdminPassword:  getEnvOrDefault("REDIS_ADMIN_PASSWORD", "admin_redis_2025!"),
+		AdminPassword:  getEnvOrDefault("REDIS_ADMIN_PASSWORD", "CHANGE_ME"),
 		RedisHost:      getEnvOrDefault("REDIS_HOST", "redis"),
 		RedisPort:      getEnvIntOrDefault("REDIS_PORT", 6379),
 		RedisPassword:  getEnvOrDefault("REDIS_PASSWORD", ""),

@@ -43,6 +43,11 @@ func (d *Dao) sendMessageToInbox(ctx context.Context, fromId int64, peer *mtprot
 		date       = time.Now().Unix()
 		message    = proto.Clone(message2).(*mtproto.Message)
 	)
+	var sequenceErr error
+	inBoxMsgId, sequenceErr = d.reserveMessageBoxId(ctx, toUserId, inBoxMsgId)
+	if sequenceErr != nil {
+		return nil, sequenceErr
+	}
 
 	if peer.PeerType == mtproto.PEER_USER {
 		if dialogMessageId == 0 {
@@ -151,8 +156,13 @@ func (d *Dao) sendMessageToInbox(ctx context.Context, fromId int64, peer *mtprot
 			Deleted:           false,
 		}
 
-		_, _, result.Err = d.MessagesDAO.InsertOrReturnIdTx(tx, inBoxDO)
+		var rowsAffected int64
+		_, rowsAffected, result.Err = d.MessagesDAO.InsertOrReturnIdTx(tx, inBoxDO)
 		if result.Err != nil {
+			return
+		}
+		if rowsAffected == 0 {
+			result.Err = fmt.Errorf("message box id collision for user %d, id %d", inBox.UserId, inBox.MessageId)
 			return
 		}
 

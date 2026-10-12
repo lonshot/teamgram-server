@@ -26,41 +26,41 @@ This implementation provides a secure Redis proxy service that allows external a
 ## Key Features
 
 ### Security
-✅ **Password Authentication** - Requires `admin_redis_2025!` password before access  
-✅ **Connection Limiting** - Configurable max connections (default: 100)  
-✅ **Protocol Validation** - Proper Redis RESP protocol parsing  
-✅ **Admin Only Access** - Designed for administrative use, not client APIs  
+✅ **Password Authentication** - Requires `CHANGE_ME` password before access
+✅ **Connection Limiting** - Configurable max connections (default: 100)
+✅ **Protocol Validation** - Proper Redis RESP protocol parsing
+✅ **Admin Only Access** - Designed for administrative use, not client APIs
 
-### Functionality  
-✅ **Full Redis Compatibility** - Transparent proxy supporting all Redis commands  
-✅ **IPv6 Support** - Proper address handling for both IPv4 and IPv6  
-✅ **Graceful Shutdown** - Clean connection handling during restarts  
-✅ **Detailed Logging** - Connection tracking and error reporting  
+### Functionality
+✅ **Full Redis Compatibility** - Transparent proxy supporting all Redis commands
+✅ **IPv6 Support** - Proper address handling for both IPv4 and IPv6
+✅ **Graceful Shutdown** - Clean connection handling during restarts
+✅ **Detailed Logging** - Connection tracking and error reporting
 
 ### Deployment
-✅ **Docker Ready** - Multi-stage Dockerfile with security best practices  
-✅ **Docker Compose Integration** - Seamless integration with existing services  
-✅ **Environment Configuration** - All settings via environment variables  
-✅ **Health Monitoring** - Status checks and connection monitoring  
+✅ **Docker Ready** - Multi-stage Dockerfile with security best practices
+✅ **Docker Compose Integration** - Seamless integration with existing services
+✅ **Environment Configuration** - All settings via environment variables
+✅ **Health Monitoring** - Status checks and connection monitoring
 
 ## Configuration
 
 ### Default Settings
 - **Proxy Port**: `6380`
-- **Admin Password**: `admin_redis_2025!`
+- **Admin Password**: `CHANGE_ME`
 - **Max Connections**: `100`
 - **Backend Redis**: `redis:6379` (Docker network)
-- **Backend Password**: `A65D0770B69940FEA084C9C8028908F7`
+- **Backend Password**: `CHANGE_ME`
 
 ### Environment Variables
 All settings are customizable via environment variables:
 ```bash
 REDIS_PROXY_HOST=0.0.0.0
-REDIS_PROXY_PORT=6380  
-REDIS_ADMIN_PASSWORD=admin_redis_2025!
+REDIS_PROXY_PORT=6380
+REDIS_ADMIN_PASSWORD=CHANGE_ME
 REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_PASSWORD=A65D0770B69940FEA084C9C8028908F7
+REDIS_PASSWORD=CHANGE_ME
 REDIS_MAX_CONNECTIONS=100
 REDIS_ENABLE_LOGGING=true
 ```
@@ -79,11 +79,11 @@ docker-compose -f docker-compose-env.yaml up -d redis-admin-proxy
 ### Connect with Admin Tools
 ```bash
 # redis-cli
-redis-cli -h localhost -p 6380 -a admin_redis_2025!
+redis-cli -h localhost -p 6380 -a CHANGE_ME
 
 # Test connection
 redis-cli -h localhost -p 6380
-> AUTH admin_redis_2025!
+> AUTH CHANGE_ME
 > PING
 PONG
 ```
@@ -93,7 +93,7 @@ PONG
 # Check status
 ./scripts/redis-proxy.sh status
 
-# View logs  
+# View logs
 ./scripts/redis-proxy.sh logs -f
 
 # Test functionality
@@ -107,7 +107,7 @@ PONG
 
 ### Production Deployment
 1. **Change Default Password** - Use strong, unique admin password
-2. **Limit Network Access** - Run on internal networks only  
+2. **Limit Network Access** - Run on internal networks only
 3. **Monitor Connections** - Track usage patterns and failed attempts
 4. **Regular Password Rotation** - Change admin password periodically
 5. **Firewall Configuration** - Restrict port 6380 to admin networks only
@@ -135,7 +135,7 @@ PONG
 The included test script validates:
 - Port connectivity
 - Authentication rejection (wrong password)
-- Authentication acceptance (correct password)  
+- Authentication acceptance (correct password)
 - Basic Redis operations (SET/GET)
 - Administrative commands (INFO)
 - Unauthenticated request blocking
@@ -146,7 +146,7 @@ The included test script validates:
 ./scripts/test-redis-proxy.sh
 
 # Manual connection test
-redis-cli -h localhost -p 6380 -a admin_redis_2025! ping
+redis-cli -h localhost -p 6380 -a CHANGE_ME ping
 ```
 
 ## Benefits

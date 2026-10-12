@@ -1,10 +1,18 @@
 package core
 
 import (
+	"context"
+	"errors"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/teamgram/proto/mtproto"
 	"pwm-server/app/messenger/msg/inbox/inbox"
+	"pwm-server/app/messenger/msg/inbox/internal/push"
 	"pwm-server/app/messenger/msg/internal/dal/dataobject"
 	"pwm-server/app/messenger/sync/sync"
+	"pwm-server/pkg/env2"
 )
 
 // InboxSendUserMessageToInboxV2
@@ -163,8 +171,106 @@ func (c *InboxCore) InboxSendUserMessageToInboxV2(in *inbox.TLInboxSendUserMessa
 			if err != nil {
 				c.Logger.Errorf("inbox.sendUserMessageToInboxV2 - error: %v", err)
 			}
+			if in.PeerType == mtproto.PEER_USER {
+				c.pushChatNotification(in.UserId, in.FromId, inBox.GetMessage(), in.GetUsers())
+			}
 		}
 	}
 
 	return mtproto.EmptyVoid, nil
+}
+
+type chatPushDevice struct {
+	Token string `db:"token"`
+}
+
+type chatPushSettings struct {
+	Silent    int32  `db:"silent"`
+	MuteUntil int32  `db:"mute_until"`
+	Sound     string `db:"sound"`
+}
+
+func (c *InboxCore) pushChatNotification(
+	userID, fromID int64, message *mtproto.Message, users []*mtproto.User,
+) {
+	// Broadcasts from the synthetic service peer have a dedicated, correctly
+	// titled FCM notification from pwm-dotnet. Emitting a generic chat push here
+	// exposes the JSON storage envelope and creates a duplicate Android card.
+	if !shouldSendChatPush(fromID) {
+		return
+	}
+	if c.svcCtx.ChatPush == nil {
+		if c.svcCtx.ChatPushError != nil && !errors.Is(c.svcCtx.ChatPushError, push.ErrNotConfigured) {
+			c.Logger.Errorf("chat push initialization: %v", c.svcCtx.ChatPushError)
+		}
+		return
+	}
+	settings := chatPushSettings{Sound: "default"}
+	_ = c.svcCtx.Dao.QueryRowPartial(c.ctx, &settings,
+		`SELECT silent, mute_until, sound FROM user_notify_settings
+		 WHERE user_id = ? AND deleted = 0
+		   AND ((peer_type = 2 AND peer_id = ?) OR (peer_type = 5 AND peer_id = 0))
+		 ORDER BY (peer_type = 2) DESC LIMIT 1`, userID, fromID)
+	if settings.Silent == 1 || settings.MuteUntil > int32(time.Now().Unix()) {
+		return
+	}
+	withSound := settings.Sound != "none" && settings.Sound != "notificationSoundNone" && settings.Sound != ""
+	var devices []chatPushDevice
+	if err := c.svcCtx.Dao.QueryRowsPartial(c.ctx, &devices,
+		`SELECT token FROM devices
+		 WHERE user_id = ? AND token_type = 2 AND state = 0 AND token <> ''
+		 UNION SELECT AndroidPushToken FROM users
+		 WHERE id = ? AND deleted = 0 AND AndroidPushToken IS NOT NULL AND AndroidPushToken <> ''
+		 UNION SELECT IOSPushToken FROM users
+		 WHERE id = ? AND deleted = 0 AND IOSPushToken IS NOT NULL AND IOSPushToken <> ''`,
+		userID, userID, userID); err != nil {
+		c.Logger.Errorf("select chat push devices for user %d: %v", userID, err)
+		return
+	}
+	if len(devices) == 0 {
+		return
+	}
+	title := "Play with Me"
+	for _, user := range users {
+		if user.GetId() == fromID {
+			name := strings.TrimSpace(user.GetFirstName().GetValue() + " " + user.GetLastName().GetValue())
+			if name != "" {
+				title = name
+			}
+			break
+		}
+	}
+	body := strings.TrimSpace(message.GetMessage())
+	if body == "" {
+		body = "Sent you a message"
+	}
+	if len([]rune(body)) > 256 {
+		body = string([]rune(body)[:256])
+	}
+	messageID := strconv.FormatInt(int64(message.GetId()), 10)
+	peerID := strconv.FormatInt(fromID, 10)
+	for _, device := range devices {
+		device := device
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+			defer cancel()
+			if err := c.svcCtx.ChatPush.SendChat(ctx, device.Token, title, body, peerID, messageID, withSound); err != nil {
+				if errors.Is(err, push.ErrTokenInvalid) {
+					_, _ = c.svcCtx.Dao.Exec(context.Background(),
+						"UPDATE devices SET state = 1 WHERE user_id = ? AND token_type = 2 AND token = ?", userID, device.Token)
+					_, _ = c.svcCtx.Dao.Exec(context.Background(),
+						`UPDATE users SET
+						 AndroidPushToken = IF(AndroidPushToken = ?, NULL, AndroidPushToken),
+						 IOSPushToken = IF(IOSPushToken = ?, NULL, IOSPushToken)
+						 WHERE id = ?`, device.Token, device.Token, userID)
+					return
+				}
+				c.Logger.Errorf("send chat push to user %d: %v", userID, err)
+			}
+		}()
+	}
+}
+
+func shouldSendChatPush(fromID int64) bool {
+	return fromID != int64(env2.ServiceUserId)
 }

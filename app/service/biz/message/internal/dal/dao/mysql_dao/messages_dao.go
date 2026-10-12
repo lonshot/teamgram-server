@@ -42,6 +42,18 @@ func (dao *MessagesDAO) CalcTableName(id int64) string {
 	}
 }
 
+// MaxUserMessageBoxId includes deleted rows: their per-user IDs remain reserved.
+func (dao *MessagesDAO) MaxUserMessageBoxId(ctx context.Context, userId int64) (int32, error) {
+	var row struct {
+		MaxId int32 `db:"max_id"`
+	}
+	query := "select coalesce(max(user_message_box_id), 0) as max_id from " + dao.CalcTableName(userId) + " where user_id = ?"
+	if err := dao.db.QueryRowPartial(ctx, &row, query, userId); err != nil {
+		return 0, err
+	}
+	return row.MaxId, nil
+}
+
 // InsertOrReturnId
 // insert into messages(user_id, user_message_box_id, dialog_id1, dialog_id2, dialog_message_id, sender_user_id, peer_type, peer_id, random_id, message_filter_type, message_data, message, mentioned, media_unread, pinned, saved_peer_type, saved_peer_id, date2, ttl_period) values (:user_id, :user_message_box_id, :dialog_id1, :dialog_id2, :dialog_message_id, :sender_user_id, :peer_type, :peer_id, :random_id, :message_filter_type, :message_data, :message, :mentioned, :media_unread, :pinned, :saved_peer_type, :saved_peer_id, :date2, :ttl_period) on duplicate key update id = last_insert_id(id)
 func (dao *MessagesDAO) InsertOrReturnId(ctx context.Context, do *dataobject.MessagesDO) (lastInsertId, rowsAffected int64, err error) {

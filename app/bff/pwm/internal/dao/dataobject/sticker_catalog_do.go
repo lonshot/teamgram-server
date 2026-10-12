@@ -31,6 +31,7 @@ type StickerSetDO struct {
 	DocumentCount       uint32 `db:"document_count"`
 	DisplayOrder        uint32 `db:"display_order"`
 	Archived            bool   `db:"archived"`
+	InstalledAt         int32  `db:"installed_at"`
 	Official            bool   `db:"official"`
 	Masks               bool   `db:"masks"`
 	Emojis              bool   `db:"emojis"`

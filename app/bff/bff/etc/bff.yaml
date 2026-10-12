@@ -15,7 +15,7 @@ Code:
   SendCodeUrl: ""
   VerifyCodeUrl: ""
   Key: ""
-  Secret: ""
+  Secret: CHANGE_ME
   RegionId: ""
   DummyCode: ""
 

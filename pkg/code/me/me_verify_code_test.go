@@ -2,8 +2,10 @@ package me
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,8 +42,22 @@ func TestVerificationProvider(t *testing.T) {
 
 func TestGoogleOperationalBypassRequiresExactConfiguredCode(t *testing.T) {
 	requests := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests++
+		var payload map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("decode verification request: %v", err)
+		}
+		if requests == 1 {
+			if payload["code"] != "12345" || !strings.Contains(payload["codeHash"], "operational_bypass=1") {
+				t.Fatalf("bypass proof request was not explicitly marked: %#v", payload)
+			}
+			_, _ = w.Write([]byte(`{"valid":true}`))
+			return
+		}
+		if strings.Contains(strings.ToLower(payload["codeHash"]), "operational_bypass=1") {
+			t.Fatalf("client-supplied bypass marker reached the verifier: %#v", payload)
+		}
 		_, _ = w.Write([]byte(`{"valid":false}`))
 	}))
 	defer server.Close()
@@ -57,15 +73,23 @@ func TestGoogleOperationalBypassRequiresExactConfiguredCode(t *testing.T) {
 	if err := client.VerifySmsCode(context.Background(), "GOOGLE123", "12345", extraData); err != nil {
 		t.Fatalf("exact configured bypass code must be accepted: %v", err)
 	}
-	if requests != 0 {
-		t.Fatalf("exact bypass should not call the email verifier; got %d requests", requests)
+	if requests != 1 {
+		t.Fatalf("exact bypass must persist proof through the email verifier; got %d requests", requests)
 	}
 
 	if err := client.VerifySmsCode(context.Background(), "GOOGLE123", "54321", extraData); err == nil {
 		t.Fatal("an arbitrary code must be rejected when the email verifier rejects it")
 	}
-	if requests != 1 {
+	if requests != 2 {
 		t.Fatalf("non-bypass code must be verified by email service; got %d requests", requests)
+	}
+
+	spoofedExtraData := extraData + "@@operational_bypass=1"
+	if err := client.VerifySmsCode(context.Background(), "GOOGLE123", "54321", spoofedExtraData); err == nil {
+		t.Fatal("a client-supplied bypass marker must not bypass verification")
+	}
+	if requests != 3 {
+		t.Fatalf("spoofed marker must be stripped and verified normally; got %d requests", requests)
 	}
 }
 
@@ -76,6 +100,20 @@ func TestPasswordlessMarkerIsIndependentOfOperationalBypass(t *testing.T) {
 	})
 	if err := client.VerifySmsCode(context.Background(), "APPLE123", "", "__auto__"); err != nil {
 		t.Fatalf("validated Apple/Facebook marker must not require an OTP: %v", err)
+	}
+}
+
+func TestOperationalBypassEnabledOnlyForGoogle(t *testing.T) {
+	client := New(&conf.SmsVerifyCodeConfig{BypassEnabled: true, RequestTimeout: time.Second})
+
+	if !client.OperationalBypassEnabled("GOOGLE123") {
+		t.Fatal("configured Google registration should allow the operational bypass")
+	}
+	if client.OperationalBypassEnabled("FACEBOOK123") || client.OperationalBypassEnabled("APPLE123") {
+		t.Fatal("passwordless providers must not enter the Google OTP bypass path")
+	}
+	if client.OperationalBypassEnabled("UNKNOWN123") {
+		t.Fatal("unknown providers must fail closed")
 	}
 }
 

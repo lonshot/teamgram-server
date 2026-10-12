@@ -15,7 +15,7 @@ func (c *InboxCore) InboxReadMediaUnreadToInboxV2(in *inbox.TLInboxReadMediaUnre
 		return nil, err
 	}
 
-	if !unreadDO.MediaUnread || !unreadDO.MediaUnread {
+	if !unreadDO.MediaUnread {
 		return mtproto.EmptyVoid, nil
 	}
 	_, err = c.svcCtx.Dao.MessagesDAO.UpdateMediaUnread(c.ctx, unreadDO.UserId, unreadDO.UserMessageBoxId)

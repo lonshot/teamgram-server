@@ -42,7 +42,7 @@ func init() {
 	minioCore, err = minio.NewCore(
 		"127.0.0.1:9000",
 		&minio.Options{
-			Creds:  credentials.NewStaticV4("TLXH0OZVP0AKOJAZ8DIT", "9Sw+Xbhc3aWvxQ78rRgUkTQQLLZ24SyelA+B6Rwe", ""),
+			Creds:  credentials.NewStaticV4("CHANGE_ME", "CHANGE_ME", ""),
 			Secure: false,
 		})
 	if err != nil {
@@ -52,12 +52,12 @@ func init() {
 
 func SaveFilePart(creator, fileId int64, filePart int32, b []byte) error {
 	//Endpoint:  http://192.168.2.145:9000  http://127.0.0.1:9000
-	//AccessKey: TLXH0OZVP0AKOJAZ8DIT
-	//SecretKey: 9Sw+Xbhc3aWvxQ78rRgUkTQQLLZ24SyelA+B6Rwe
+	//AccessKey: CHANGE_ME
+	//SecretKey: CHANGE_ME
 
 	//endpoint := "127.0.0.1:9000"
-	//accessKeyID := "Q3AM3UQ867SPQQA43P2F"
-	//secretAccessKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+	//accessKeyID := "CHANGE_ME"
+	//secretAccessKey := "CHANGE_ME"
 	//useSSL := true
 
 	var (

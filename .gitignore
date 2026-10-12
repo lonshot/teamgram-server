@@ -52,3 +52,17 @@ pwm/etc2/
 /app/service/biz/username/cmd/username/username
 /app/service/media/internal/dao/examples/examples
 /app/service/status/cmd/cli/cli
+
+# Recovery: keep credentials and generated artifacts outside Git.
+.env
+.env.*.local
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+cloud-*.log
+go.mod.cloud-original
+._*
+
+!third_party/pwm-teamgram-proto/**/*.tl

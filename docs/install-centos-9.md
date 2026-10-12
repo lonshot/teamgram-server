@@ -1,21 +1,21 @@
-## Centos 9 Stream Build and Install 
+## Centos 9 Stream Build and Install
 
 ## Depends Install and Run
 
-### Install Mysql Server 
+### Install Mysql Server
 ```
 dnf install mysql-server -y
 systemctl enable --now mysqld
 ```
 
-### Install Redis Server 
+### Install Redis Server
 ```
 dnf install redis -y
 systemctl enable redis
 systemctl start redis
 ```
 
-### Install Etcd.io 
+### Install Etcd.io
 ```
 ETCD_VER=v3.5.0
 
@@ -59,11 +59,11 @@ bin/kafka-server-start.sh -daemon config/server.properties
 ```
 ps aux | grep kafka | wc -l
 #show number 3 is ok !
-#else run 
+#else run
 bin/kafka-server-start.sh -daemon config/server.properties
 ```
 
-### Install Minio 
+### Install Minio
 ```
 cd /tmp
 wget https://dl.min.io/server/minio/release/linux-amd64/minio
@@ -72,13 +72,13 @@ chmod +x minio
 ```
 Console: http://ip:xxxxx ...
 RootUser: admin
-RootPass: pwm@admin2025!
+RootPass: CHANGE_ME
 ```
 firewall-cmd --zone=public --permanent --add-port=xxxxx/tcp
 firewall-cmd --reload
 ```
 Access  http://ip:xxxxx
-Create Bucket 
+Create Bucket
  - documents
  - encryptedfiles
  - photos
@@ -97,7 +97,7 @@ tar -xf pika-linux-x86_64-v3.3.6.tar.bz2
 mv output pika
 /tmp/pika/bin/pika -c /tmp/pika/conf/pika.conf &
 ```
-### Install FFMpeg 
+### Install FFMpeg
 ```
 cd /tmp
 wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
@@ -109,13 +109,13 @@ cp ff* /usr/local/bin/
 
 ## Install Teamgram Server
 
-### Get source code 
+### Get source code
 ```
 git clone https://github.com/teamgram/teamgram-server.git
 cd teamgram-server
 ```
 
-### Init Database 
+### Init Database
 - create teamgram database
 ```
 mysql -uroot -p
@@ -136,12 +136,12 @@ dnf install go -y
 make
 ```
 
-### Modify config file 
+### Modify config file
 ```
 vim ../pwm/etc/dfs.yaml
 {
-AccessKeyID: pwm-dotnet-api
-SecretAccessKey: pwm@dotnet2025!secure
+AccessKeyID: CHANGE_ME
+SecretAccessKey: CHANGE_ME
 
 SSDB:
   - Host: 127.0.0.1:9221
@@ -160,5 +160,3 @@ cd ../pwm/bin/
 firewall-cmd --zone=public --permanent --add-port=10443/tcp
 firewall-cmd --reload
 ```
-
-

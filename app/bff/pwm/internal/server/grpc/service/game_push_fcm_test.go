@@ -70,4 +70,6 @@ func TestGameHintData(t *testing.T) {
 	require.Equal(t, "event-1", data["eventId"])
 	require.Equal(t, "42", data["cursor"])
 	require.Equal(t, "7", data["aggregateId"])
+	require.Equal(t, "Play with Me", data["title"])
+	require.Equal(t, "Your partner submitted an answer", data["body"])
 }

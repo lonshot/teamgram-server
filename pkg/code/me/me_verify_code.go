@@ -28,6 +28,14 @@ type meVerifyCode struct {
 	client *http.Client
 }
 
+// OperationalBypassEnabled reports whether this registration identity may
+// skip email delivery and proceed directly to the configured fallback code.
+// The social provider token is still validated by pwm-dotnet before this is
+// reached, and VerifySmsCode performs the constant-time code comparison.
+func (m *meVerifyCode) OperationalBypassEnabled(phoneNumber string) bool {
+	return m.code.BypassEnabled && providerAllowsOperationalBypass(registrationProvider(phoneNumber))
+}
+
 // Shared function to send JSON POST request
 func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map[string]string) ([]byte, error) {
 	logx.Infof("Preparing verification request")
@@ -122,13 +130,21 @@ func (m *meVerifyCode) VerifySmsCode(ctx context.Context, codeHash, code_, extra
 		logx.Infof("Provider passwordless verification accepted.")
 		return nil
 	}
+	// Verification metadata originates in the client auth payload. Never honor
+	// an internal bypass marker supplied there; only this service may add it
+	// after the configured code passes the constant-time comparison below.
+	extraData = stripOperationalBypassMarker(extraData)
 	// Apple and Facebook use the explicit __auto__ path above. Google uses an
 	// email OTP, with an optional exact-match operational bypass configured in
 	// the environment. Every other value is verified by the email service.
 	if m.code.BypassEnabled && providerAllowsOperationalBypass(verificationProvider(extraData)) &&
 		conf.SecureCodeEqual(code_, m.code.BypassCode) {
-		logx.Infof("Operational verification bypass accepted for the Google email OTP flow.")
-		return nil
+		logx.Infof("Operational verification bypass accepted for the Google email OTP flow; persisting the email proof.")
+		// pwm-dotnet owns the durable verified-email proof consumed by /register.
+		// Mark this request explicitly so it can persist that proof without
+		// weakening the normal OTP comparison path.
+		code_ = m.code.BypassCode
+		extraData += "@@operational_bypass=1"
 	}
 
 	// Prepare the JSON data
@@ -184,4 +200,30 @@ func verificationProvider(extraData string) string {
 
 func providerAllowsOperationalBypass(provider string) bool {
 	return provider == "google"
+}
+
+func registrationProvider(phoneNumber string) string {
+	normalized := strings.ToUpper(strings.TrimSpace(phoneNumber))
+	switch {
+	case strings.HasPrefix(normalized, "GOOGLE"):
+		return "google"
+	case strings.HasPrefix(normalized, "FACEBOOK"):
+		return "facebook"
+	case strings.HasPrefix(normalized, "APPLE"):
+		return "apple"
+	default:
+		return "unknown"
+	}
+}
+
+func stripOperationalBypassMarker(extraData string) string {
+	parts := strings.Split(extraData, "@@")
+	filtered := parts[:0]
+	for _, part := range parts {
+		if strings.EqualFold(strings.TrimSpace(part), "operational_bypass=1") {
+			continue
+		}
+		filtered = append(filtered, part)
+	}
+	return strings.Join(filtered, "@@")
 }

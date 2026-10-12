@@ -340,7 +340,7 @@ func (d *Dao) SelectUserStickerSets(ctx context.Context, userId int64, category 
 func (d *Dao) SelectInstalledStickerSets(ctx context.Context, userId int64, category uint8) ([]dataobject.StickerSetDO, error) {
 	const query = `SELECT s.id, s.import_id, s.source_set_id, s.source_access_hash, s.native_set_id, s.native_access_hash,
 		s.owner_user_id, s.short_name, s.short_name_normalized, s.title, s.set_hash, s.document_count, s.display_order,
-		s.archived, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
+		u.archived, u.installed_at, s.official, s.masks, s.emojis, s.animated, s.videos, s.text_color, COALESCE(s.thumb_document_id, 0) AS thumb_document_id,
 		COALESCE(s.thumb_access_hash, 0) AS thumb_access_hash, s.thumb_dc_id, s.thumb_version, s.import_state, s.last_error
 		FROM user_sticker_sets u JOIN sticker_sets s ON s.id = u.sticker_set_id
 		WHERE u.user_id = ? AND u.category = ? AND u.archived = 0 AND s.import_state = 2 ORDER BY u.order2, u.id`

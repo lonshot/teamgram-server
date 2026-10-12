@@ -4,7 +4,7 @@ ARG BUILD_BRANCH=unknown
 WORKDIR /src/pwm-server
 
 COPY go.mod go.sum ./
-COPY --from=proto . /src/pwm-teamgram-proto
+COPY third_party/pwm-teamgram-proto ./third_party/pwm-teamgram-proto
 RUN go mod download
 COPY . .
 RUN make all \

@@ -109,6 +109,11 @@ func (c *InboxCore) InboxEditMessageToInboxV2(in *inbox.TLInboxEditMessageToInbo
 			dstMessage.Entities = newMessage.Entities
 			dstMessage.EditDate = newMessage.EditDate
 			dstMessage.EditHide = newMessage.EditHide
+			// Reactions are message metadata, not a text edit. Preserve the
+			// authoritative aggregate when copying the edited message into the
+			// other participant's inbox; otherwise realtime updates and the next
+			// history load both lose the reaction.
+			dstMessage.Reactions = newMessage.Reactions
 
 			newMessage = dstMessage
 

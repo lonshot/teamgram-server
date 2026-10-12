@@ -72,19 +72,27 @@ func newFCMHTTPV1Sender(ctx context.Context) (gamePushSender, error) {
 }
 
 func (s *fcmHTTPV1Sender) Send(ctx context.Context, token string, data map[string]string) error {
-	body, err := json.Marshal(map[string]any{
-		"message": map[string]any{
-			"token": token,
-			"data":  data,
-			"android": map[string]any{
-				"priority": "high",
-			},
-			"apns": map[string]any{
-				"headers": map[string]string{"apns-priority": "10", "apns-push-type": "background"},
-				"payload": map[string]any{"aps": map[string]any{"content-available": 1}},
-			},
+	message := map[string]any{
+		"token": token,
+		"data":  data,
+		"android": map[string]any{
+			"priority": "high",
 		},
-	})
+	}
+	if title, hasTitle := data["title"]; hasTitle && title != "" {
+		if notificationBody := data["body"]; notificationBody != "" {
+			message["notification"] = map[string]string{"title": title, "body": notificationBody}
+			message["android"] = map[string]any{
+				"priority":     "high",
+				"notification": map[string]string{"channel_id": "playwithme_channel", "sound": "default"},
+			}
+			message["apns"] = map[string]any{
+				"headers": map[string]string{"apns-priority": "10", "apns-push-type": "alert"},
+				"payload": map[string]any{"aps": map[string]any{"sound": "default"}},
+			}
+		}
+	}
+	body, err := json.Marshal(map[string]any{"message": message})
 	if err != nil {
 		return err
 	}

@@ -61,7 +61,7 @@ volumes:
 privileged: true
 environment:
 TZ: Asia/Shanghai
-MYSQL_ROOT_PASSWORD: teamgram2022
+MYSQL_ROOT_PASSWORD: CHANGE_ME
 ALLOW_HOST: "%"
 MYSQL_DATABASE: teamgram
 command: [
@@ -102,7 +102,7 @@ volumes:
 - /Volumes/data/teamgram/volumes/minio/config:/root/.minio
 environment:
 MINIO_ROOT_USER: admin
-MINIO_ROOT_PASSWORD: pwm@admin2025!
+MINIO_ROOT_PASSWORD: CHANGE_ME
 
 zookeeper:
 image: wurstmeister/zookeeper
@@ -188,7 +188,7 @@ ip_range: 192.168.1.0/24
 #!/bin/bash
 # 将teamgram2.sql改名为init-teamgram2.sql 确保先执行
 MYSQL_USER=${MYSQL_USER:-root}
-MYSQL_PASSWORD=${MYSQL_PASSWORD:-teamgram2022}
+MYSQL_PASSWORD=${MYSQL_PASSWORD:-CHANGE_ME}
 MYSQL_DB="teamgram"
 SCRIPT_PATH=$(cd $(dirname $0);pwd)
 SQL_FILE="/sqls"

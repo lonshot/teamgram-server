@@ -21,12 +21,47 @@ func (d *Dao) SelectGamePushDevices(ctx context.Context, userIds []int64) ([]dat
 	err := d.db.QueryRowsPartial(ctx, &rows, `SELECT MIN(id) AS id, user_id, token FROM devices
 		WHERE token_type = ? AND state = 0 AND token <> '' AND user_id IN (`+placeholders+`)
 		GROUP BY user_id, token ORDER BY user_id, id`, args...)
-	return rows, err
+	if err != nil {
+		return nil, err
+	}
+	legacyArgs := make([]any, 0, len(userIds)*2)
+	for _, userId := range userIds {
+		legacyArgs = append(legacyArgs, userId)
+	}
+	for _, userId := range userIds {
+		legacyArgs = append(legacyArgs, userId)
+	}
+	legacy := make([]dataobject.GamePushDeviceDO, 0)
+	err = d.db.QueryRowsPartial(ctx, &legacy, `SELECT id, id AS user_id, AndroidPushToken AS token FROM users
+		WHERE deleted = 0 AND AndroidPushToken IS NOT NULL AND AndroidPushToken <> '' AND id IN (`+placeholders+`)
+		UNION ALL SELECT id, id AS user_id, IOSPushToken AS token FROM users
+		WHERE deleted = 0 AND IOSPushToken IS NOT NULL AND IOSPushToken <> '' AND id IN (`+placeholders+`)`, legacyArgs...)
+	if err != nil {
+		return nil, err
+	}
+	seen := make(map[string]struct{}, len(rows)+len(legacy))
+	for _, row := range rows {
+		seen[row.Token] = struct{}{}
+	}
+	for _, row := range legacy {
+		if _, ok := seen[row.Token]; ok {
+			continue
+		}
+		seen[row.Token] = struct{}{}
+		rows = append(rows, row)
+	}
+	return rows, nil
 }
 
 func (d *Dao) DisableGamePushDevice(ctx context.Context, userId int64, token string) error {
-	_, err := d.db.Exec(ctx, `UPDATE devices SET state = 1
-		WHERE user_id = ? AND token = ? AND token_type = 2 AND state = 0`, userId, token)
+	if _, err := d.db.Exec(ctx, `UPDATE devices SET state = 1
+		WHERE user_id = ? AND token = ? AND token_type = 2 AND state = 0`, userId, token); err != nil {
+		return err
+	}
+	_, err := d.db.Exec(ctx, `UPDATE users SET
+		AndroidPushToken = IF(AndroidPushToken = ?, NULL, AndroidPushToken),
+		IOSPushToken = IF(IOSPushToken = ?, NULL, IOSPushToken)
+		WHERE id = ?`, token, token, userId)
 	return err
 }
 

@@ -37,3 +37,32 @@ func TestVerificationDeliveryErrorIsStableRpcError(t *testing.T) {
 		t.Fatalf("unexpected status message: %q", status.Convert(err).Message())
 	}
 }
+
+func TestVerificationResponseErrorPreservesPublicCodes(t *testing.T) {
+	tests := []struct {
+		input       string
+		wantCode    int
+		wantMessage string
+	}{
+		{" email_address_invalid ", int(mtproto.ErrBadRequest), "EMAIL_ADDRESS_INVALID"},
+		{"EMAIL_ADDRESS_OCCUPIED", int(mtproto.ErrBadRequest), "EMAIL_ADDRESS_OCCUPIED"},
+		{"EMAIL_DELIVERY_FAILED", int(mtproto.ErrInternal), "EMAIL_DELIVERY_FAILED"},
+		{"EMAIL_VERIFICATION_STATE_UNAVAILABLE", int(mtproto.ErrInternal), "EMAIL_VERIFICATION_STATE_UNAVAILABLE"},
+		{"downstream implementation detail", int(mtproto.ErrInternal), "EMAIL_DELIVERY_FAILED"},
+		{"", int(mtproto.ErrInternal), "EMAIL_DELIVERY_FAILED"},
+	}
+
+	for _, test := range tests {
+		err := verificationResponseError(test.input)
+		if int(status.Code(err)) != test.wantCode {
+			t.Fatalf("code for %q: got %v, want %v", test.input, status.Code(err), test.wantCode)
+		}
+		if actual := status.Convert(err).Message(); actual != test.wantMessage {
+			t.Fatalf("message for %q: got %q, want %q", test.input, actual, test.wantMessage)
+		}
+		rpcError := mtproto.NewRpcError(err)
+		if actual := rpcError.GetErrorMessage(); actual != test.wantMessage {
+			t.Fatalf("MTProto message for %q: got %q, want %q", test.input, actual, test.wantMessage)
+		}
+	}
+}

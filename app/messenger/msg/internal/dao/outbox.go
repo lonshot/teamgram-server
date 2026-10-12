@@ -68,6 +68,10 @@ func (d *Dao) sendMessageToOutbox(ctx context.Context, fromId int64, peer *mtpro
 		err = mtproto.ErrInternalServerError
 		return nil, false, err
 	}
+	outBoxMsgId, err = d.reserveMessageBoxId(ctx, fromId, outBoxMsgId)
+	if err != nil {
+		return nil, false, err
+	}
 
 	// A, B
 	tR := sqlx.TxWrapper(ctx, d.DB, func(tx *sqlx.Tx, result *sqlx.StoreResult) {
@@ -137,14 +141,8 @@ func (d *Dao) sendMessageToOutbox(ctx context.Context, fromId int64, peer *mtpro
 		}
 
 		if rowsAffected == 0 {
-			// TODO(@benqi): random_id已经存在
-			if lastInsertId > 0 {
-				result.Data = lastInsertId
-				return
-			} else {
-				result.Err = errors.New("insert error")
-				return
-			}
+			result.Err = fmt.Errorf("message box id collision for user %d, id %d (existing row %d)", fromId, outBoxMsgId, lastInsertId)
+			return
 		}
 
 		//outMsgBox.Pts = d.IDGenClient2.NextPtsId(ctx, fromId)

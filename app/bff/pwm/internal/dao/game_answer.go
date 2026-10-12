@@ -53,6 +53,7 @@ type GameTaskAnswerPresentationDO struct {
 
 type GameAnswerResultDO struct {
 	Version            int                           `json:"version"`
+	ErrorCode          string                        `json:"errorCode,omitempty"`
 	Accepted           bool                          `json:"accepted"`
 	NewlyRecorded      bool                          `json:"newlyRecorded"`
 	ConfigComplete     bool                          `json:"configComplete"`
@@ -335,6 +336,7 @@ func insertGameEvents(tx *sqlx.Tx, commandId uint64, actorId int64,
 	}
 	outboxPayload, err := json.Marshal(map[string]interface{}{
 		"version":       1,
+		"actorUserId":   actorId,
 		"eventId":       eventId,
 		"eventType":     eventType,
 		"aggregateType": "pair_game",

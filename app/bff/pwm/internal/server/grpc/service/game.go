@@ -96,6 +96,13 @@ func (s *Service) PwmSubmitAnswer(ctx context.Context, in *mtproto.TLPwmSubmitAn
 		MediaPath:    in.GetMediaPath(),
 	})
 	if err != nil {
+		if errors.Is(err, dao.ErrGameTaskInvalid) {
+			return dataJSON(map[string]any{
+				"version": 1,
+				"accepted": false,
+				"errorCode": "task_stale",
+			})
+		}
 		return nil, gameRPCError(err)
 	}
 	return dataJSON(result)

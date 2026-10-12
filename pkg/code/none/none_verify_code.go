@@ -18,6 +18,10 @@ type noneVerifyCode struct {
 	code *conf.SmsVerifyCodeConfig
 }
 
+func (m *noneVerifyCode) OperationalBypassEnabled(_ string) bool {
+	return m.code.BypassEnabled
+}
+
 func (m *noneVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code, codeHash, data string) (
 	*dataobject.VerifyResponse, error,
 ) {

@@ -85,10 +85,10 @@ services:
     environment:
       REDIS_PROXY_HOST: 0.0.0.0
       REDIS_PROXY_PORT: 6380
-      REDIS_ADMIN_PASSWORD: p@ss543456a!
+      REDIS_ADMIN_PASSWORD: CHANGE_ME
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
+      REDIS_PASSWORD: CHANGE_ME
       REDIS_MAX_CONNECTIONS: 100
       REDIS_ENABLE_LOGGING: "true"
     restart: always
@@ -101,10 +101,10 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: pass123456a
+      MYSQL_ROOT_PASSWORD: CHANGE_ME
       MYSQL_DATABASE: pwm
       MYSQL_USER: pwm
-      MYSQL_PASSWORD: pass123456a
+      MYSQL_PASSWORD: CHANGE_ME
     ports:
       - 3306:3306
     volumes:
@@ -131,7 +131,7 @@ services:
     environment:
       # Root user for MinIO Console login
       MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: pwm@admin2025!
+      MINIO_ROOT_PASSWORD: CHANGE_ME
       # Enable browser/console
       MINIO_BROWSER: "on"
       # Console configuration

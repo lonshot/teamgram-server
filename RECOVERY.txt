@@ -1,0 +1,45 @@
+Go backend + embedded proto recovery — 2026-10-12
+
+Repository: https://github.com/lonshot/teamgram-server.git
+Branch: recovery/cloud-20261012
+Base: master, 6a2e6fd50af602f2152207f7010e8997b120cfa5
+Source: pwm-test-10ccu / vibenest-studio / me-west1-b
+Directories recovered: pwm-server and pwm-teamgram-proto
+No .git metadata was present in the recovered directories, so the exact
+cloud source commit and Git remote cannot be established.
+
+The recovered proto module is included at third_party/pwm-teamgram-proto,
+including Go code, protobuf schemas, tests, and Apache-2.0 license.
+go.mod replaces github.com/teamgram/proto with this local path.
+Dockerfile.production copies the same directory; a separate proto checkout
+or external Docker build context is no longer needed.
+
+Excluded: runtime .env, private/signing keys, build output, caches and logs.
+Credential values in YAML, DSNs and examples are placeholders. Configure
+credentials separately; .env.example is a template. Supply the production
+RSA key outside Git and mount it at the runtime path expected by deployment.
+Historical commits are retained; this branch removes credentials from its
+current tree and does not rewrite pre-existing upstream history.
+
+The proto RSA test generates a temporary 2048-bit key instead of retaining
+an embedded or file-based private key. Unused private-key example code is
+removed from the fingerprint utility. Public RSA keys remain available.
+
+Files absent from the recovery archive are not automatically deleted.
+Unmodified recovered source remains in the protected local recovery folder.
+
+Validation on macOS with Go 1.21.13:
+- go build -tags=jsoniter ./...: passed
+- go test -ldflags=-linkmode=external -count=1 for recovered authorization,
+  game/gift/sticker, OTP, message sequence and FCM regression packages: passed
+  (8 packages with tests).
+- In third_party/pwm-teamgram-proto: go test -ldflags=-linkmode=external
+  -count=1 ./...: passed (3 packages with tests).
+- External linking is required for Go 1.21 test binaries on this macOS version.
+- Optional MySQL integration tests require PWM_GAME_TEST_DSN and were skipped;
+  no production database was contacted.
+- Removed one pre-existing duplicate MediaUnread predicate reported by go vet;
+  this preserves the condition's behavior.
+
+Secret review: all staged source and configuration checked for recovered values,
+private key blocks and token patterns; Gitleaks directory scan used with redaction.

@@ -8,10 +8,10 @@ export PWM_HOST=${PWM_HOST:-"0.0.0.0"}
 export ETCD_URL=${ETCD_URL:-"etcd:2379"}
 export REDIS_HOST=${REDIS_HOST:-"redis:6379"}
 export KAFKA_HOST=${KAFKA_HOST:-"kafka:9092"}
-export MYSQL_URI=${MYSQL_URI:-"teamgram:teamgram@tcp(mysql:3306)/pwm?charset=utf8mb4"}
+export MYSQL_URI=${MYSQL_URI:-"teamgram:CHANGE_ME@tcp(mysql:3306)/pwm?charset=utf8mb4"}
 export MINIO_URI=${MINIO_URI:-"minio:9000"}
-export MINIO_KEY=${MINIO_KEY:-"pwm-dotnet-api"}
-export MINIO_SECRET=${MINIO_SECRET:-"pwm@dotnet2025!secure"}
+export MINIO_KEY=${MINIO_KEY:-"CHANGE_ME"}
+export MINIO_SECRET=${MINIO_SECRET:-"CHANGE_ME"}
 export MINIO_SSL=${MINIO_SSL:-"false"}
 #export MTZ=${MTZ:-"Asia%2FTehran"}
 
@@ -26,8 +26,8 @@ createConfigs() {
       | sed "s#127.0.0.1:6379#$REDIS_HOST#g" \
       | sed "s#localhost:6379#$REDIS_HOST#g" \
       | sed "s#root:@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4#$MYSQL_URI#g" \
-      | sed 's#AccessKeyID: pwm-dotnet-api#AccessKeyID: '"$MINIO_KEY"'#g' \
-      | sed 's#SecretAccessKey: pwm@dotnet2025!secure#SecretAccessKey: '"$MINIO_SECRET"'#g' \
+      | sed 's#AccessKeyID: CHANGE_ME#AccessKeyID: '"$MINIO_KEY"'#g' \
+      | sed 's#SecretAccessKey: CHANGE_ME#SecretAccessKey: '"$MINIO_SECRET"'#g' \
       | sed 's#UseSSL: false#UseSSL: '"$MINIO_SSL"'#g' \
       | sed "s#localhost:9000#$MINIO_URI#g" \
       | sed "s#127.0.0.1:9092#$KAFKA_HOST#g" \

@@ -19,8 +19,8 @@ Open source [mtproto](https://core.telegram.org/mtproto) server implementation w
 ## Architecture
 ![Architecture](docs/image/architecture-001.png)
 
-## Installing Teamgram 
-`Teamgram` relies on high-performance components: 
+## Installing Teamgram
+`Teamgram` relies on high-performance components:
 
 - **mysql5.7**
 - [redis](https://redis.io/)
@@ -29,7 +29,7 @@ Open source [mtproto](https://core.telegram.org/mtproto) server implementation w
 - [minio](https://docs.min.io/docs/minio-quickstart-guide.html#GNU/Linux)
 - [ffmpeg](https://www.johnvansickle.com/ffmpeg/)
 
-Privatization deployment Before `Teamgram`, please make sure that the above five components have been installed. If your server does not have the above components, you must first install Missing components. 
+Privatization deployment Before `Teamgram`, please make sure that the above five components have been installed. If your server does not have the above components, you must first install Missing components.
 
 - [Centos9 Stream Build and Install](docs/install-centos-9.md) [@A Feel]
 - [CentOS7 teamgram-server环境搭建](docs/install-centos-7.md) [@saeipi]
@@ -41,7 +41,7 @@ If you have the above components, it is recommended to use them directly. If not
 #### Install [Go environment](https://go.dev/doc/install). Make sure Go version is at least 1.17.
 
 
-#### Get source code　
+#### Get source code
 
 ```
 git clone https://github.com/teamgram/teamgram-server.git
@@ -94,7 +94,7 @@ cd teamgram-server
 
 
 #### Build
-	
+
 ```
 make
 ```
@@ -123,7 +123,7 @@ config loader expands `${NAME}` values):
 
 ```bash
 export PWM_STICKER_DATA=/path/to/data/stickers
-export PWM_STICKERIMPORT_MYSQL_DSN='user:password@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4&parseTime=true'
+export PWM_STICKERIMPORT_MYSQL_DSN='user:CHANGE_ME@tcp(127.0.0.1:3306)/pwm?charset=utf8mb4&parseTime=true'
 export PWM_ETCD_HOST=127.0.0.1:2379
 go run ./app/tool/stickerimport -source "$PWM_STICKER_DATA" -config /private/path/stickerimport.yaml -resume -verify -workers 8
 ```
@@ -149,7 +149,7 @@ cd teamgram-server
 
 #### Run
 
-```  
+```
 # run dependency
 docker-compose -f ./docker-compose-env.yaml up -d
 
@@ -162,7 +162,7 @@ docker-compose up -d
 For administrative access to Redis, this project includes a secure Redis proxy service that provides password-protected access to the Redis instance.
 
 ### Features
-- **Password Authentication**: Requires admin authentication before allowing Redis operations  
+- **Password Authentication**: Requires admin authentication before allowing Redis operations
 - **External Access**: Safely exposes Redis to external admin tools
 - **Connection Limiting**: Configurable maximum concurrent connections
 - **Full Protocol Support**: Compatible with all Redis clients and tools
@@ -173,9 +173,9 @@ For administrative access to Redis, this project includes a secure Redis proxy s
 ./scripts/redis-proxy.sh start
 
 # Test connection
-redis-cli -h localhost -p 6380 -a admin_redis_2025!
+redis-cli -h localhost -p 6380 -a CHANGE_ME
 
-# Check status  
+# Check status
 ./scripts/redis-proxy.sh status
 
 # View logs
@@ -183,7 +183,7 @@ redis-cli -h localhost -p 6380 -a admin_redis_2025!
 ```
 
 ### Configuration
-The proxy runs on port `6380` by default with password `admin_redis_2025!`. You can customize these settings in `docker-compose-env.yaml`:
+The proxy runs on port `6380` by default with password `CHANGE_ME`. You can customize these settings in `docker-compose-env.yaml`:
 
 ```yaml
 redis-admin-proxy:
@@ -194,9 +194,9 @@ redis-admin-proxy:
 ```
 
 ### Admin Tools Connection Examples
-- **redis-cli**: `redis-cli -h your-server -p 6380 -a admin_redis_2025!`
-- **Redis Desktop Manager**: Host: `your-server`, Port: `6380`, Auth: `admin_redis_2025!`  
-- **RedisInsight**: Standalone connection with Host: `your-server`, Port: `6380`, Password: `admin_redis_2025!`
+- **redis-cli**: `redis-cli -h your-server -p 6380 -a CHANGE_ME`
+- **Redis Desktop Manager**: Host: `your-server`, Port: `6380`, Auth: `CHANGE_ME`
+- **RedisInsight**: Standalone connection with Host: `your-server`, Port: `6380`, Password: `CHANGE_ME`
 
 📚 **Full documentation**: [docs/redis-admin-proxy.md](docs/redis-admin-proxy.md)
 

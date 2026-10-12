@@ -45,7 +45,7 @@ func init() {
 	minioCore, err = minio.NewCore(
 		"127.0.0.1:9000",
 		&minio.Options{
-			Creds:  credentials.NewStaticV4("TLXH0OZVP0AKOJAZ8DIT", "9Sw+Xbhc3aWvxQ78rRgUkTQQLLZ24SyelA+B6Rwe", ""),
+			Creds:  credentials.NewStaticV4("CHANGE_ME", "CHANGE_ME", ""),
 			Secure: false,
 		})
 	if err != nil {

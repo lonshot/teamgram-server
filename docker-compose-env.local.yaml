@@ -77,10 +77,10 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: pass123456a
+      MYSQL_ROOT_PASSWORD: CHANGE_ME
       MYSQL_DATABASE: pwm
       MYSQL_USER: pwm
-      MYSQL_PASSWORD: pass123456a
+      MYSQL_PASSWORD: CHANGE_ME
     ports:
       - 127.0.0.1:3306:3306
     volumes:
@@ -106,8 +106,8 @@ services:
     volumes:
       - ./data/minio/data:/data
     environment:
-      MINIO_ACCESS_KEY: pwm-dotnet-api
-      MINIO_SECRET_KEY: pwm@dotnet2025!secure
+      MINIO_ACCESS_KEY: CHANGE_ME
+      MINIO_SECRET_KEY: CHANGE_ME
     command: server /data --console-address ":9001"
     restart: always
     networks:

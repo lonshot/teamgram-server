@@ -20,8 +20,8 @@ Cache:
   - Host: 127.0.0.1:6379
 Minio:
   Endpoint: localhost:9000
-  AccessKeyID: pwm-dotnet-api
-  SecretAccessKey: pwm@dotnet2025!secure
+  AccessKeyID: CHANGE_ME
+  SecretAccessKey: CHANGE_ME
   UseSSL: false
 IdGen:
   Etcd:

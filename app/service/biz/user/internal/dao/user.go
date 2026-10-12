@@ -98,7 +98,7 @@ func (d *Dao) CreateNewUserV2(
 					"account_days_ttl": int32(180),
 					"premium":          true,
 					"deleted":          false,
-					"delete_reason":    "",
+					"delete_reason":    pendingRestoreReason,
 					// pwm-dotnet and pwm-server intentionally share the users row.
 					// Reopening the native MTProto identity must not reopen the old
 					// PWM account: admin deletion owns a fresh onboarding boundary.
@@ -147,7 +147,7 @@ func (d *Dao) CreateNewUserV2(
 				oldUserDO.AccountDaysTtl = 180
 				oldUserDO.Premium = true
 				oldUserDO.Deleted = false
-				oldUserDO.DeleteReason = ""
+				oldUserDO.DeleteReason = pendingRestoreReason
 				userDO = oldUserDO
 			} else {
 				err2 = mtproto.ErrPhoneNumberOccupied

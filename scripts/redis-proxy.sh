@@ -63,11 +63,11 @@ start_service() {
     
     echo -e "${GREEN}Redis Admin Proxy started successfully!${NC}"
     echo -e "${BLUE}Service available on port 6380${NC}"
-    echo -e "${BLUE}Admin password: admin_redis_2025!${NC}"
+    echo -e "${BLUE}Admin password: CHANGE_ME${NC}"
     echo ""
     echo "Test connection:"
     echo "  redis-cli -h localhost -p 6380"
-    echo "  > AUTH admin_redis_2025!"
+    echo "  > AUTH CHANGE_ME"
     echo "  > PING"
 }
 

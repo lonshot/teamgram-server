@@ -52,13 +52,13 @@ func getImageFormat(extName string) (int, error) {
 		".tiff": TIFF,
 		".bmp":  BMP,
 		".gif":  GIF,
-		// ".webp": WEBP,
+		".webp": PNG, // All webp stickers are always rendered as PNG to preserve alpha transparency
 	}
 
 	ext := strings.ToLower(extName)
 	f, ok := formats[ext]
 	if !ok {
-		return -1, imaging.ErrUnsupportedFormat
+		return int(PNG), nil // Fallback everything unknown to PNG
 	}
 
 	return int(f), nil

@@ -132,6 +132,18 @@ type gameChainCompletionState struct {
 	ChildTaskId string `db:"child_task_id"`
 }
 
+type gameConfigCompletionIndexRow struct {
+	ConfigId int64 `db:"config_id"`
+	PlayerId int64 `db:"player_id"`
+}
+
+type gameChainCompletionIndexRow struct {
+	ConfigId    int64  `db:"config_id"`
+	ChainId     string `db:"chain_id"`
+	PlayerId    int64  `db:"player_id"`
+	ChildTaskId string `db:"child_task_id"`
+}
+
 func isGameNotFound(err error) bool {
 	return errors.Is(err, sqlx.ErrNotFound) || errors.Is(err, sql.ErrNoRows)
 }
@@ -251,6 +263,40 @@ func selectChainCompletionPlayers(q gameQuery, pairGameId, configId int64, chain
 		done[row.PlayerId][row.ChildTaskId] = true
 	}
 	return done, nil
+}
+
+func selectGameCompletionIndexes(q gameQuery, pairGameId int64) (map[int64]map[int64]bool, map[int64]map[string]map[int64]map[string]bool, error) {
+	configRows := make([]gameConfigCompletionIndexRow, 0)
+	if err := q.QueryRowsPartial(&configRows, `SELECT game_config_id AS config_id, player_id
+		FROM game_config_completions WHERE pair_game_id = ?`, pairGameId); err != nil {
+		return nil, nil, err
+	}
+	configDone := make(map[int64]map[int64]bool, len(configRows))
+	for _, row := range configRows {
+		if configDone[row.ConfigId] == nil {
+			configDone[row.ConfigId] = make(map[int64]bool)
+		}
+		configDone[row.ConfigId][row.PlayerId] = true
+	}
+	chainRows := make([]gameChainCompletionIndexRow, 0)
+	if err := q.QueryRowsPartial(&chainRows, `SELECT game_config_id AS config_id, chain_id,
+		player_id, child_task_id FROM game_chain_submissions WHERE pair_game_id = ?`, pairGameId); err != nil {
+		return nil, nil, err
+	}
+	chainDone := make(map[int64]map[string]map[int64]map[string]bool, len(chainRows))
+	for _, row := range chainRows {
+		if chainDone[row.ConfigId] == nil {
+			chainDone[row.ConfigId] = make(map[string]map[int64]map[string]bool)
+		}
+		if chainDone[row.ConfigId][row.ChainId] == nil {
+			chainDone[row.ConfigId][row.ChainId] = make(map[int64]map[string]bool)
+		}
+		if chainDone[row.ConfigId][row.ChainId][row.PlayerId] == nil {
+			chainDone[row.ConfigId][row.ChainId][row.PlayerId] = make(map[string]bool)
+		}
+		chainDone[row.ConfigId][row.ChainId][row.PlayerId][row.ChildTaskId] = true
+	}
+	return configDone, chainDone, nil
 }
 
 func localizedGameTaskText(q gameQuery, taskId string, languageId, actorGender int) (title, common string, err error) {
@@ -409,6 +455,10 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 		FROM net_gameconfig WHERE GameId = ? ORDER BY Seq, Id`, pairGame.GameId); err != nil {
 		return nil, err
 	}
+	configDone, chainDone, err := selectGameCompletionIndexes(q, pairGame.PairGameId)
+	if err != nil {
+		return nil, err
+	}
 	for _, config := range configs {
 		parentTaskId := taskIdForActor(config, partner.Gender)
 		parentTask, err := selectGameTaskState(q, parentTaskId)
@@ -427,9 +477,9 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 			if len(children) == 0 {
 				continue
 			}
-			done, err := selectChainCompletionPlayers(q, pairGame.PairGameId, config.Id, parentTaskId)
-			if err != nil {
-				return nil, err
+			done := chainDone[config.Id][parentTaskId]
+			if done == nil {
+				done = map[int64]map[string]bool{}
 			}
 			actorDone := done[actorId]
 			partnerDone := done[partnerId]
@@ -461,9 +511,9 @@ func selectNextGameTask(q gameQuery, actorId, partnerId, requestedPairId int64) 
 			}
 			return result("", nil, detail), nil
 		}
-		done, err := selectConfigCompletionPlayers(q, pairGame.PairGameId, config.Id)
-		if err != nil {
-			return nil, err
+		done := configDone[config.Id]
+		if done == nil {
+			done = map[int64]bool{}
 		}
 		if done[actorId] && done[partnerId] {
 			continue

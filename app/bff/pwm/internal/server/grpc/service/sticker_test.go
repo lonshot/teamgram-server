@@ -33,6 +33,7 @@ func TestBuildStickerSetLayer186(t *testing.T) {
 	set := buildStickerSet(&dataobject.StickerSetDO{
 		NativeSetId: 42, NativeAccessHash: 84, Title: "Animals", ShortName: "animals",
 		SetHash: 7, DocumentCount: 3, Official: true, Animated: true,
+		InstalledAt:     1777000000,
 		ThumbDocumentId: 9, ThumbDcId: 2, ThumbVersion: 4,
 	})
 
@@ -42,6 +43,7 @@ func TestBuildStickerSetLayer186(t *testing.T) {
 	require.Equal(t, int32(3), set.GetCount())
 	require.Equal(t, int32(7), set.GetHash())
 	require.Equal(t, int64(9), set.GetThumbDocumentId().GetValue())
+	require.Equal(t, int32(1777000000), set.GetInstalledDate().GetValue())
 }
 
 func TestStickerPacksPreserveFirstEmojiOrder(t *testing.T) {

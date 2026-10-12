@@ -13,7 +13,6 @@ import (
 
 	TLRPC.TL_account_updateNotifySettings req = new TLRPC.TL_account_updateNotifySettings();
 	req.settings = new TLRPC.TL_inputPeerNotifySettings();
-	req.settings.sound = "default";
 	int mute_type = preferences.getInt("notify2_" + dialog_id, 0);
 	if (mute_type == 3) {
 		req.settings.mute_until = preferences.getInt("notifyuntil_" + dialog_id, 0);

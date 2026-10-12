@@ -31,7 +31,7 @@ A secure proxy service that provides authenticated access to Redis for administr
 2. Connect using redis-cli:
    ```bash
    redis-cli -h localhost -p 6380
-   127.0.0.1:6380> AUTH admin_redis_2025!
+   127.0.0.1:6380> AUTH CHANGE_ME
    OK
    127.0.0.1:6380> PING
    PONG
@@ -62,10 +62,10 @@ The service is configured via environment variables:
 |----------|---------|-------------|
 | `REDIS_PROXY_HOST` | `0.0.0.0` | Proxy server bind address |
 | `REDIS_PROXY_PORT` | `6380` | Proxy server port |
-| `REDIS_ADMIN_PASSWORD` | `admin_redis_2025!` | Admin password for proxy access |
+| `REDIS_ADMIN_PASSWORD` | `CHANGE_ME` | Admin password for proxy access |
 | `REDIS_HOST` | `redis` | Backend Redis host |
 | `REDIS_PORT` | `6379` | Backend Redis port |
-| `REDIS_PASSWORD` | `A65D0770B69940FEA084C9C8028908F7` | Backend Redis password |
+| `REDIS_PASSWORD` | `CHANGE_ME` | Backend Redis password |
 | `REDIS_MAX_CONNECTIONS` | `100` | Maximum concurrent connections |
 | `REDIS_ENABLE_LOGGING` | `true` | Enable detailed logging |
 
@@ -75,7 +75,7 @@ The service is configured via environment variables:
 Every client must authenticate with the admin password before accessing Redis:
 ```bash
 redis-cli -h proxy-host -p 6380
-> AUTH admin_redis_2025!
+> AUTH CHANGE_ME
 OK
 ```
 
@@ -97,7 +97,7 @@ The proxy is designed to run on internal networks only. For external access:
 ```bash
 # Connect and authenticate
 redis-cli -h localhost -p 6380
-> AUTH admin_redis_2025!
+> AUTH CHANGE_ME
 OK
 
 # Basic Redis operations
@@ -128,14 +128,14 @@ OK
 1. Create new connection
 2. Host: `your-server-ip`
 3. Port: `6380`
-4. Auth: `admin_redis_2025!`
+4. Auth: `CHANGE_ME`
 
 ### Using with RedisInsight
 1. Add database
 2. Connection Type: Standalone
 3. Host: `your-server-ip`
 4. Port: `6380` 
-5. Password: `admin_redis_2025!`
+5. Password: `CHANGE_ME`
 
 ## Docker Configuration
 
@@ -199,7 +199,7 @@ Test proxy health:
 redis-cli -h localhost -p 6380 ping
 
 # Test authentication
-redis-cli -h localhost -p 6380 -a admin_redis_2025! ping
+redis-cli -h localhost -p 6380 -a CHANGE_ME ping
 ```
 
 ## Production Deployment

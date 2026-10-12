@@ -19,7 +19,7 @@ Code:
   VerifyCodeUrl: "http://pwm_web_server:8080/api/v1/verify_secret_code"
   PushMessageUrl: "http://pwm_web_server:8080/api/v1/push_message"
   Key: "pwm-server"
-  Secret: "cde23a1529ca4534bec2c78aa3642e6944cb2748337c4226998c79d3a678cddb"
+  Secret: CHANGE_ME
   RegionId: ""
   RequestTimeout: 20s
   AutoVerifyEnabled: false

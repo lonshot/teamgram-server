@@ -32,8 +32,8 @@ type MinioConfig struct {
 }
 
 // endpoint := "127.0.0.1:9000"
-// accessKeyID := "Q3AM3UQ867SPQQA43P2F"
-// secretAccessKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+// accessKeyID := "CHANGE_ME"
+// secretAccessKey := "CHANGE_ME"
 // useSSL := true
 
 func MustNewMinioClient(c *MinioConfig) *minio.Core {
