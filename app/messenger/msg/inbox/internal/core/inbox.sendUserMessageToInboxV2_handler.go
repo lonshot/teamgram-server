@@ -184,12 +184,6 @@ type chatPushDevice struct {
 	Token string `db:"token"`
 }
 
-type chatPushSettings struct {
-	Silent    int32  `db:"silent"`
-	MuteUntil int32  `db:"mute_until"`
-	Sound     string `db:"sound"`
-}
-
 func (c *InboxCore) pushChatNotification(
 	userID, fromID int64, message *mtproto.Message, users []*mtproto.User,
 ) {
@@ -205,12 +199,17 @@ func (c *InboxCore) pushChatNotification(
 		}
 		return
 	}
-	settings := chatPushSettings{Sound: "default"}
-	_ = c.svcCtx.Dao.QueryRowPartial(c.ctx, &settings,
-		`SELECT silent, mute_until, sound FROM user_notify_settings
+	var preferenceRows []chatPushSettings
+	if err := c.svcCtx.Dao.QueryRowsPartial(c.ctx, &preferenceRows,
+		`SELECT show_previews, silent, mute_until, sound FROM user_notify_settings
 		 WHERE user_id = ? AND deleted = 0
 		   AND ((peer_type = 2 AND peer_id = ?) OR (peer_type = 5 AND peer_id = 0))
-		 ORDER BY (peer_type = 2) DESC LIMIT 1`, userID, fromID)
+		 ORDER BY (peer_type = 2) ASC`, userID, fromID); err != nil {
+		// Never reveal content or deliver a muted alert when privacy settings cannot be read.
+		c.Logger.Errorf("load chat notification preferences for user %d: %v", userID, err)
+		return
+	}
+	settings := resolveChatPushSettings(preferenceRows)
 	if settings.Silent == 1 || settings.MuteUntil > int32(time.Now().Unix()) {
 		return
 	}
@@ -244,9 +243,7 @@ func (c *InboxCore) pushChatNotification(
 	if body == "" {
 		body = "Sent you a message"
 	}
-	if len([]rune(body)) > 256 {
-		body = string([]rune(body)[:256])
-	}
+	title, body = chatPushPreview(settings.ShowPreviews == 1, title, body)
 	messageID := strconv.FormatInt(int64(message.GetId()), 10)
 	peerID := strconv.FormatInt(fromID, 10)
 	for _, device := range devices {
