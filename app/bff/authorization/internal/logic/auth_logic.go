@@ -170,7 +170,7 @@ func (m *AuthLogic) DoAuthSignIn(ctx context.Context,
 	if codeData.State != model.CodeStateOk &&
 		codeData.State != model.CodeStateSent &&
 		codeData.State != model.CodeStateSignIn {
-		logx.WithContext(ctx).Errorf("error - invalid codeData state: %v", codeData)
+		logx.WithContext(ctx).Error("invalid phone verification state")
 		err = mtproto.ErrInternalServerError
 		return
 	}

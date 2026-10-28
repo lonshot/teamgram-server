@@ -18,8 +18,12 @@ import (
 
 func New(c *conf.SmsVerifyCodeConfig) *meVerifyCode {
 	return &meVerifyCode{
-		code:   c,
-		client: &http.Client{Timeout: c.RequestTimeout},
+		code: c,
+		client: &http.Client{
+			Timeout: c.RequestTimeout,
+			// Never forward the server-only gateway credential to a redirect target.
+			CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse },
+		},
 	}
 }
 
@@ -71,12 +75,15 @@ func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map
 	logx.Infof("Verification service response status code: %d", resp.StatusCode)
 
 	// Read the response body
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 65537))
 	if err != nil {
 		logx.Errorf("Error reading response body: %v", err)
 		return nil, err
 	}
 
+	if len(body) > 65536 {
+		return nil, errors.New("verification response exceeds size limit")
+	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("verification service returned HTTP %d", resp.StatusCode)
 	}
@@ -87,6 +94,10 @@ func (m *meVerifyCode) postJson(ctx context.Context, url string, requestData map
 func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_, codeHash, data string) (
 	*dataobject.VerifyResponse, error,
 ) {
+	nativeProof, err := validateNativeSocialProof(phoneNumber, codeHash, data, m.code.Secret)
+	if err != nil {
+		return nil, err
+	}
 	// Prepare the JSON data
 	requestData := map[string]string{
 		"phoneNumber": phoneNumber,
@@ -115,6 +126,9 @@ func (m *meVerifyCode) SendSmsVerifyCode(ctx context.Context, phoneNumber, code_
 		return nil, err
 	}
 
+	if nativeProof && (!verifyResp.Valid || !verifyResp.Auto) {
+		return nil, errors.New("native social proof was rejected")
+	}
 	logx.Infof("Verification response - Valid: %v, Auto: %v", verifyResp.Valid, verifyResp.Auto)
 
 	return &verifyResp, nil

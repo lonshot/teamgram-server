@@ -120,7 +120,7 @@ func (c *AuthorizationCore) authSendCode(
 	// 1. check api_id and api_hash
 	email, _, err := c.svcCtx.Dao.CheckApiIdAndHash(request.ApiId, request.ApiHash)
 	if err != nil {
-		c.Logger.Errorf("invalid api: {api_id: %d, api_hash: %s}", request.ApiId, request.ApiHash)
+		c.Logger.Error("invalid social authentication envelope")
 		return
 	}
 
